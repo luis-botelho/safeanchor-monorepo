@@ -1,65 +1,41 @@
-# SafeAnchor
+# ⚓ SafeAnchor
 
-Projeto de estudo para aprender React, backend simples e organizacao de codigo aos poucos.
+> Digitalizing fleet management, operational safety and professional training for the maritime industry.
 
-Nesta versao, vamos evitar complexidade: sem Next.js, sem TypeScript, sem Prisma e sem monorepo avancado por enquanto. A meta e entender bem o basico antes de crescer.
+SafeAnchor is a Vertical SaaS platform designed for vessel owners, maritime professionals and service providers.
 
-## Estrutura
+The platform centralizes fleet management, maintenance tracking, document compliance, safety inspections and professional development into a single ecosystem.
 
-```text
-safeanchor-monorepo
-├── apps
-│   ├── frontend   # React com Vite, MVVM e CSS BEM
-│   └── backend    # Express simples com rotas, controllers e services
-└── docs           # Roteiro de aprendizado
-```
+---
 
-## Como Instalar
+## 🚀 Vision
 
-Na raiz do projeto:
+To become the operating system of the maritime industry.
 
-```bash
-npm run install:all
-```
+---
 
-## Como Rodar
+## 🎯 Problem
 
-Em um terminal, rode o backend:
+The maritime sector still relies heavily on:
 
-```bash
-npm run dev:backend
-```
+- Spreadsheets
+- Paper documentation
+- Manual inspections
+- Fragmented maintenance records
+- Decentralized professional training
 
-Em outro terminal, rode o frontend:
+These processes increase operational risks, reduce efficiency and make compliance difficult.
 
-```bash
-npm run dev:frontend
-```
+---
 
-Enderecos:
+## 💡 Solution
 
-```text
-Frontend: http://localhost:5173
-Backend:  http://localhost:3001
-API:      http://localhost:3001/modules
-```
+SafeAnchor provides a unified platform where users can:
 
-## O Que Estudar Primeiro
+- Manage vessels
+- Track maintenance
+- Monitor documentation
+- Execute safety checklists
+- Access maritime training
 
-1. Abra `apps/frontend/src/views/App.jsx`.
-2. Veja como a View usa o ViewModel.
-3. Abra `apps/frontend/src/viewmodels/useHomeViewModel.js`.
-4. Veja como o ViewModel busca dados no Service.
-5. Abra `apps/frontend/src/services/moduleService.js`.
-6. Veja como o Service chama o backend.
-7. Abra `apps/backend/src/server.js`.
-8. Siga o caminho da rota `/modules`.
-
-## Tarefas Pequenas
-
-- [ ] Trocar o texto do titulo no ViewModel.
-- [ ] Alterar uma cor no CSS BEM.
-- [ ] Adicionar um novo modulo no backend.
-- [ ] Criar um novo campo chamado `difficulty`.
-- [ ] Mostrar esse campo no card do frontend.
-
+All in one place.
