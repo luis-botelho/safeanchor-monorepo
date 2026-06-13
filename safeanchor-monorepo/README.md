@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SafeAnchor
 
-## Getting Started
+Projeto de estudo para aprender React, backend simples e organizacao de codigo aos poucos.
 
-First, run the development server:
+Nesta versao, vamos evitar complexidade: sem Next.js, sem TypeScript, sem Prisma e sem monorepo avancado por enquanto. A meta e entender bem o basico antes de crescer.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Estrutura
+
+```text
+safeanchor-monorepo
+├── apps
+│   ├── frontend   # React com Vite, MVVM e CSS BEM
+│   └── backend    # Express simples com rotas, controllers e services
+└── docs           # Roteiro de aprendizado
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Como Instalar
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Na raiz do projeto:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run install:all
+```
 
-## Learn More
+## Como Rodar
 
-To learn more about Next.js, take a look at the following resources:
+Em um terminal, rode o backend:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run dev:backend
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Em outro terminal, rode o frontend:
 
-## Deploy on Vercel
+```bash
+npm run dev:frontend
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Enderecos:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+Frontend: http://localhost:5173
+Backend:  http://localhost:3001
+API:      http://localhost:3001/modules
+```
+
+## O Que Estudar Primeiro
+
+1. Abra `apps/frontend/src/views/App.jsx`.
+2. Veja como a View usa o ViewModel.
+3. Abra `apps/frontend/src/viewmodels/useHomeViewModel.js`.
+4. Veja como o ViewModel busca dados no Service.
+5. Abra `apps/frontend/src/services/moduleService.js`.
+6. Veja como o Service chama o backend.
+7. Abra `apps/backend/src/server.js`.
+8. Siga o caminho da rota `/modules`.
+
+## Tarefas Pequenas
+
+- [ ] Trocar o texto do titulo no ViewModel.
+- [ ] Alterar uma cor no CSS BEM.
+- [ ] Adicionar um novo modulo no backend.
+- [ ] Criar um novo campo chamado `difficulty`.
+- [ ] Mostrar esse campo no card do frontend.
+
