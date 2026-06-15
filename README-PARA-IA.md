@@ -67,12 +67,17 @@ safeanchor-monorepo
 │   │   ├── package.json
 │   │   └── src
 │   │       ├── controllers
-│   │       │   └── modulesController.js
+│   │       │   ├── modulesController.js
+│   │       │   └── vesselController.js
+│   │       ├── models
+│   │       │   └── vesselModel.js
 │   │       ├── routes
-│   │       │   └── modulesRoutes.js
-│   │       ├── server.js
-│   │       └── services
-│   │           └── modulesService.js
+│   │       │   ├── modulesRoutes.js
+│   │       │   └── vesselRoutes.js
+│   │       ├── services
+│   │       │   ├── modulesService.js
+│   │       │   └── vesselService.js
+│   │       └── server.js
 │   └── frontend
 │       ├── README.md
 │       ├── index.html
@@ -386,31 +391,88 @@ Stack:
 ```text
 apps/backend/src
 ├── server.js
+├── models
+│   └── vesselModel.js
 ├── controllers
-│   └── modulesController.js
+│   ├── modulesController.js
+│   └── vesselController.js
 ├── routes
-│   └── modulesRoutes.js
+│   ├── modulesRoutes.js
+│   └── vesselRoutes.js
 └── services
-    └── modulesService.js
+    ├── modulesService.js
+    └── vesselService.js
 ```
 
-### Papel De Cada Pasta No Backend
+### Papel De Cada Arquivo No Backend
 
 `server.js`
 
-Cria o app Express, configura middlewares, registra rotas e liga o servidor.
+Cria o app Express, configura os middlewares, registra a rota raiz, conecta `modules` e `vessels` e liga o servidor na porta `3001`.
 
 `routes`
 
-Define as URLs. Exemplo: `GET /modules`.
+Define as URLs publicas do backend. Hoje existem dois routers: `modulesRoutes.js` e `vesselRoutes.js`.
 
 `controllers`
 
-Recebe `request` e `response`. Chama services e devolve JSON.
+Recebe `request` e `response`, chama os services e devolve JSON.
 
 `services`
 
-Guarda os dados e regras simples. Nesta fase, nao existe banco de dados.
+Guarda os dados e regras simples. Nesta fase, tudo ainda esta em memoria, sem banco de dados.
+
+`models`
+
+Define objetos simples do dominio. Hoje existe apenas `Vessel`, usado pelo service de embarcacoes.
+
+### O Que Cada Arquivo Faz
+
+`apps/backend/src/server.js`
+
+- cria o servidor Express;
+- habilita `cors`;
+- habilita `express.json()`;
+- disponibiliza `GET /` com status basico;
+- registra `GET /modules`;
+- registra `GET /vessels`.
+
+`apps/backend/src/controllers/modulesController.js`
+
+- busca os modulos no service;
+- responde com o array em JSON.
+
+`apps/backend/src/services/modulesService.js`
+
+- guarda um array fixo de modulos;
+- retorna os modulos para o controller;
+- ainda nao conversa com banco ou API externa.
+
+`apps/backend/src/routes/modulesRoutes.js`
+
+- cria o router de modulos;
+- disponibiliza `GET /` dentro do prefixo `/modules`.
+
+`apps/backend/src/controllers/vesselController.js`
+
+- busca as embarcacoes no service;
+- responde com o array em JSON.
+
+`apps/backend/src/services/vesselService.js`
+
+- monta um array fixo de embarcacoes;
+- instancia objetos com a classe `Vessel`;
+- ainda nao persiste dados em lugar nenhum.
+
+`apps/backend/src/routes/vesselRoutes.js`
+
+- cria o router de embarcacoes;
+- disponibiliza `GET /` dentro do prefixo `/vessels`.
+
+`apps/backend/src/models/vesselModel.js`
+
+- define a classe `Vessel`;
+- padroniza os campos `id`, `name`, `type` e `status`.
 
 ### Fluxo Da API
 
@@ -434,6 +496,28 @@ modulesController.js
 
 modulesService.js
   getModules retorna array de modulos
+```
+
+Quando o navegador chama:
+
+```text
+GET http://localhost:3001/vessels
+```
+
+O caminho e:
+
+```text
+server.js
+  app.use("/vessels", vesselRoutes)
+
+vesselRoutes.js
+  router.get("/", getVessels)
+
+vesselController.js
+  getVessels chama getAllVessels()
+
+vesselService.js
+  getAllVessels retorna array de embarcacoes
 ```
 
 ### Rotas Atuais
@@ -484,6 +568,50 @@ Resposta esperada:
 ]
 ```
 
+Rota de embarcacoes:
+
+```text
+GET /vessels
+```
+
+Resposta esperada:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Sea Explorer",
+    "type": "Lancha",
+    "status": "Ativa"
+  },
+  {
+    "id": 2,
+    "name": "Ocean Dream",
+    "type": "Iate",
+    "status": "Manutencao"
+  }
+]
+```
+
+### Estado Atual Do Backend
+
+O backend hoje ja tem:
+
+- rota raiz `GET /`;
+- lista fixa de modulos em `GET /modules`;
+- lista fixa de embarcacoes em `GET /vessels`;
+- separacao simples entre route, controller, service e model;
+- dados ainda em memoria, sem persistencia.
+
+O backend ainda nao tem:
+
+- rota `GET /health`;
+- CRUD de modulos;
+- CRUD de embarcacoes;
+- banco de dados;
+- validacao de entrada;
+- tratamento padronizado de erro.
+
 ## Documentacao Existente
 
 Arquivos em `docs`:
@@ -509,7 +637,7 @@ O projeto ja possui:
 - estrutura raiz limpa, sem pasta duplicada `safeanchor-monorepo/safeanchor-monorepo`;
 - frontend React com Vite;
 - backend Express;
-- primeira rota `GET /modules`;
+- rotas `GET /`, `GET /modules` e `GET /vessels`;
 - tela inicial que lista modulos;
 - fallback no frontend se a API nao estiver ligada;
 - CSS com BEM;
@@ -651,19 +779,18 @@ Passos:
 
 ## Sugestao De Proxima Feature Pequena
 
-Criar uma pagina/tela de estudo para embarcacoes ainda sem banco.
+Criar uma rota simples de saude para o backend.
 
 Versao minima:
 
-- adicionar um array fixo de embarcacoes no backend;
-- criar rota `GET /vessels`;
-- criar service `vesselService.js` no frontend;
-- criar ViewModel `useVesselsViewModel.js`;
-- renderizar uma lista simples.
+- adicionar rota `GET /health` no backend;
+- responder com `{ "status": "ok" }`;
+- criar controller separado para essa rota;
+- manter a resposta simples e previsivel.
 
-Nao criar formulario ainda.
 Nao criar banco ainda.
 Nao criar autenticacao ainda.
+Nao criar CRUD ainda.
 
 ## Prompt Pronto Para Colar Em Outra IA
 
