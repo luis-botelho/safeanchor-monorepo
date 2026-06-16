@@ -42,5 +42,3 @@ next-env.d.ts
 
 /app/generated/prisma
 
-# pasta local para documentação e aprendizado
-/.learning/
