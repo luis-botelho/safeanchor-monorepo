@@ -42,5 +42,5 @@ next-env.d.ts
 
 /app/generated/prisma
 
-# anotações locais para IA
-/README-PARA-IA-FRONTEND.md
+# pasta local para documentação e aprendizado
+/.learning/
