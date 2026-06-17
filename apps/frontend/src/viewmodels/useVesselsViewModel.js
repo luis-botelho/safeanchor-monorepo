@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getVessels } from "../services/vesselService";
 
 export function useVesselsViewModel() {
+  const [hasError, setHasError] = useState(false);
   const [source, setSource] = useState("loading");
   const [vessels, setVessels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -10,9 +11,10 @@ export function useVesselsViewModel() {
     async function loadVessels() {
       const result = await getVessels();
 
-      setVessels(result.data);
+      setVessels(result.vessels);
       setSource(result.source);
-      setIsLoading(false);
+      setHasError(result.error);
+      setIsLoading(false);  
     }
 
     loadVessels();
@@ -22,5 +24,6 @@ export function useVesselsViewModel() {
     vessels,
     isLoading,
     source,
+    hasError,
   };
 }

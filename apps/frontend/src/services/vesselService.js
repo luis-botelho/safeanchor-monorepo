@@ -22,13 +22,15 @@ export async function getVessels() {
     const data = await response.json();
 
     return {
-      data,
-      source: "api",
+      vessels: data,      
+      source: "api",      
+      error: false,
     };
-  } catch {
+  } catch (error){
     return {
-      data: fallbackVessels,
-      source: "fallback",
+      vessels: fallbackVessels,
+      source: "fallback",     
+      error: true,
     };
   }
 }
