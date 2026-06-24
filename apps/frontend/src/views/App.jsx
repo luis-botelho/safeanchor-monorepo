@@ -27,9 +27,14 @@
 //     </main>
 //   );
 // }
-import { VesselsPage }
-from "./VesselsPage";
+// import { VesselsPage }
+// from "./VesselsPage";
 
-export default function App() {
-  return <VesselsPage />;
+// export default function App() {
+//   return <VesselsPage />;
+// }
+import CreateVesselPage  from "./CreateVesselPage";
+
+export function App() {
+  return <CreateVesselPage />;
 }
