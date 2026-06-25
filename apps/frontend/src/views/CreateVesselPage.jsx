@@ -1,6 +1,6 @@
 import { useCreateVesselViewModel } from "../viewmodels/useCreateVesselViewModel";
 
-export default function CreateVesselPage() {
+export default function CreateVesselPage({ onSuccess }) {
   const viewModel = useCreateVesselViewModel();
 
   return (
@@ -29,15 +29,20 @@ export default function CreateVesselPage() {
       />
 
       <button
-        onClick={viewModel.submit}
+        onClick={async () => {
+          const success = await viewModel.submit();
+
+          if (success) {
+            onSuccess();
+          }
+        }}
         disabled={viewModel.isLoading}
       >
         {viewModel.isLoading ? "Salvando..." : "Cadastrar"}
       </button>
 
-      {viewModel.error && (
-        <p>{viewModel.error}</p>
-      )}
+      {viewModel.error && <p>{viewModel.error}</p>}
+      {viewModel.successMessage && <p>{viewModel.successMessage}</p>}
     </main>
   );
 }

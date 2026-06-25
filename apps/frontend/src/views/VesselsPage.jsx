@@ -1,7 +1,7 @@
 import { useVesselsViewModel } from "../viewmodels/useVesselsViewModel";
 
-export function VesselsPage() {
-  const { vessels, isLoading, source , hasError} = useVesselsViewModel();
+export default function VesselsPage({onCreate}) {
+  const { vessels, isLoading, source, hasError } = useVesselsViewModel();
 
   if (isLoading) {
     return <p>Carregando...</p>;
@@ -10,6 +10,7 @@ export function VesselsPage() {
   return (
     <div>
       <h1>Embarcações</h1>
+      <button onClick={onCreate}>Nova Embarcação</button>
       <p>{source === "api" ? "🟢 Backend conectado" : "🟡 Dados locais"}</p>
       {hasError && (
         <div className="alert" style={{ color: "red", margin: "10px 0" }}>
