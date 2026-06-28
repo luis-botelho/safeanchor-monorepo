@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createVessel } from "../services/vesselCreateService";
+import { createVessel } from "../services/vesselService";
 
 export function useCreateVesselViewModel() {
   const [name, setName] = useState("");
