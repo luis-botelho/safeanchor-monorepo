@@ -1,6 +1,7 @@
 import { useVesselsViewModel } from "../viewmodels/useVesselsViewModel";
+import { Link } from "react-router-dom"
 
-export default function VesselsPage({onCreate}) {
+export default function VesselsPage() {
   const { vessels, isLoading, source, hasError } = useVesselsViewModel();
 
   if (isLoading) {
@@ -10,7 +11,7 @@ export default function VesselsPage({onCreate}) {
   return (
     <div>
       <h1>Embarcações</h1>
-      <button onClick={onCreate}>Nova Embarcação</button>
+      <Link to="/create">Nova Embarcação</Link>
       <p>{source === "api" ? "🟢 Backend conectado" : "🟡 Dados locais"}</p>
       {hasError && (
         <div className="alert" style={{ color: "red", margin: "10px 0" }}>
@@ -18,13 +19,16 @@ export default function VesselsPage({onCreate}) {
         </div>
       )}
       {vessels.map((vessel) => (
-        <div key={vessel.id}>
-          <h2>{vessel.name}</h2>
+        <Link key={vessel.id} to={`/vessels/${vessel.id}`}>
+          {" "}
+          <div key={vessel.id}>
+            <h2>{vessel.name}</h2>
 
-          <p>Tipo: {vessel.type}</p>
+            <p>Tipo: {vessel.type}</p>
 
-          <p>Status: {vessel.status}</p>
-        </div>
+            <p>Status: {vessel.status}</p>
+          </div>
+        </Link>
       ))}
     </div>
   );
