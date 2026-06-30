@@ -1,21 +1,15 @@
-import { useState ,useEffect} from "react";
-import  VesselsPage from "./VesselsPage";
+import { Routes, Route } from "react-router-dom";
+
+import VesselsPage from "./VesselsPage";
 import CreateVesselPage from "./CreateVesselPage";
+import VesselDetailsPage from "./VesselDetailsPage";
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState("list");
-  
-  if (currentPage === "create") {
-    return (
-      <CreateVesselPage
-        onSuccess={() => setCurrentPage("list")}
-      />
-    );
-  }
-
   return (
-    <VesselsPage
-      onCreate={() => setCurrentPage("create")}
-    />
+    <Routes>
+      <Route path="/" element={<VesselsPage />} />
+      <Route path="/create" element={<CreateVesselPage />} />
+      <Route path="/vessels/:id" element={<VesselDetailsPage />} />
+    </Routes>
   );
 }
