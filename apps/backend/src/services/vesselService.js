@@ -35,3 +35,15 @@ export const getVesselById = (id) => {
     (vessel) => vessel.id === Number(id)
   );
 };
+
+export const updateVessel = (id, VesselData) =>{
+  const vessel = getVesselById(id);
+  if (!vessel){
+    return null
+  }
+  vessel.name = vesselData.name
+  vessel.status = vesselData.status
+  vessel.type = vesselData.type
+
+  return vessel
+}

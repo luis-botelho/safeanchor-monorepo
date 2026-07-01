@@ -1,7 +1,8 @@
 import {
   getAllVessels,
   getVesselById,
-  createVessel
+  createVessel,
+  updateVessel,
 } from "../services/vesselService.js";
 
 
@@ -32,3 +33,17 @@ export const createNewVessel = (request, response) => {
 
   response.status(201).json(vessel);
 };
+
+export const updateVesselController = (request, response) => {
+  const { id } = request.params;
+  const vesselData = request.body;
+
+  const vessel = updateVessel(id, vesselData);
+  if (!vessel) {
+    return response.status(404).json({
+        message: "Vessel not found",
+    });
+}
+
+  response.status(200).json(vessel)
+}
