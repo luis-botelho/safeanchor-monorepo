@@ -82,4 +82,19 @@ export async function getVesselById(id) {
 }
 
 //Update vessel 
+export async function upDateVessel(id,vesselData) {
+  const response = await fetch(`${apiUrl}/vessels/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(vesselData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Nao foi possivel Atualizar a embarcação.");
+  }
+
+  return response.json();
+}
 //Delete 
