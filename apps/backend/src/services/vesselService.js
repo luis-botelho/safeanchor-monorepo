@@ -36,7 +36,7 @@ export const getVesselById = (id) => {
   );
 };
 
-export const updateVessel = (id, VesselData) =>{
+export const updateVessel = (id, vesselData) =>{
   const vessel = getVesselById(id);
   if (!vessel){
     return null
