@@ -1,16 +1,19 @@
 import { useEditVesselViewModel } from "../viewmodels/useEditVesselViewModel";
 import VesselForm from "../components/VesselForm";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function EditVesselPage({ onSuccess }) {
   const { id } = useParams();
+  const navigate = useNavigate();
 
-const viewModel = useEditVesselViewModel(id);
+  const viewModel = useEditVesselViewModel(id);
 
-return (
+  return (
     <VesselForm
-        title="Editar Embarcação"
-        viewModel={viewModel}
+      title="Editar Embarcação"
+      viewModel={viewModel}
+      onSuccess={() => navigate("/")}
+      button='Atualizar'
     />
-);
+  );
 }

@@ -1,4 +1,4 @@
-export default function VesselForm({ title, viewModel, onSuccess }) {
+export default function VesselForm({ title, viewModel, onSuccess, button }) {
   return (
     <form
       onSubmit={async (event) => {
@@ -37,7 +37,7 @@ export default function VesselForm({ title, viewModel, onSuccess }) {
       <button
         type="submit"
       >
-        {viewModel.isLoading ? "Salvando..." : "Cadastrar"}
+        {button}
       </button>
 
       {viewModel.error && <p>{viewModel.error}</p>}

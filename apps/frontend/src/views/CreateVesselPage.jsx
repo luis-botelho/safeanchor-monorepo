@@ -6,7 +6,7 @@ export default function CreateVesselPage({ onSuccess }) {
 
   return (
     <main>
-      <VesselForm title={"Cadastrar Embarcação"}viewModel={viewModel} onSuccess={onSuccess} />
+      <VesselForm title={"Cadastrar Embarcação"}viewModel={viewModel} onSuccess={onSuccess} button='Cadastrar'/>
     </main>
   );
 }
