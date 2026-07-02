@@ -69,7 +69,7 @@ export async function getVesselById(id) {
       error: false,
     };
   } catch (error){
-    const vessel = vessels.find(
+    const vessel = fallbackVessels.find(
      (vessel) => vessel.id === Number(id)
   );
 
@@ -82,7 +82,7 @@ export async function getVesselById(id) {
 }
 
 //Update vessel 
-export async function upDateVessel(id,vesselData) {
+export async function updateVessel(id,vesselData) {
   const response = await fetch(`${apiUrl}/vessels/${id}`, {
     method: "PUT",
     headers: {

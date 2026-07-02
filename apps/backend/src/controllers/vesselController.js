@@ -41,9 +41,9 @@ export const updateVesselController = (request, response) => {
   const vessel = updateVessel(id, vesselData);
   if (!vessel) {
     return response.status(404).json({
-        message: "Vessel not found",
+      message: "Vessel not found",
     });
-}
+  }
 
-  response.status(200).json(vessel)
-}
+  return response.status(200).json(vessel);
+};
