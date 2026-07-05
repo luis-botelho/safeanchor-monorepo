@@ -3,6 +3,7 @@ import {
   getVesselById,
   createVessel,
   updateVessel,
+  deleteVessel
 } from "../services/vesselService.js";
 
 
@@ -46,4 +47,17 @@ export const updateVesselController = (request, response) => {
   }
 
   return response.status(200).json(vessel);
+};
+
+export const deleteVesselController = (request, response) => {
+  const { id } = request.params;
+  const deletedVessel = deleteVessel(id);
+
+  if (!deletedVessel) {
+    return response.status(404).json({
+      message: "Vessel not found",
+    });
+  }
+
+  return response.sendStatus(204);
 };

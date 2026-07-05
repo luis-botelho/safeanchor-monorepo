@@ -4,6 +4,7 @@ import {
   getVessel,
   createNewVessel,
   updateVesselController,
+  deleteVesselController,
 } from "../controllers/vesselController.js";
 
 const router = express.Router();
@@ -12,5 +13,6 @@ router.get("/", getVessels);
 router.post("/", createNewVessel);
 router.get("/:id", getVessel);
 router.put("/:id", updateVesselController)
+router.delete("/:id", deleteVesselController)
 
 export default router;
