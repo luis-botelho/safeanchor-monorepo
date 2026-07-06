@@ -98,3 +98,14 @@ export async function updateVessel(id,vesselData) {
   return response.json();
 }
 //Delete 
+export async function deleteVessel(id){
+  const response = await fetch(`${apiUrl}/vessels/${id}`, {
+    method: "DELETE"
+  });
+
+  if (!response.ok) {
+    throw new Error("Não foi possivel Deletar a embarcação.");
+  }
+
+  return true;
+}
