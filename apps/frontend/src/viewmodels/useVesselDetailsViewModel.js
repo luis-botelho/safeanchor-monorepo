@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getVesselById } from "../services/vesselService";
+import { deleteVessel, getVesselById } from "../services/vesselService";
 
 export function useVesselDetailsViewModel(id) {
   const [vessel, setVessel] = useState(null);
@@ -9,6 +9,8 @@ export function useVesselDetailsViewModel(id) {
   useEffect(() => {
     async function loadVessel() {
       try {
+        setIsLoading(true);
+        setError("");
         const loadedVessel = await getVesselById(id);
         setVessel(loadedVessel.vessel);
       } catch (error) {
@@ -16,15 +18,23 @@ export function useVesselDetailsViewModel(id) {
       } finally {
         setIsLoading(false);
       }
-
     }
 
     loadVessel();
   }, [id]);
 
+  async function removeVessel() {
+    try {
+      await deleteVessel(id);
+    } catch (error) {
+      throw new Error(error.message || "Não foi possível excluir a embarcação.");
+    }
+  }
+
   return {
     vessel,
     isLoading,
     error,
+    removeVessel,
   };
 }
