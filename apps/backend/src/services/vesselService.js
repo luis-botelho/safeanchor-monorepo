@@ -1,22 +1,5 @@
 import { Vessel } from "../models/vesselModel.js";
 
-// export const getAllVessels = () => {
-//   return [
-//     new Vessel(
-//       1,
-//       "Sea Explorer",
-//       "Lancha",
-//       "Ativa"
-//     ),
-//     new Vessel(
-//       2,
-//       "Ocean Dream",
-//       "Iate",
-//       "Manutenção"
-//     )
-//   ];
-// };
-
 const vessels = [
   {
     id: 1,
@@ -36,7 +19,7 @@ export const getAllVessels = () => vessels;
 
 export const createVessel = (vesselData) => {
   const newVessel = {
-    id: vessels.length + 1,  // Forma de gerar um ID único simples, mas muito básica. Em um cenário real, seria melhor usar um UUID ou um sistema de banco de dados para garantir unicidade.
+    id: vessels.length + 1, // Forma de gerar um ID único simples, mas muito básica. Em um cenário real, seria melhor usar um UUID ou um sistema de banco de dados para garantir unicidade.
     ...vesselData,
   };
 
@@ -48,7 +31,30 @@ export const createVessel = (vesselData) => {
 export const getVesselById = (id) => {
   const vessels = getAllVessels();
 
-  return vessels.find(
-    (vessel) => vessel.id === Number(id)
-  );
+  return vessels.find((vessel) => vessel.id === Number(id));
+};
+
+export const updateVessel = (id, vesselData) => {
+  const vessel = getVesselById(id);
+  if (!vessel) {
+    return null;
+  }
+  vessel.name = vesselData.name;
+  vessel.status = vesselData.status;
+  vessel.type = vesselData.type;
+
+  return vessel;
+};
+
+export const deleteVessel = (id) => {
+  const vessel = getVesselById(id);
+  if (!vessel) {
+    return null;
+  }
+
+  const index = vessels.findIndex((v) => v.id === Number(id));
+
+  vessels.splice(index, 1);
+
+  return true;
 };

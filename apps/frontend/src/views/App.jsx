@@ -1,29 +1,17 @@
-import { useHomeViewModel } from "../viewmodels/useHomeViewModel";
+import { Routes, Route } from "react-router-dom";
 
-export function App() {
-  const viewModel = useHomeViewModel();
+import VesselsPage from "./VesselsPage";
+import CreateVesselPage from "./CreateVesselPage";
+import VesselDetailsPage from "./VesselDetailsPage";
+import EditVesselPage from "./EditVesselPage"
 
+export default function App() {
   return (
-    <main className="home">
-      <section className="home__intro">
-        <p className="home__eyebrow">Projeto de estudo</p>
-        <h1 className="home__title">{viewModel.appName}</h1>
-        <p className="home__subtitle">{viewModel.subtitle}</p>
-      </section>
-
-      <section className="module-list" aria-label="Modulos iniciais">
-        {viewModel.isLoading ? (
-          <p className="module-list__loading">Carregando modulos...</p>
-        ) : (
-          viewModel.modules.map((module) => (
-            <article className="module-card" key={module.id}>
-              <p className="module-card__status">{module.status}</p>
-              <h2 className="module-card__title">{module.name}</h2>
-              <p className="module-card__description">{module.description}</p>
-            </article>
-          ))
-        )}
-      </section>
-    </main>
+    <Routes>
+      <Route path="/" element={<VesselsPage />} />
+      <Route path="/create" element={<CreateVesselPage />} />
+      <Route path="/vessels/:id" element={<VesselDetailsPage />} />
+      <Route path="/update/:id" element={<EditVesselPage/>}/>
+    </Routes>
   );
 }
