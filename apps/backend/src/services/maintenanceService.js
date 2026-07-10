@@ -19,3 +19,7 @@ const maintenances = [
 ];
 
 export const getMaintenances = () => maintenances;
+export const getMaintenanceById = (id) => {
+  const maintenances = getMaintenances();
+  return maintenances.find((vessel) => maintenance.id === Number(id));
+};
