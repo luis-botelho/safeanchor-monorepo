@@ -5,6 +5,8 @@ import CreateVesselPage from "./CreateVesselPage";
 import VesselDetailsPage from "./VesselDetailsPage";
 import EditVesselPage from "./EditVesselPage"
 
+import MaintenancesPage from "./MaintenancesPage";
+
 export default function App() {
   return (
     <Routes>
@@ -12,6 +14,8 @@ export default function App() {
       <Route path="/create" element={<CreateVesselPage />} />
       <Route path="/vessels/:id" element={<VesselDetailsPage />} />
       <Route path="/update/:id" element={<EditVesselPage/>}/>
+      <Route path="/maintenances" element={<MaintenancesPage />} />
     </Routes>
+    
   );
 }
