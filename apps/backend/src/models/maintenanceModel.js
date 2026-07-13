@@ -12,7 +12,7 @@ export class Maintenance {
     this.vesselId = vesselId;
     this.title = title;
     this.description = description;
-    this.type
+    this.type = type;
     this.date = date;
     this.status = status;
   }
