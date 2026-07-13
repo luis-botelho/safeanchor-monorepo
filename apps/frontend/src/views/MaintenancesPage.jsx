@@ -1,4 +1,5 @@
 import { useMaintenancesViewModel } from "../viewmodels/useMaintenancesViewModel";
+import { Link } from "react-router-dom";
 
 export default function MaintenancesPage() {
   const viewModel = useMaintenancesViewModel();
@@ -13,7 +14,7 @@ export default function MaintenancesPage() {
   return (
     <main>
       <h1>Manutenções</h1>
-
+      <Link to="/maintenances/create">Nova Manutenção</Link>
       {viewModel.maintenances.map((maintenance) => (
         <div key={maintenance.id}>
           <h2>{maintenance.title}</h2>

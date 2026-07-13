@@ -19,7 +19,7 @@ app.get("/", (request, response) => {
 
 app.use("/modules", modulesRouter);
 app.use("/vessels", vesselRoutes);
-app.use("/maintenance", maintenanceRoutes);
+app.use("/maintenances", maintenanceRoutes);
 
 app.listen(port, () => {
   console.log(`SafeAnchor API rodando em http://localhost:${port}`);
