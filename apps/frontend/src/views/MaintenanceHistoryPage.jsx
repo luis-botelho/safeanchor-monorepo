@@ -17,7 +17,26 @@ export default function MaintenanceHistoryPage() {
   return (
     <main className="maintenance-history">
       <h1>Histórico de Manutenções</h1>
+      <div>
+        <select
+          value={viewModel.statusFilter}
+          onChange={(e) => viewModel.setStatusFilter(e.target.value)}
+        >
+          <option value="">Todos os status</option>
+          <option value="Pendente">Pendente</option>
+          <option value="Em andamento">Em andamento</option>
+          <option value="Concluída">Concluída</option>
+        </select>
 
+        <select
+          value={viewModel.typeFilter}
+          onChange={(e) => viewModel.setTypeFilter(e.target.value)}
+        >
+          <option value="">Todos os tipos</option>
+          <option value="Preventiva">Preventiva</option>
+          <option value="Corretiva">Corretiva</option>
+        </select>
+      </div>
       <Link to={`/vessels/${id}`}>← Voltar para embarcação</Link>
 
       {viewModel.maintenances.length === 0 ? (
