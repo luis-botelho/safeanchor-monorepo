@@ -6,7 +6,7 @@ import VesselDetailsPage from "./VesselDetailsPage";
 import EditVesselPage from "./EditVesselPage";
 
 import MaintenancesPage from "./MaintenancesPage";
-
+import MaintenanceHistoryPage from "./MaintenanceHistoryPage";
 import CreateMaintenancePage from "./CreateMaintenancePage";
 
 export default function App() {
@@ -19,6 +19,8 @@ export default function App() {
 
       <Route path="/maintenances" element={<MaintenancesPage />} />
       <Route path="/maintenances/create" element={<CreateMaintenancePage />} />
+      <Route path="/vessels/:id/maintenances" element={<MaintenanceHistoryPage />}
+      />
     </Routes>
   );
 }
