@@ -25,3 +25,14 @@ export async function getMaintenances() {
   return response.json();
 }
 
+export async function getMaintenancesByVesselId(vesselId) {
+  const response = await fetch(
+    `${apiUrl}/vessels/${vesselId}/maintenances`
+  );
+
+  if (!response.ok) {
+    throw new Error("Não foi possível carregar o histórico.");
+  }
+
+  return response.json();
+}

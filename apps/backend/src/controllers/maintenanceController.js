@@ -1,6 +1,7 @@
 import {
   getMaintenances,
   createMaintenance,
+  getMaintenancesByVesselId,
 } from "../services/maintenanceService.js";
 
 export const getMaintenancesController = (request, response) => {
@@ -15,4 +16,12 @@ export const createMaintenanceController = (request, response) => {
   const maintenance = createMaintenance(maintenanceData);
 
   return response.status(201).json(maintenance);
+};
+
+export const getMaintenancesByVesselIdController = (request, response) => {
+  const { id } = request.params;
+
+  const maintenances = getMaintenancesByVesselId(id);
+
+  return response.status(200).json(maintenances);
 };

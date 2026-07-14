@@ -21,14 +21,6 @@ const maintenances = [
   },
 ];
 
-export const getMaintenances = () => maintenances;
-
-export const getMaintenanceById = (id) => {
-  const maintenances = getMaintenances();
-
-  return maintenances.find((maintenance) => maintenance.id === Number(id));
-};
-
 export const createMaintenance = (maintenanceData) => {
   const newMaintenance = new Maintenance(
     maintenances.length + 1,
@@ -39,8 +31,22 @@ export const createMaintenance = (maintenanceData) => {
     maintenanceData.date,
     maintenanceData.status
   );
-
+  
   maintenances.push(newMaintenance);
-
+  
   return newMaintenance;
+};
+
+export const getMaintenances = () => maintenances;
+
+export const getMaintenanceById = (id) => {
+  const maintenances = getMaintenances();
+
+  return maintenances.find((maintenance) => maintenance.id === Number(id));
+};
+
+export const getMaintenancesByVesselId = (vesselId) => {
+  return maintenances.filter(
+    (maintenance) => maintenance.vesselId === Number(vesselId)
+  );
 };
