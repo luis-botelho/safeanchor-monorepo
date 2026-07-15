@@ -17,3 +17,12 @@ export async function createPreventiveMaintenance(data) {
 
   return response.json();
 }
+export async function getPreventiveMaintenances() {
+  const response = await fetch(`${apiUrl}/preventive-maintenances`);
+
+  if (!response.ok) {
+    throw new Error("Não foi possível carregar as manutenções preventivas.");
+  }
+
+  return response.json();
+}
