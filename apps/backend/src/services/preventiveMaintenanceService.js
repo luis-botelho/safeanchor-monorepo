@@ -31,6 +31,8 @@ function calculateNextExecution(startDate, periodicity) {
   return nextExecution.toISOString().split("T")[0];
 }
 
+export const getPreventiveMaintenances = () => preventiveMaintenances;
+
 export const createPreventiveMaintenance = ({
   title,
   description,
