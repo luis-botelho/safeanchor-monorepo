@@ -48,7 +48,10 @@ export default function VesselDetailsPage() {
 
       <div>
         <Link to={`/update/${id}`}>✏️ Editar</Link>
-        <button type="button" onClick={handleDelete}>🗑️ Excluir</button>
+        <Link to={`/vessels/${id}/maintenances`}>📋 Histórico</Link>
+        <button type="button" onClick={handleDelete}>
+          🗑️ Excluir
+        </button>
       </div>
     </main>
   );

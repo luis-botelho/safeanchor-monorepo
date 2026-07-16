@@ -7,9 +7,9 @@ This document defines the target backend architecture for SafeAnchor as a produc
 ## Stack
 
 - NestJS
-- PostgreSQL
-- Prisma ORM
-- TypeScript
+- PostgreSQL 
+- Prisma ORM 
+- TypeScript 
 
 ## Architecture Goals
 

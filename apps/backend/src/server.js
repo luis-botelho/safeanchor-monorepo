@@ -2,7 +2,8 @@ import cors from "cors";
 import express from "express";
 import { modulesRouter } from "./routes/modulesRoutes.js";
 import vesselRoutes from "./routes/vesselRoutes.js";
-
+import maintenanceRoutes from "./routes/maintenanceRoutes.js";
+import preventiveMaintenanceRoutes from "./routes/preventiveMaintenanceRoutes.js";
 
 const app = express();
 const port = 3001;
@@ -19,6 +20,8 @@ app.get("/", (request, response) => {
 
 app.use("/modules", modulesRouter);
 app.use("/vessels", vesselRoutes);
+app.use("/maintenances", maintenanceRoutes);
+app.use("/preventive-maintenances", preventiveMaintenanceRoutes);
 
 app.listen(port, () => {
   console.log(`SafeAnchor API rodando em http://localhost:${port}`);
