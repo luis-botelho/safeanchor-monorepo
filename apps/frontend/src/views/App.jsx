@@ -11,6 +11,7 @@ import CreateMaintenancePage from "./CreateMaintenancePage";
 
 import PreventiveMaintenancesPage from "./PreventiveMaintenancesPage";
 import CreatePreventiveMaintenancePage from "./CreatePreventiveMaintenancePage";
+import MaintenanceDashboardPage from "./MaintenanceDashboardPage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
 
       <Route path="/preventive-maintenances" element={<PreventiveMaintenancesPage />} />
       <Route path="/preventive-maintenances/create" element={<CreatePreventiveMaintenancePage />} />
+      <Route path="/maintenance-dashboard" element={<MaintenanceDashboardPage />} />
 
     </Routes>
   );
