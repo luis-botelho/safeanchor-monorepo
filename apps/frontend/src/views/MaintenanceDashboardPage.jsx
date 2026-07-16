@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useMaintenanceDashboardViewModel } from "../viewmodels/useMaintenanceDashboardViewModel";
 
 export default function MaintenanceDashboardPage() {
@@ -14,15 +15,42 @@ export default function MaintenanceDashboardPage() {
   const dashboard = viewModel.dashboard;
 
   return (
-    <main>
-      <h1>Maintenance Dashboard</h1>
+    <main className="maintenance-dashboard">
+      <header className="maintenance-dashboard__header">
+        <h1>Dashboard de Manutenção</h1>
 
-      <section>
-        <p>Total: {dashboard.total}</p>
-        <p>Preventivas: {dashboard.preventive}</p>
-        <p>Corretivas: {dashboard.corrective}</p>
-        <p>Pendentes: {dashboard.pending}</p>
-        <p>Concluídas: {dashboard.completed}</p>
+        <Link to="/maintenances">
+          Ver Manutenções
+        </Link>
+      </header>
+
+      <section className="maintenance-dashboard__cards">
+
+        <article>
+          <h2>Total</h2>
+          <strong>{dashboard.total}</strong>
+        </article>
+
+        <article>
+          <h2>Preventivas</h2>
+          <strong>{dashboard.preventive}</strong>
+        </article>
+
+        <article>
+          <h2>Corretivas</h2>
+          <strong>{dashboard.corrective}</strong>
+        </article>
+
+        <article>
+          <h2>Pendentes</h2>
+          <strong>{dashboard.pending}</strong>
+        </article>
+
+        <article>
+          <h2>Concluídas</h2>
+          <strong>{dashboard.completed}</strong>
+        </article>
+
       </section>
     </main>
   );
