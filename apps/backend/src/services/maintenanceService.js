@@ -50,3 +50,4 @@ export const getMaintenancesByVesselId = (vesselId) => {
     (maintenance) => maintenance.vesselId === Number(vesselId)
   );
 };
+
