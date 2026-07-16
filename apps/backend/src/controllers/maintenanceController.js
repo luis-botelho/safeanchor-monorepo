@@ -1,8 +1,10 @@
+
 import {
   getMaintenances,
   createMaintenance,
   getMaintenancesByVesselId,
 } from "../services/maintenanceService.js";
+import { getDashboardStatistics } from "../services/maintenanceDashboardService.js";
 
 export const getMaintenancesController = (request, response) => {
   const maintenances = getMaintenances();
@@ -25,3 +27,8 @@ export const getMaintenancesByVesselIdController = (request, response) => {
 
   return response.status(200).json(maintenances);
 };
+export function getMaintenanceDashboardController(request, response) {
+  const dashboard = getDashboardStatistics();
+
+  return response.json(dashboard);
+}
