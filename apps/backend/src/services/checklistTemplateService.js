@@ -17,3 +17,7 @@ export function createTemplate({
 
   return template;
 }
+
+export function getChecklistTemplates() {
+  return checklistTemplates;
+}
