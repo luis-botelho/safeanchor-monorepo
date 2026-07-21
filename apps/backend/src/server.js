@@ -5,6 +5,7 @@ import vesselRoutes from "./routes/vesselRoutes.js";
 import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import preventiveMaintenanceRoutes from "./routes/preventiveMaintenanceRoutes.js";
 import checklistTemplateRoutes from "./routes/checklistTemplateRoutes.js";
+import checklistExecutionRoutes from "./routes/checklistExecutionRoutes.js";
 
 const app = express();
 const port = 3001;
@@ -24,6 +25,7 @@ app.use("/vessels", vesselRoutes);
 app.use("/maintenances", maintenanceRoutes);
 app.use("/preventive-maintenances", preventiveMaintenanceRoutes);
 app.use("/checklist-templates", checklistTemplateRoutes);
+app.use("/checklist-executions", checklistExecutionRoutes);
 
 app.listen(port, () => {
   console.log(`SafeAnchor API rodando em http://localhost:${port}`);
