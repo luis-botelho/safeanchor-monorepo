@@ -1,15 +1,15 @@
-export function createExecutionTemplate({
+export function createChecklistExecution({
   id,
   templateId,
   vesselId,
   responses,
-  executedat,
+  executedAt,
 }) {
   return {
     id,
     templateId,
     vesselId,
     responses,
-    executedat,
+    executedAt,
   };
 }
