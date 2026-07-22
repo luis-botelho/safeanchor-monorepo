@@ -15,6 +15,8 @@ import MaintenanceDashboardPage from "./MaintenanceDashboardPage";
 
 import CreateChecklistTemplatePage from "./CreateChecklistTemplatePage";
 import ChecklistTemplatesPage from "./ChecklistTemplatesPage";
+import CreateChecklistExecutionPage from "./CreateChecklistExecutionPage";
+import ChecklistExecutionsPage from "./ChecklistExecutionsPage";
 
 export default function App() {
   return (
@@ -34,6 +36,9 @@ export default function App() {
 
       <Route path="/checklist-templates/new" element={<CreateChecklistTemplatePage />} />
       <Route path="/checklist-templates" element={<ChecklistTemplatesPage />} />
+
+      <Route path="/checklist-executions/new" element={<CreateChecklistExecutionPage />} />
+      <Route path="/checklist-executions" element={<ChecklistExecutionsPage />} />
 
     </Routes>
   );
