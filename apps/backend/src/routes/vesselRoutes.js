@@ -9,6 +9,9 @@ import {
 import {
   getMaintenancesByVesselIdController,
 } from "../controllers/maintenanceController.js";
+import {
+  getChecklistExecutionsByVesselIdController,
+} from "../controllers/checklistExecutionController.js";
 
 const router = express.Router();
 
@@ -18,5 +21,6 @@ router.get("/:id", getVessel);
 router.put("/:id", updateVesselController)
 router.delete("/:id", deleteVesselController)
 router.get("/:id/maintenances", getMaintenancesByVesselIdController);
+router.get("/:id/inspections", getChecklistExecutionsByVesselIdController);
 
 export default router;

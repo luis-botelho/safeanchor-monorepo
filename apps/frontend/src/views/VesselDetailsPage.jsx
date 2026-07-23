@@ -1,6 +1,7 @@
 import { useVesselDetailsViewModel } from "../viewmodels/useVesselDetailsViewModel";
 import { useParams, Link, useNavigate } from "react-router-dom";
 
+
 export default function VesselDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -47,12 +48,15 @@ export default function VesselDetailsPage() {
       </section>
 
       <div>
-        <Link to={`/update/${id}`}>✏️ Editar</Link>
-        <Link to={`/vessels/${id}/maintenances`}>📋 Histórico</Link>
-        <button type="button" onClick={handleDelete}>
-          🗑️ Excluir
-        </button>
+        <Link to={`/vessels/${vessel.id}/maintenances`}>
+          Maintenance History
+        </Link>
+
+        <Link to={`/vessels/${vessel.id}/inspections`}>Inspection History</Link>
       </div>
+      <button type="button" onClick={handleDelete}>
+        🗑️ Excluir
+      </button>
     </main>
   );
 }
