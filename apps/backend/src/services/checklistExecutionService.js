@@ -22,3 +22,9 @@ export function createExecution({
 export function getChecklistExecutions() {
   return checklistExecutions;
 }
+
+export function getChecklistExecutionsByVesselId(vesselId) {
+  return checklistExecutions
+    .filter((execution) => execution.vesselId === vesselId)
+    .sort((a, b) => new Date(b.executedAt) - new Date(a.executedAt));
+}
