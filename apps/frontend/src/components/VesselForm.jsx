@@ -12,7 +12,6 @@ export default function VesselForm({ title, viewModel, onSuccess, button }) {
       }}
     >
       <h1>{title}</h1>
-
       <input
         type="text"
         placeholder="Nome"
