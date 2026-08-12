@@ -3,17 +3,17 @@ import {
   getPreventiveMaintenances,
 } from "../services/preventiveMaintenanceService.js";
 
-export const getPreventiveMaintenancesController = (request, response) => {
-  const preventiveMaintenances = getPreventiveMaintenances();
+export const getPreventiveMaintenancesController = async (request, response) => {
+  const preventiveMaintenances = await getPreventiveMaintenances();
 
   return response.status(200).json(preventiveMaintenances);
 };
 
-export const createPreventiveMaintenanceController = (request, response) => {
+export const createPreventiveMaintenanceController = async (request, response) => {
   const preventiveMaintenanceData = request.body;
 
   const preventiveMaintenance =
-    createPreventiveMaintenance(preventiveMaintenanceData);
+    await createPreventiveMaintenance(preventiveMaintenanceData);
 
   return response.status(201).json(preventiveMaintenance);
 };

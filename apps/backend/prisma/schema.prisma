@@ -1,0 +1,70 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Vessel {
+  id                     String                  @id @default(cuid())
+  name                   String
+  type                   String
+  status                 String
+  maintenances           Maintenance[]
+  preventiveMaintenances PreventiveMaintenance[]
+  checklistExecutions    ChecklistExecution[]
+}
+
+model Maintenance {
+  id          String @id @default(cuid())
+  vesselId    String
+  title       String
+  description String
+  type        String
+  date        String
+  status      String
+
+  vessel Vessel @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+
+  @@index([vesselId])
+}
+
+model PreventiveMaintenance {
+  id            String @id @default(cuid())
+  title         String
+  description   String
+  type          String
+  status        String
+  vesselId      String
+  periodicity   String
+  startDate     String
+  nextExecution String
+
+  vessel Vessel @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+
+  @@index([vesselId])
+}
+
+model ChecklistTemplate {
+  id         String               @id @default(cuid())
+  title      String
+  vesselType String
+  items      Json
+  executions ChecklistExecution[]
+}
+
+model ChecklistExecution {
+  id         String @id @default(cuid())
+  templateId String
+  vesselId   String
+  responses  Json
+  executedAt String
+
+  template ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  vessel   Vessel            @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+  @@index([vesselId])
+}

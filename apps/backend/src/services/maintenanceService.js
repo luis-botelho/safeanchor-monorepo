@@ -1,53 +1,34 @@
-import { Maintenance } from "../models/maintenanceModel.js";
+import prisma from "../lib/prisma.js";
 
-const maintenances = [
-  {
-    id: 1,
-    vesselId: 1,
-    title: "arrumando",
-    description: "o barco ta concertando mano",
-    type: "critical",
-    date: "10/06/26",
-    status: "fudido",
-  },
-  {
-    id: 2,
-    vesselId: 2,
-    title: "concertado",
-    description: "o barco ta pronto mano",
-    type: "doned",
-    date: "30/09/26",
-    status: "novinho",
-  },
-];
-
-export const createMaintenance = (maintenanceData) => {
-  const newMaintenance = new Maintenance(
-    maintenances.length + 1,
-    maintenanceData.vesselId,
-    maintenanceData.title,
-    maintenanceData.description,
-    maintenanceData.type,
-    maintenanceData.date,
-    maintenanceData.status
-  );
-  
-  maintenances.push(newMaintenance);
-  
-  return newMaintenance;
+export const createMaintenance = async (maintenanceData) => {
+  return prisma.maintenance.create({
+    data: {
+      vesselId: maintenanceData.vesselId,
+      title: maintenanceData.title,
+      description: maintenanceData.description,
+      type: maintenanceData.type,
+      date: maintenanceData.date,
+      status: maintenanceData.status,
+    },
+  });
 };
 
-export const getMaintenances = () => maintenances;
-
-export const getMaintenanceById = (id) => {
-  const maintenances = getMaintenances();
-
-  return maintenances.find((maintenance) => maintenance.id === Number(id));
+export const getMaintenances = async () => {
+  return prisma.maintenance.findMany();
 };
 
-export const getMaintenancesByVesselId = (vesselId) => {
-  return maintenances.filter(
-    (maintenance) => maintenance.vesselId === Number(vesselId)
-  );
+export const getMaintenanceById = async (id) => {
+  return prisma.maintenance.findUnique({
+    where: {
+      id,
+    },
+  });
 };
 
+export const getMaintenancesByVesselId = async (vesselId) => {
+  return prisma.maintenance.findMany({
+    where: {
+      vesselId,
+    },
+  });
+};
