@@ -50,3 +50,6 @@ next-env.d.ts
 skills-lock.json
 
 /.learning
+
+# Vite build output
+/apps/frontend/dist/
