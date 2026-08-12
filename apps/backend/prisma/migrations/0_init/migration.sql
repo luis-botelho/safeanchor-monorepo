@@ -83,3 +83,16 @@ ALTER TABLE "ChecklistExecution" ADD CONSTRAINT "ChecklistExecution_templateId_f
 
 -- AddForeignKey
 ALTER TABLE "ChecklistExecution" ADD CONSTRAINT "ChecklistExecution_vesselId_fkey" FOREIGN KEY ("vesselId") REFERENCES "Vessel"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Restrict access to the backend connection until application authorization exists.
+ALTER TABLE "Vessel" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Maintenance" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "PreventiveMaintenance" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ChecklistTemplate" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "ChecklistExecution" ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL PRIVILEGES ON TABLE "Vessel" FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON TABLE "Maintenance" FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON TABLE "PreventiveMaintenance" FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON TABLE "ChecklistTemplate" FROM anon, authenticated;
+REVOKE ALL PRIVILEGES ON TABLE "ChecklistExecution" FROM anon, authenticated;

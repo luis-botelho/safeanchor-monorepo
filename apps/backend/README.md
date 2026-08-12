@@ -84,6 +84,10 @@ Para consultar o estado depois:
 npm run prisma:status
 ```
 
+A baseline `0_init` esta registrada no banco Supabase atual. O diff estrutural
+foi confirmado como vazio antes do registro, e `prisma migrate status` indica
+que o schema esta atualizado.
+
 Nunca use `prisma migrate reset` ou `prisma db push` no projeto remoto.
 
 ## Testes verificados nesta fundacao
@@ -94,5 +98,24 @@ Nunca use `prisma migrate reset` ou `prisma db push` no projeto remoto.
 - build do frontend.
 
 O smoke test que escreve no Supabase so deve ser executado quando
-`ALLOW_DATABASE_SMOKE=true` estiver definido. Resultados remotos devem ser
-registrados apenas depois da execucao real.
+`ALLOW_DATABASE_SMOKE=true` estiver definido:
+
+```bash
+ALLOW_DATABASE_SMOKE=true npm run test:db:smoke
+```
+
+O teste cria dados com marcador unico `codex-smoke-<timestamp>`, registra todos
+os IDs e remove somente esses IDs no bloco `finally`. O fluxo completo passou
+contra o Supabase, incluindo CRUD de Vessel, criacao dos quatro registros
+relacionados, consultas por `vesselId`, cascatas e confirmacao de limpeza.
+
+## Acesso e seguranca
+
+As cinco tabelas de dominio permanecem no schema `public`, mas possuem RLS
+habilitado e nao concedem privilegios a `anon` nem `authenticated`. Nao existem
+policies publicas. Portanto, o acesso atual acontece exclusivamente pelo
+backend Express usando a conexao PostgreSQL do Prisma.
+
+Policies de propriedade so devem ser adicionadas quando autenticacao e
+autorizacao fizerem parte do escopo. Ate la, o frontend nao deve consultar as
+tabelas diretamente pela Data API do Supabase.

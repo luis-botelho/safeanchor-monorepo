@@ -37,6 +37,16 @@ As quatro chaves estrangeiras possuem indice e usam `ON DELETE CASCADE` e
 Os valores reais ficam apenas em `apps/backend/.env`. O arquivo
 `apps/backend/.env.example` contem placeholders seguros.
 
+## Seguranca de acesso
+
+As cinco tabelas de dominio usam RLS sem policies e tiveram todos os privilegios
+diretos de `anon` e `authenticated` revogados. Isso bloqueia o acesso pela Data
+API e mantem a conexao PostgreSQL do backend como unico caminho atual.
+
+As policies de propriedade serao definidas junto da futura camada de
+autenticacao e autorizacao. Elas nao devem ser criadas como policies publicas
+temporarias.
+
 ## Baseline
 
 `apps/backend/prisma/migrations/0_init/migration.sql` reproduz o schema completo
@@ -58,3 +68,22 @@ npx prisma migrate resolve --applied 0_init
 ```
 
 Esse comando registra o historico; ele nao deve ser usado para esconder drift.
+
+No projeto Supabase atual, o diff estrutural foi confirmado como vazio e a
+baseline `0_init` foi registrada. `npm run prisma:status` retorna que o schema
+esta atualizado.
+
+## Smoke test
+
+O teste remoto reproduzivel fica em
+`apps/backend/test/database.smoke.test.js`. Ele e ignorado por padrao e exige
+autorizacao explicita:
+
+```bash
+cd apps/backend
+ALLOW_DATABASE_SMOKE=true npm run test:db:smoke
+```
+
+O teste usa marcador `codex-smoke-<timestamp>`, registra os IDs exatos, valida
+relacionamentos e cascatas e remove somente os registros criados por ele. O
+fluxo completo e a limpeza final foram validados no Supabase.
