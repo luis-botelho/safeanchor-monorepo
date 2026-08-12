@@ -5,7 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "node --test",
+    "postinstall": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:generate": "prisma generate",
+    "prisma:status": "prisma migrate status"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
