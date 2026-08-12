@@ -4,10 +4,10 @@ import {
   getChecklistExecutionsByVesselId,
 } from "../services/checklistExecutionService.js";
 
-export function createChecklistExecution(req, res) {
+export async function createChecklistExecution(req, res) {
   const { templateId, vesselId, responses } = req.body;
 
-  const execution = createExecution({
+  const execution = await createExecution({
     templateId,
     vesselId,
     responses,
@@ -16,16 +16,16 @@ export function createChecklistExecution(req, res) {
   return res.status(201).json(execution);
 }
 
-export function listChecklistExecutions(req, res) {
-  const executions = getChecklistExecutions();
+export async function listChecklistExecutions(req, res) {
+  const executions = await getChecklistExecutions();
 
   return res.json(executions);
 }
 
-export function getChecklistExecutionsByVesselIdController(req, res) {
+export async function getChecklistExecutionsByVesselIdController(req, res) {
   const { id } = req.params;
 
-  const executions = getChecklistExecutionsByVesselId(id);
+  const executions = await getChecklistExecutionsByVesselId(id);
 
   return res.status(200).json(executions);
 }

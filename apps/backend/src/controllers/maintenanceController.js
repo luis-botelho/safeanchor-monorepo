@@ -6,29 +6,29 @@ import {
 } from "../services/maintenanceService.js";
 import { getDashboardStatistics } from "../services/maintenanceDashboardService.js";
 
-export const getMaintenancesController = (request, response) => {
-  const maintenances = getMaintenances();
+export const getMaintenancesController = async (request, response) => {
+  const maintenances = await getMaintenances();
 
   return response.status(200).json(maintenances);
 };
 
-export const createMaintenanceController = (request, response) => {
+export const createMaintenanceController = async (request, response) => {
   const maintenanceData = request.body;
 
-  const maintenance = createMaintenance(maintenanceData);
+  const maintenance = await createMaintenance(maintenanceData);
 
   return response.status(201).json(maintenance);
 };
 
-export const getMaintenancesByVesselIdController = (request, response) => {
+export const getMaintenancesByVesselIdController = async (request, response) => {
   const { id } = request.params;
 
-  const maintenances = getMaintenancesByVesselId(id);
+  const maintenances = await getMaintenancesByVesselId(id);
 
   return response.status(200).json(maintenances);
 };
-export function getMaintenanceDashboardController(request, response) {
-  const dashboard = getDashboardStatistics();
+export async function getMaintenanceDashboardController(request, response) {
+  const dashboard = await getDashboardStatistics();
 
   return response.json(dashboard);
 }
