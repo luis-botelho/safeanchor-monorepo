@@ -3,43 +3,43 @@ import {
   getVesselById,
   createVessel,
   updateVessel,
-  deleteVessel
+  deleteVessel,
 } from "../services/vesselService.js";
 
-
-export const getVessels = (request, response) => {
-  const vessels = getAllVessels();
+export const getVessels = async (request, response) => {
+  const vessels = await getAllVessels();
 
   response.json(vessels);
 };
 
-export const getVessel = (request, response) => {
+export const getVessel = async (request, response) => {
   const { id } = request.params;
 
-  const vessel = getVesselById(id);
+  const vessel = await getVesselById(id);
 
   if (!vessel) {
     return response.status(404).json({
-      message: "Vessel not found"
+      message: "Vessel not found",
     });
   }
 
-  response.json(vessel);
+  return response.json(vessel);
 };
 
-export const createNewVessel = (request, response) => {
+export const createNewVessel = async (request, response) => {
   const vesselData = request.body;
 
-  const vessel = createVessel(vesselData);
+  const vessel = await createVessel(vesselData);
 
-  response.status(201).json(vessel);
+  return response.status(201).json(vessel);
 };
 
-export const updateVesselController = (request, response) => {
+export const updateVesselController = async (request, response) => {
   const { id } = request.params;
   const vesselData = request.body;
 
-  const vessel = updateVessel(id, vesselData);
+  const vessel = await updateVessel(id, vesselData);
+
   if (!vessel) {
     return response.status(404).json({
       message: "Vessel not found",
@@ -49,9 +49,10 @@ export const updateVesselController = (request, response) => {
   return response.status(200).json(vessel);
 };
 
-export const deleteVesselController = (request, response) => {
+export const deleteVesselController = async (request, response) => {
   const { id } = request.params;
-  const deletedVessel = deleteVessel(id);
+
+  const deletedVessel = await deleteVessel(id);
 
   if (!deletedVessel) {
     return response.status(404).json({
