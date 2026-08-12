@@ -1,8 +1,4 @@
-import { PreventiveMaintenance } from "../models/preventiveMaintenanceModel.js";
-
-const preventiveMaintenances = [];
-
-let nextId = 1;
+import prisma from "../lib/prisma.js";
 
 function calculateNextExecution(startDate, periodicity) {
   const nextExecution = new Date(startDate);
@@ -31,9 +27,11 @@ function calculateNextExecution(startDate, periodicity) {
   return nextExecution.toISOString().split("T")[0];
 }
 
-export const getPreventiveMaintenances = () => preventiveMaintenances;
+export const getPreventiveMaintenances = async () => {
+  return prisma.preventiveMaintenance.findMany();
+};
 
-export const createPreventiveMaintenance = ({
+export const createPreventiveMaintenance = async ({
   title,
   description,
   type,
@@ -43,19 +41,16 @@ export const createPreventiveMaintenance = ({
   startDate,
 }) => {
   const nextExecution = calculateNextExecution(startDate, periodicity);
-  const preventiveMaintenance = new PreventiveMaintenance(
-    nextId++,
-    title,
-    description,
-    type,
-    status,
-    vesselId,
-    periodicity,
-    startDate,
-    nextExecution,
-  );
-
-  preventiveMaintenances.push(preventiveMaintenance);
-
-  return preventiveMaintenance;
+  return prisma.preventiveMaintenance.create({
+    data: {
+      title,
+      description,
+      type,
+      status,
+      vesselId,
+      periodicity,
+      startDate,
+      nextExecution,
+    },
+  });
 };

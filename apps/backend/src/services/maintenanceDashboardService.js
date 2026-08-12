@@ -1,7 +1,7 @@
 import { getMaintenances } from "./maintenanceService.js";
 
-export function getDashboardStatistics() {
-  const maintenances = getMaintenances();
+export async function getDashboardStatistics() {
+  const maintenances = await getMaintenances();
 
   return {
     total: maintenances.length,
