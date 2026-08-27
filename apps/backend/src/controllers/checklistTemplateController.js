@@ -3,10 +3,10 @@ import {
   getChecklistTemplates,
 } from "../services/checklistTemplateService.js";
 
-export function createChecklistTemplate(req, res) {
+export async function createChecklistTemplate(req, res) {
   const { title, vesselType, items } = req.body;
 
-  const template = createTemplate({
+  const template = await createTemplate({
     title,
     vesselType,
     items,
@@ -15,8 +15,8 @@ export function createChecklistTemplate(req, res) {
   return res.status(201).json(template);
 }
 
-export function listChecklistTemplates(req, res) {
-  const templates = getChecklistTemplates();
+export async function listChecklistTemplates(req, res) {
+  const templates = await getChecklistTemplates();
 
   return res.json(templates);
 }

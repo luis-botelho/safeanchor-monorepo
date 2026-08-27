@@ -5,10 +5,23 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "node --test",
+    "test:db:smoke": "node --test test/database.smoke.test.js",
+    "postinstall": "prisma generate",
+    "prisma:validate": "prisma validate",
+    "prisma:generate": "prisma generate",
+    "prisma:status": "prisma migrate status"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
     "cors": "^2.8.6",
-    "express": "^5.0.0"
+    "dotenv": "^17.4.2",
+    "express": "^5.0.0",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "prisma": "^7.9.1"
   }
 }

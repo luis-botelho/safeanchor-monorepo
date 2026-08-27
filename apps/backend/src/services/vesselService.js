@@ -1,60 +1,58 @@
-import { Vessel } from "../models/vesselModel.js";
+import prisma from "../lib/prisma.js";
 
-const vessels = [
-  {
-    id: 1,
-    name: "Sea Explorer",
-    type: "Lancha",
-    status: "Ativa",
-  },
-  {
-    id: 2,
-    name: "Ocean Dream",
-    type: "Iate",
-    status: "Manutenção",
-  },
-];
-
-export const getAllVessels = () => vessels;
-
-export const createVessel = (vesselData) => {
-  const newVessel = {
-    id: vessels.length + 1, // Forma de gerar um ID único simples, mas muito básica. Em um cenário real, seria melhor usar um UUID ou um sistema de banco de dados para garantir unicidade.
-    ...vesselData,
-  };
-
-  vessels.push(newVessel);
-
-  return newVessel;
+export const getAllVessels = async () => {
+  return prisma.vessel.findMany();
 };
 
-export const getVesselById = (id) => {
-  const vessels = getAllVessels();
-
-  return vessels.find((vessel) => vessel.id === Number(id));
+export const createVessel = async (vesselData) => {
+  return prisma.vessel.create({
+    data: {
+      name: vesselData.name,
+      type: vesselData.type,
+      status: vesselData.status,
+    },
+  });
 };
 
-export const updateVessel = (id, vesselData) => {
-  const vessel = getVesselById(id);
-  if (!vessel) {
-    return null;
-  }
-  vessel.name = vesselData.name;
-  vessel.status = vesselData.status;
-  vessel.type = vesselData.type;
-
-  return vessel;
+export const getVesselById = async (id) => {
+  return prisma.vessel.findUnique({
+    where: {
+      id,
+    },
+  });
 };
 
-export const deleteVessel = (id) => {
-  const vessel = getVesselById(id);
+export const updateVessel = async (id, vesselData) => {
+  const vessel = await getVesselById(id);
+
   if (!vessel) {
     return null;
   }
 
-  const index = vessels.findIndex((v) => v.id === Number(id));
+  return prisma.vessel.update({
+    where: {
+      id,
+    },
+    data: {
+      name: vesselData.name,
+      type: vesselData.type,
+      status: vesselData.status,
+    },
+  });
+};
 
-  vessels.splice(index, 1);
+export const deleteVessel = async (id) => {
+  const vessel = await getVesselById(id);
+
+  if (!vessel) {
+    return null;
+  }
+
+  await prisma.vessel.delete({
+    where: {
+      id,
+    },
+  });
 
   return true;
 };

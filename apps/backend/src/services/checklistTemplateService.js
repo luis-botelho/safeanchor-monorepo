@@ -1,23 +1,19 @@
-import checklistTemplates from "../data/checklistTemplates.js";
-import { createChecklistTemplate } from "../models/checklistTemplateModel.js";
+import prisma from "../lib/prisma.js";
 
-export function createTemplate({
+export async function createTemplate({
   title,
   vesselType,
   items,
 }) {
-  const template = createChecklistTemplate({
-    id: Date.now().toString(),
-    title,
-    vesselType,
-    items,
+  return prisma.checklistTemplate.create({
+    data: {
+      title,
+      vesselType,
+      items,
+    },
   });
-
-  checklistTemplates.push(template);
-
-  return template;
 }
 
-export function getChecklistTemplates() {
-  return checklistTemplates;
+export async function getChecklistTemplates() {
+  return prisma.checklistTemplate.findMany();
 }

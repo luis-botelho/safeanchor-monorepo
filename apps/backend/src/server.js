@@ -27,6 +27,14 @@ app.use("/preventive-maintenances", preventiveMaintenanceRoutes);
 app.use("/checklist-templates", checklistTemplateRoutes);
 app.use("/checklist-executions", checklistExecutionRoutes);
 
+app.use((error, request, response, next) => {
+  console.error(error);
+
+  return response.status(500).json({
+    message: "Internal server error",
+  });
+});
+
 app.listen(port, () => {
   console.log(`SafeAnchor API rodando em http://localhost:${port}`);
 });

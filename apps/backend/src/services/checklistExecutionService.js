@@ -1,30 +1,31 @@
-import checklistExecutions from "../data/checklistExecutionData.js";
-import { createChecklistExecution } from "../models/checklistExecutionModel.js";
+import prisma from "../lib/prisma.js";
 
-export function createExecution({
+export async function createExecution({
   templateId,
   vesselId,
   responses,
 }) {
-  const execution = createChecklistExecution({
-    id: Date.now().toString(),
-    templateId,
-    vesselId,
-    responses,
-    executedAt: new Date().toISOString(),
+  return prisma.checklistExecution.create({
+    data: {
+      templateId,
+      vesselId,
+      responses,
+      executedAt: new Date().toISOString(),
+    },
   });
-
-  checklistExecutions.push(execution);
-
-  return execution;
 }
 
-export function getChecklistExecutions() {
-  return checklistExecutions;
+export async function getChecklistExecutions() {
+  return prisma.checklistExecution.findMany();
 }
 
-export function getChecklistExecutionsByVesselId(vesselId) {
-  return checklistExecutions
-    .filter((execution) => execution.vesselId === vesselId)
-    .sort((a, b) => new Date(b.executedAt) - new Date(a.executedAt));
+export async function getChecklistExecutionsByVesselId(vesselId) {
+  return prisma.checklistExecution.findMany({
+    where: {
+      vesselId,
+    },
+    orderBy: {
+      executedAt: "desc",
+    },
+  });
 }
