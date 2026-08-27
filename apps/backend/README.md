@@ -119,3 +119,22 @@ backend Express usando a conexao PostgreSQL do Prisma.
 Policies de propriedade so devem ser adicionadas quando autenticacao e
 autorizacao fizerem parte do escopo. Ate la, o frontend nao deve consultar as
 tabelas diretamente pela Data API do Supabase.
+
+## Seed de desenvolvimento
+
+O seed reproduzivel fica em `prisma/seed.js` e cria dados relacionados para os
+cinco modelos usando IDs determinísticos com prefixo `seed-demo-`. As operacoes
+usam `upsert`: uma nova execucao atualiza ou reutiliza os mesmos registros, sem
+duplicar dados e sem limpar tabelas.
+
+A execucao e bloqueada sem autorizacao explicita. Depois de confirmar que
+`DATABASE_URL` aponta para o banco de desenvolvimento correto, execute:
+
+```bash
+ALLOW_DATABASE_SEED=true npx prisma db seed
+```
+
+Tenha cuidado especial com ambientes configurados para um Supabase remoto. O
+seed cria dados de desenvolvimento; ele nao altera o schema e nao substitui uma
+migration. Migrations versionam a estrutura do banco, enquanto o seed cria ou
+atualiza somente seus registros de demonstracao conhecidos.
