@@ -87,3 +87,27 @@ ALLOW_DATABASE_SMOKE=true npm run test:db:smoke
 O teste usa marcador `codex-smoke-<timestamp>`, registra os IDs exatos, valida
 relacionamentos e cascatas e remove somente os registros criados por ele. O
 fluxo completo e a limpeza final foram validados no Supabase.
+
+## Seed de desenvolvimento
+
+O arquivo `apps/backend/prisma/seed.js` cria um conjunto pequeno de dados de
+demonstracao cobrindo os cinco modelos e seus relacionamentos. O seed usa IDs
+deterministicos com prefixo `seed-demo-` e operacoes `upsert`, portanto pode ser
+executado novamente sem criar duplicatas e sem apagar outros registros.
+
+Por seguranca, a execucao e bloqueada por padrao. Antes de liberar o comando,
+confirme que `DATABASE_URL` aponta para o banco de desenvolvimento correto:
+
+```bash
+cd apps/backend
+ALLOW_DATABASE_SEED=true npx prisma db seed
+```
+
+Nunca habilite `ALLOW_DATABASE_SEED` sem confirmar o destino, especialmente
+quando o ambiente estiver configurado para um Supabase remoto. O seed cria ou
+atualiza somente seus IDs conhecidos; ele nao limpa tabelas, executa migrations
+ou altera o schema.
+
+Migration e seed possuem responsabilidades diferentes: migrations versionam
+mudancas na estrutura do banco, enquanto o seed fornece dados reproduziveis
+para desenvolvimento e testes. O seed nao deve ser tratado como migration.
