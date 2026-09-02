@@ -68,3 +68,33 @@ model ChecklistExecution {
   @@index([templateId])
   @@index([vesselId])
 }
+
+enum PartyType {
+  USER
+  ORGANIZATION
+}
+
+model Party {
+  id           String        @id @default(cuid())
+  type         PartyType
+  user         User?
+  organization Organization?
+}
+
+model User {
+  id           String @id @default(cuid())
+  partyId      String @unique
+  name         String
+  email        String @unique
+  passwordHash String
+
+  party Party @relation(fields: [partyId], references: [id], onDelete: Cascade)
+}
+
+model Organization {
+  id      String @id @default(cuid())
+  partyId String @unique
+  name    String
+
+  party Party @relation(fields: [partyId], references: [id], onDelete: Cascade)
+}
