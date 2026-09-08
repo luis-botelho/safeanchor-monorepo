@@ -1,48 +1,10 @@
-import cors from "cors";
-import express from "express";
-import { modulesRouter } from "./routes/modulesRoutes.js";
-import vesselRoutes from "./routes/vesselRoutes.js";
-import maintenanceRoutes from "./routes/maintenanceRoutes.js";
-import preventiveMaintenanceRoutes from "./routes/preventiveMaintenanceRoutes.js";
-import checklistTemplateRoutes from "./routes/checklistTemplateRoutes.js";
-import checklistExecutionRoutes from "./routes/checklistExecutionRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import { requireAuth } from "./middleware/authMiddleware.js";
+import { createApp } from "./app.js";
+import logger from "./lib/logger.js";
 
-const app = express();
 const port = 3001;
 
-app.use(cors());
-app.use(express.json());
-
-// Public routes
-app.get("/", (request, response) => {
-  response.json({
-    name: "SafeAnchor API",
-    status: "online",
-  });
-});
-
-app.use("/auth", authRoutes);
-
-// Everything below this line requires authentication
-app.use(requireAuth);
-
-app.use("/modules", modulesRouter);
-app.use("/vessels", vesselRoutes);
-app.use("/maintenances", maintenanceRoutes);
-app.use("/preventive-maintenances", preventiveMaintenanceRoutes);
-app.use("/checklist-templates", checklistTemplateRoutes);
-app.use("/checklist-executions", checklistExecutionRoutes);
-
-app.use((error, request, response, next) => {
-  console.error(error);
-
-  return response.status(500).json({
-    message: "Internal server error",
-  });
-});
+const app = createApp();
 
 app.listen(port, () => {
-  console.log(`SafeAnchor API rodando em http://localhost:${port}`);
+  logger.info(`SafeAnchor API rodando em http://localhost:${port}`);
 });
