@@ -1,6 +1,6 @@
 import { createModule } from "../models/moduleModel";
 
-const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+import { apiFetch } from "./api";
 
 const fallbackModules = [
   createModule({
@@ -25,14 +25,12 @@ const fallbackModules = [
 
 export async function getModules() {
   try {
-    const response = await fetch(`${apiUrl}/modules`);
-
-    if (!response.ok) {
-      throw new Error("Nao foi possivel carregar os modulos.");
+    return await apiFetch("/modules");
+  } catch (error) {
+    if (error.status === 401) {
+      throw error;
     }
 
-    return response.json();
-  } catch {
     return fallbackModules;
   }
 }

@@ -1,0 +1,7 @@
+ALTER TABLE "Party" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Organization" ENABLE ROW LEVEL SECURITY;
+
+REVOKE ALL ON TABLE "Party" FROM anon, authenticated;
+REVOKE ALL ON TABLE "User" FROM anon, authenticated;
+REVOKE ALL ON TABLE "Organization" FROM anon, authenticated;

@@ -1,8 +1,16 @@
+import { useNavigate, Link } from "react-router-dom";
 import { useVesselsViewModel } from "../viewmodels/useVesselsViewModel";
-import { Link } from "react-router-dom"
+import { useAuth } from "../context/AuthContext";
 
 export default function VesselsPage() {
   const { vessels, isLoading, source, hasError } = useVesselsViewModel();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   if (isLoading) {
     return <p>Carregando...</p>;
@@ -10,6 +18,14 @@ export default function VesselsPage() {
 
   return (
     <div>
+      <div className="topbar">
+        <span>
+          Olá, {user?.name}!
+        </span>
+        <button className="topbar__logout" onClick={handleLogout}>
+          Sair
+        </button>
+      </div>
       <h1>Embarcações</h1>
       <Link to="/create">Nova Embarcação</Link>
       <p>{source === "api" ? "🟢 Backend conectado" : "🟡 Dados locais"}</p>

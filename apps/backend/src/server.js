@@ -6,6 +6,8 @@ import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import preventiveMaintenanceRoutes from "./routes/preventiveMaintenanceRoutes.js";
 import checklistTemplateRoutes from "./routes/checklistTemplateRoutes.js";
 import checklistExecutionRoutes from "./routes/checklistExecutionRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import { requireAuth } from "./middleware/authMiddleware.js";
 
 const app = express();
 const port = 3001;
@@ -13,12 +15,18 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 
+// Public routes
 app.get("/", (request, response) => {
   response.json({
     name: "SafeAnchor API",
     status: "online",
   });
 });
+
+app.use("/auth", authRoutes);
+
+// Everything below this line requires authentication
+app.use(requireAuth);
 
 app.use("/modules", modulesRouter);
 app.use("/vessels", vesselRoutes);
