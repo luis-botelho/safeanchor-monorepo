@@ -1,4 +1,8 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+
+import ProtectedRoute from "../components/ProtectedRoute";
+import LoginPage from "../views/LoginPage";
+import RegisterPage from "../views/RegisterPage";
 
 import VesselsPage from "../views/VesselsPage";
 import CreateVesselPage from "../views/CreateVesselPage";
@@ -23,56 +27,63 @@ import InspectionHistoryPage from "../views/InspectionHistoryPage";
 export default function AppRouter() {
   return (
     <Routes>
-      {/* Vessels */}
-      <Route path="/" element={<VesselsPage />} />
-      <Route path="/create" element={<CreateVesselPage />} />
-      <Route path="/vessels/:id" element={<VesselDetailsPage />} />
-      <Route path="/update/:id" element={<EditVesselPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
-      {/* Maintenances */}
-      <Route path="/maintenances" element={<MaintenancesPage />} />
-      <Route path="/maintenances/create" element={<CreateMaintenancePage />} />
-      <Route
-        path="/vessels/:id/maintenances"
-        element={<MaintenanceHistoryPage />}
-      />
+      <Route element={<ProtectedRoute />}>
+        {/* Vessels */}
+        <Route path="/" element={<VesselsPage />} />
+        <Route path="/create" element={<CreateVesselPage />} />
+        <Route path="/vessels/:id" element={<VesselDetailsPage />} />
+        <Route path="/update/:id" element={<EditVesselPage />} />
 
-      {/* Preventive Maintenances */}
-      <Route
-        path="/preventive-maintenances"
-        element={<PreventiveMaintenancesPage />}
-      />
-      <Route
-        path="/preventive-maintenances/create"
-        element={<CreatePreventiveMaintenancePage />}
-      />
-      <Route
-        path="/maintenance-dashboard"
-        element={<MaintenanceDashboardPage />}
-      />
+        {/* Maintenances */}
+        <Route path="/maintenances" element={<MaintenancesPage />} />
+        <Route path="/maintenances/create" element={<CreateMaintenancePage />} />
+        <Route
+          path="/vessels/:id/maintenances"
+          element={<MaintenanceHistoryPage />}
+        />
 
-      {/* Checklist Templates */}
-      <Route path="/checklist-templates" element={<ChecklistTemplatesPage />} />
-      <Route
-        path="/checklist-templates/new"
-        element={<CreateChecklistTemplatePage />}
-      />
+        {/* Preventive Maintenances */}
+        <Route
+          path="/preventive-maintenances"
+          element={<PreventiveMaintenancesPage />}
+        />
+        <Route
+          path="/preventive-maintenances/create"
+          element={<CreatePreventiveMaintenancePage />}
+        />
+        <Route
+          path="/maintenance-dashboard"
+          element={<MaintenanceDashboardPage />}
+        />
 
-      {/* Checklist Executions */}
-      <Route
-        path="/checklist-executions"
-        element={<ChecklistExecutionsPage />}
-      />
-      <Route
-        path="/checklist-executions/new"
-        element={<CreateChecklistExecutionPage />}
-      />
+        {/* Checklist Templates */}
+        <Route path="/checklist-templates" element={<ChecklistTemplatesPage />} />
+        <Route
+          path="/checklist-templates/new"
+          element={<CreateChecklistTemplatePage />}
+        />
 
-      {/* Inspections */}
-      <Route
-        path="/vessels/:id/inspections"
-        element={<InspectionHistoryPage />}
-      />
+        {/* Checklist Executions */}
+        <Route
+          path="/checklist-executions"
+          element={<ChecklistExecutionsPage />}
+        />
+        <Route
+          path="/checklist-executions/new"
+          element={<CreateChecklistExecutionPage />}
+        />
+
+        {/* Inspections */}
+        <Route
+          path="/vessels/:id/inspections"
+          element={<InspectionHistoryPage />}
+        />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
