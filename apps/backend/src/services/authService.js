@@ -27,6 +27,7 @@ export const registerUser = async ({ name, email, password }) => {
           name,
           email,
           passwordHash,
+          role: "USER",
         },
       },
     },
@@ -38,6 +39,7 @@ export const registerUser = async ({ name, email, password }) => {
           partyId: true,
           name: true,
           email: true,
+          role: true,
         },
       },
     },
@@ -71,6 +73,7 @@ export const loginUser = async ({ email, password }) => {
     {
       userId: user.id,
       partyId: user.partyId,
+      role: user.role,
     },
     process.env.JWT_SECRET,
     {
@@ -84,6 +87,7 @@ export const loginUser = async ({ email, password }) => {
       partyId: user.partyId,
       name: user.name,
       email: user.email,
+      role: user.role,
     },
     token,
   };
@@ -99,6 +103,7 @@ export const getUserById = async (userId) => {
       partyId: true,
       name: true,
       email: true,
+      role: true,
     },
   });
 };
