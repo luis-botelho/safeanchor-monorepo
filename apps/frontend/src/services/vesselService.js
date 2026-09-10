@@ -1,86 +1,49 @@
-import { apiFetch } from "./api";
+import { vessels, vesselStatusMeta } from "../mock/vessels";
 
-const fallbackVessels = [
-  createVessel({
-    id: 1,
-    name: "Sea Explorer",
-    type: "Lancha",
-    status: "Ativa",
-  }),
-];
-
-//create vessel 
-
-export async function createVessel(vesselData) {
-  return apiFetch("/vessels", {
-    method: "POST",
-    body: JSON.stringify(vesselData),
-  });
-}
-
-//Get vessels 
 export async function getVessels() {
-  try {
-    const data = await apiFetch("/vessels");
-
-    return {
-      vessels: data,
-      source: "api",
-      error: false,
-    };
-  } catch (error) {
-    if (error.status === 401) {
-      throw error;
-    }
-
-    return {
-      vessels: fallbackVessels,
-      source: "fallback",
-      error: true,
-    };
-  }
+  return {
+    vessels,
+    source: "mock",
+    error: false,
+  };
 }
 
-//Get vessel by id
+export async function getFleetVessels() {
+  return vessels.filter(
+    (item) => !item.ownerType || item.ownerType === "OWNER",
+  );
+}
+
+export async function getVesselsByOwner(ownerId) {
+  return vessels.filter((item) => item.ownerId === ownerId);
+}
+
 export async function getVesselById(id) {
-  try {
-    const data = await apiFetch(`/vessels/${id}`);
+  const vessel = vessels.find((item) => item.id === id);
 
-    return {
-      vessel: data,
-      source: "api",
-      error: false,
-    };
-  } catch (error) {
-    if (error.status === 401) {
-      throw error;
-    }
-
-    const vessel = fallbackVessels.find(
-      (vessel) => vessel.id === Number(id)
-    );
-
-    return {
-      vessel,
-      source: "fallback",
-      error: false,
-    };
-  }
+  return {
+    vessel,
+    source: "mock",
+    error: false,
+  };
 }
 
-//Update vessel 
-export async function updateVessel(id, vesselData) {
-  return apiFetch(`/vessels/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(vesselData),
-  });
+export async function getVessel(id) {
+  const result = await getVesselById(id);
+  return result.vessel;
 }
 
-//Delete 
-export async function deleteVessel(id) {
-  await apiFetch(`/vessels/${id}`, {
-    method: "DELETE",
-  });
+export function getVesselStatus(status) {
+  return vesselStatusMeta[status] || { label: status, tone: "neutral" };
+}
 
+// Mocks preservados para compatibilidade com telas anteriores.
+export async function createVessel() {
+  return null;
+}
+export async function updateVessel() {
+  return null;
+}
+export async function deleteVessel() {
   return true;
 }

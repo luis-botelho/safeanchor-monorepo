@@ -1,0 +1,143 @@
+export const poiCategories = [
+  "Praias",
+  "Restaurantes",
+  "Bares",
+  "Hospedagem",
+  "Combustível",
+  "Mergulho",
+  "Pesca",
+  "Passeios",
+  "Turismo",
+  "Manutenção",
+  "Mercados",
+  "Farmácias",
+  "Serviços náuticos",
+];
+
+// Destino pode ter marina cadastrada no SafeAnchor ou não.
+// Marina não cadastrada demonstra a descoberta de território
+// ("Marina encontrada") abrindo uma ação mock de solicitação.
+export const destinations = [
+  {
+    id: "dst-angra",
+    name: "Angra dos Reis",
+    region: "Costa Verde · RJ",
+    coords: { x: 30, y: 70 },
+    marina: {
+      registered: true,
+      marinaId: "marin-admiral",
+      name: "Yacht Club Angra",
+      availability: "Vagas disponíveis",
+      tone: "success",
+      services: ["Combustível", "Água e energia", "Manobrista", "Restaurante"],
+      contact: { phone: "(24) 3365-0000", email: "atracacao@yachtclubangra.com.br" },
+      rating: 4.7,
+      reviewsCount: 58,
+      reservationsAvailable: true,
+    },
+    pois: [
+      { id: "poi-angra-1", category: "Praias", name: "Praia do Anil" },
+      { id: "poi-angra-2", category: "Restaurantes", name: "Restaurante do Porto" },
+      { id: "poi-angra-3", category: "Combustível", name: "Posto 24h Benício" },
+      { id: "poi-angra-4", category: "Mergulho", name: "Mergulho Ilha do Algodão" },
+      { id: "poi-angra-5", category: "Farmácias", name: "Farmácia Central Angra" },
+      { id: "poi-angra-6", category: "Serviços náuticos", name: "Estaleiro Angra Reparos" },
+    ],
+  },
+  {
+    id: "dst-ilha-grande",
+    name: "Ilha Grande · Vila do Abraão",
+    region: "Costa Verde · RJ",
+    coords: { x: 52, y: 52 },
+    marina: {
+      registered: false,
+      marinaId: null,
+      name: "Marina Ilha Verde (cais local)",
+      availability: "Sob consulta",
+      tone: "warning",
+      services: ["Água e energia", "Táxi-boat", "Restaurantes próximos"],
+      contact: null,
+      rating: null,
+      reviewsCount: null,
+      reservationsAvailable: false,
+    },
+    pois: [
+      { id: "poi-ilha-1", category: "Praias", name: "Praia de Lopes Mendes" },
+      { id: "poi-ilha-2", category: "Trilhas", name: "Pico do Papagaio" },
+      { id: "poi-ilha-3", category: "Hospedagem", name: "Pousada Dois Rios" },
+      { id: "poi-ilha-4", category: "Passeios", name: "Passeio de escuna à Lagoa Azul" },
+      { id: "poi-ilha-5", category: "Mercados", name: "Mercado do Cais" },
+      { id: "poi-ilha-6", category: "Bares", name: "Bar da Vila" },
+    ],
+  },
+  {
+    id: "dst-paraty",
+    name: "Paraty",
+    region: "Costa Verde · RJ",
+    coords: { x: 40, y: 88 },
+    marina: {
+      registered: true,
+      marinaId: "marin-santa-catarina",
+      name: "Paraty Yacht Marina",
+      availability: "Alta temporada | poucas vagas",
+      tone: "warning",
+      services: ["Combustível", "Içamento", "Água e energia", "Café náutico"],
+      contact: { phone: "(24) 3371-0000", email: "bras@paratyyacht.com.br" },
+      rating: 4.8,
+      reviewsCount: 74,
+      reservationsAvailable: true,
+    },
+    pois: [
+      { id: "poi-paraty-1", category: "Turismo", name: "Centro histórico de Paraty" },
+      { id: "poi-paraty-2", category: "Restaurantes", name: "Restaurante do Cais" },
+      { id: "poi-paraty-3", category: "Combustível", name: "Posto Náutico Paraty" },
+      { id: "poi-paraty-4", category: "Pesca", name: "Pesca esportiva Ilha do Cedro" },
+      { id: "poi-paraty-5", category: "Hospedagem", name: "Pousada do Porto" },
+      { id: "poi-paraty-6", category: "Mercados", name: "Mercado Municipal" },
+    ],
+  },
+  {
+    id: "dst-trindade",
+    name: "Trindade",
+    region: "Costa Verde · RJ",
+    coords: { x: 58, y: 78 },
+    marina: {
+      registered: false,
+      marinaId: null,
+      name: "Ancoradouro de Trindade (fundeio local)",
+      availability: "Fundeio livre",
+      tone: "success",
+      services: ["Bares na praia", "Trekking", "Restaurantes simples"],
+      contact: null,
+      rating: null,
+      reviewsCount: null,
+      reservationsAvailable: false,
+    },
+    pois: [
+      { id: "poi-trin-1", category: "Praias", name: "Praia do Cepilho" },
+      { id: "poi-trin-2", category: "Mergulho", name: "Mergulho em Trindade" },
+      { id: "poi-trin-3", category: "Passeios", name: "Cachoeiras de Trindade" },
+      { id: "poi-trin-4", category: "Hospedagem", name: "Pousada Raízes" },
+      { id: "poi-trin-5", category: "Bares", name: "Quiosque do Farol" },
+    ],
+  },
+];
+
+export const profileRecommendations = [
+  {
+    profileTag: "Família",
+    text: "Você costuma viajar em família. Encontramos 3 praias e 2 restaurantes mais adequados ao seu perfil na Costa Verde.",
+  },
+  {
+    profileTag: "Adrenalina",
+    text: "Seu perfil aponta para ritmo intenso: adicionamos paradas de mergulho e pesca esportiva no melhores trechos da rota.",
+  },
+  {
+    profileTag: "Cruzeiro",
+    text: "Você prefere navegar tranquilo: reduzimos a média de milhas diárias e priorizamos marinas com cais e restaurante.",
+  },
+  {
+    profileTag: "Conforto",
+    text: "Priorizamos hospedagem e marinas com estrutura completa, energia e água no píer para sua tripulação.",
+  },
+];
