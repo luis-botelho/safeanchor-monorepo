@@ -1,3 +1,4 @@
+import { getAccessScope } from "../services/accessScopeService.js";
 import {
   getAllVessels,
   getVesselById,
@@ -7,15 +8,19 @@ import {
 } from "../services/vesselService.js";
 
 export const getVessels = async (request, response) => {
-  const vessels = await getAllVessels();
+  const scope = await getAccessScope(request.user);
+
+  const vessels = await getAllVessels(scope);
 
   response.json(vessels);
 };
 
 export const getVessel = async (request, response) => {
+  const scope = await getAccessScope(request.user);
+
   const { id } = request.params;
 
-  const vessel = await getVesselById(id);
+  const vessel = await getVesselById(scope, id);
 
   if (!vessel) {
     return response.status(404).json({
@@ -27,18 +32,25 @@ export const getVessel = async (request, response) => {
 };
 
 export const createNewVessel = async (request, response) => {
-  const vesselData = request.body;
+  const scope = await getAccessScope(request.user);
 
-  const vessel = await createVessel(vesselData);
+  const vessel = await createVessel(scope, request.body);
+
+  if (!vessel) {
+    return response.status(403).json({
+      message: "Insufficient permissions",
+    });
+  }
 
   return response.status(201).json(vessel);
 };
 
 export const updateVesselController = async (request, response) => {
-  const { id } = request.params;
-  const vesselData = request.body;
+  const scope = await getAccessScope(request.user);
 
-  const vessel = await updateVessel(id, vesselData);
+  const { id } = request.params;
+
+  const vessel = await updateVessel(scope, id, request.body);
 
   if (!vessel) {
     return response.status(404).json({
@@ -50,9 +62,11 @@ export const updateVesselController = async (request, response) => {
 };
 
 export const deleteVesselController = async (request, response) => {
+  const scope = await getAccessScope(request.user);
+
   const { id } = request.params;
 
-  const deletedVessel = await deleteVessel(id);
+  const deletedVessel = await deleteVessel(scope, id);
 
   if (!deletedVessel) {
     return response.status(404).json({

@@ -120,6 +120,35 @@ Policies de propriedade so devem ser adicionadas quando autenticacao e
 autorizacao fizerem parte do escopo. Ate la, o frontend nao deve consultar as
 tabelas diretamente pela Data API do Supabase.
 
+## Escopo de propriedade (ownership)
+
+Recursos operacionais sao protegidos por ownership baseado em `Party`:
+
+- `Vessel` possui `ownerPartyId`, apontando para um `Party` do tipo `USER` ou
+  `ORGANIZATION`.
+- `Membership` liga um `User` a uma `Organization`. O escopo de um usuario comum
+  e o proprio `Party` mais os `Party` das organizacoes das quais ele e membro.
+- `ADMIN` ignora o scope e acessa todos os registros (acesso global).
+- `GET` por ID de um recurso fora do escopo retorna `404`.
+- `POST`/`PUT`/`DELETE` nao permitem criar ou alterar recursos fora do escopo.
+- Manutencoes, manutencoes preventivas e execucoes de checklist herdam o scope
+  da `Vessel` associada.
+
+A logica central esta em `src/services/accessScopeService.js`. Os controllers
+obtem o scope via `getAccessScope(request.user)` e repassam para os services,
+que aplicam os filtros de `ownerPartyId` nas consultas do Prisma.
+
+O teste de integracao `test/ownership-scope.integration.test.js` valida o escopo
+de acesso e segue o mesmo gatilho do smoke test:
+
+```bash
+ALLOW_DATABASE_SMOKE=true node --test test/ownership-scope.integration.test.js
+```
+
+O `prisma/seed.js` cria um usuario demo (`demo@safeanchor.test`, senha
+`demo123456`) com membership na organizacao demo e vincula a embarcacao de
+demonstracao ao `Party` da organizacao.
+
 ## Seed de desenvolvimento
 
 O seed reproduzivel fica em `prisma/seed.js` e cria dados relacionados para os

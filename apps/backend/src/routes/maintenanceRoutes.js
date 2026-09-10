@@ -4,11 +4,12 @@ import {
   createMaintenanceController,
   getMaintenanceDashboardController,
 } from "../controllers/maintenanceController.js";
+import { authorizeRoles } from "../middleware/authorizeRoles.js";
 
 const router = Router();
 
 router.get("/", getMaintenancesController);
-router.post("/", createMaintenanceController);
+router.post("/", authorizeRoles("MANAGER", "ADMIN"), createMaintenanceController);
 router.get("/dashboard", getMaintenanceDashboardController);
 
 

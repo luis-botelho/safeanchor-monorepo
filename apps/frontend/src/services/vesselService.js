@@ -1,111 +1,49 @@
-const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+import { vessels, vesselStatusMeta } from "../mock/vessels";
 
-const fallbackVessels = [
-  createVessel({
-    id: 1,
-    name: "Sea Explorer",
-    type: "Lancha",
-    status: "Ativa",
-  }),
-];
-
-//create vessel 
-
-export async function createVessel(vesselData) {
-  const response = await fetch(`${apiUrl}/vessels`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(vesselData),
-  });
-
-  if (!response.ok) {
-    throw new Error("Nao foi possivel cadastrar a embarcacao.");
-  }
-
-  return response.json();
-}
-
-//Get vessels 
 export async function getVessels() {
-  try {
-    const response = await fetch(`${apiUrl}/vessels`);
-
-    if (!response.ok) {
-      throw new Error("Nao foi possivel carregar as embarcacoes.");
-    }
-
-    const data = await response.json();
-
-    return {
-      vessels: data,      
-      source: "api",      
-      error: false,
-    };
-  } catch (error){
-    return {
-      vessels: fallbackVessels,
-      source: "fallback",     
-      error: true,
-    };
-  }
+  return {
+    vessels,
+    source: "mock",
+    error: false,
+  };
 }
 
-//Get vessel by id
-export async function getVesselById(id) {
-  try {
-    const response = await fetch(`${apiUrl}/vessels/${id}`);
-    
-    if (!response.ok) {
-      throw new Error("Nao foi possivel carregar a embarcação.");
-    }
-    
-    const data = await response.json();
-    
-    return {
-      vessel: data,      
-      source: "api",      
-      error: false,
-    };
-  } catch (error){
-    const vessel = fallbackVessels.find(
-     (vessel) => vessel.id === Number(id)
+export async function getFleetVessels() {
+  return vessels.filter(
+    (item) => !item.ownerType || item.ownerType === "OWNER",
   );
-
-    return {
-      vessel,
-      source: "fallback",     
-      error: false,
-    };
-  }
 }
 
-//Update vessel 
-export async function updateVessel(id,vesselData) {
-  const response = await fetch(`${apiUrl}/vessels/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(vesselData),
-  });
-
-  if (!response.ok) {
-    throw new Error("Nao foi possivel Atualizar a embarcação.");
-  }
-
-  return response.json();
+export async function getVesselsByOwner(ownerId) {
+  return vessels.filter((item) => item.ownerId === ownerId);
 }
-//Delete 
-export async function deleteVessel(id){
-  const response = await fetch(`${apiUrl}/vessels/${id}`, {
-    method: "DELETE"
-  });
 
-  if (!response.ok) {
-    throw new Error("Não foi possivel Deletar a embarcação.");
-  }
+export async function getVesselById(id) {
+  const vessel = vessels.find((item) => item.id === id);
 
+  return {
+    vessel,
+    source: "mock",
+    error: false,
+  };
+}
+
+export async function getVessel(id) {
+  const result = await getVesselById(id);
+  return result.vessel;
+}
+
+export function getVesselStatus(status) {
+  return vesselStatusMeta[status] || { label: status, tone: "neutral" };
+}
+
+// Mocks preservados para compatibilidade com telas anteriores.
+export async function createVessel() {
+  return null;
+}
+export async function updateVessel() {
+  return null;
+}
+export async function deleteVessel() {
   return true;
 }

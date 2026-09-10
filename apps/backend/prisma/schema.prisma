@@ -8,13 +8,18 @@ datasource db {
 }
 
 model Vessel {
-  id                     String                  @id @default(cuid())
-  name                   String
-  type                   String
-  status                 String
+  id           String  @id @default(cuid())
+  ownerPartyId String?
+  name         String
+  type         String
+  status       String
+
+  ownerParty             Party?                  @relation(fields: [ownerPartyId], references: [id])
   maintenances           Maintenance[]
   preventiveMaintenances PreventiveMaintenance[]
   checklistExecutions    ChecklistExecution[]
+
+  @@index([ownerPartyId])
 }
 
 model Maintenance {
@@ -67,4 +72,56 @@ model ChecklistExecution {
 
   @@index([templateId])
   @@index([vesselId])
+}
+
+enum PartyType {
+  USER
+  ORGANIZATION
+}
+
+enum UserRole {
+  USER
+  MANAGER
+  ADMIN
+}
+
+model Party {
+  id           String        @id @default(cuid())
+  type         PartyType
+  user         User?
+  organization Organization?
+  vessels      Vessel[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  partyId      String   @unique
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(USER)
+
+  party       Party        @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  memberships Membership[]
+}
+
+model Organization {
+  id      String @id @default(cuid())
+  partyId String @unique
+  name    String
+
+  party       Party        @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  memberships Membership[]
+}
+
+model Membership {
+  id             String @id @default(cuid())
+  userId         String
+  organizationId String
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
 }

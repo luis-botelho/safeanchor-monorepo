@@ -6,6 +6,11 @@ if (process.env.ALLOW_DATABASE_SEED !== "true") {
 }
 
 const seedIds = {
+  organizationParty: "seed-demo-party-organization",
+  organization: "seed-demo-organization-safeanchor",
+  userParty: "seed-demo-party-user",
+  user: "seed-demo-user-demo",
+  membership: "seed-demo-membership-demo",
   vessel: "seed-demo-vessel-safeanchor",
   maintenance: "seed-demo-maintenance-engine-inspection",
   preventiveMaintenance: "seed-demo-preventive-oil-change",
@@ -14,19 +19,84 @@ const seedIds = {
 };
 
 const { default: prisma } = await import("../src/lib/prisma.js");
+const { hashSync } = await import("bcrypt");
 
 async function seed() {
   console.log("Criando ou atualizando dados de desenvolvimento:", seedIds);
 
+  await prisma.party.upsert({
+    where: { id: seedIds.organizationParty },
+    update: {},
+    create: {
+      id: seedIds.organizationParty,
+      type: "ORGANIZATION",
+    },
+  });
+
+  await prisma.organization.upsert({
+    where: { id: seedIds.organization },
+    update: { name: "SafeAnchor Demo" },
+    create: {
+      id: seedIds.organization,
+      partyId: seedIds.organizationParty,
+      name: "SafeAnchor Demo",
+    },
+  });
+
+  await prisma.party.upsert({
+    where: { id: seedIds.userParty },
+    update: {},
+    create: {
+      id: seedIds.userParty,
+      type: "USER",
+    },
+  });
+
+  const demoUser = {
+    partyId: seedIds.userParty,
+    name: "Usuário Demo",
+    email: "demo@safeanchor.test",
+    passwordHash: hashSync("demo123456", 10),
+    role: "MANAGER",
+  };
+
+  await prisma.user.upsert({
+    where: { id: seedIds.user },
+    update: {
+      passwordHash: demoUser.passwordHash,
+    },
+    create: {
+      id: seedIds.user,
+      ...demoUser,
+    },
+  });
+
+  await prisma.membership.upsert({
+    where: {
+      userId_organizationId: {
+        userId: seedIds.user,
+        organizationId: seedIds.organization,
+      },
+    },
+    update: {},
+    create: {
+      id: seedIds.membership,
+      userId: seedIds.user,
+      organizationId: seedIds.organization,
+    },
+  });
+
   await prisma.vessel.upsert({
     where: { id: seedIds.vessel },
     update: {
+      ownerPartyId: seedIds.organizationParty,
       name: "SafeAnchor Demo Vessel",
       type: "Lancha",
       status: "Ativa",
     },
     create: {
       id: seedIds.vessel,
+      ownerPartyId: seedIds.organizationParty,
       name: "SafeAnchor Demo Vessel",
       type: "Lancha",
       status: "Ativa",

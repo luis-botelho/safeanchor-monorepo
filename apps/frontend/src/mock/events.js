@@ -1,0 +1,68 @@
+export const events = [
+  {
+    id: "evt-regata",
+    name: "Regata Costa Azul",
+    type: "Regata",
+    date: "21/09/2026",
+    time: "08:00",
+    location: "Marina Costa Azul — Florianópolis, SC",
+    organizer: "Marina Costa Azul",
+    imageSeed: "safeanchor-evento-regata",
+    participants: 58,
+    capacity: 80,
+    description:
+      "Regata de embarcações de 22 a 40 pés com percurso pela Baía Norte. Premiação para as três primeiras colocadas de cada categoria.",
+    highlights: ["Percurso de 12 milhas", "Comissão de regata oficial", "Almoço de confraternização"],
+    ticket: "Inscrição gratuita para sócios",
+  },
+  {
+    id: "evt-encontro",
+    name: "Encontro de Proprietários",
+    type: "Encontro",
+    date: "05/10/2026",
+    time: "18:00",
+    location: "Yacht Club Admiral — São Francisco do Sul, SC",
+    organizer: "Yacht Club Admiral",
+    imageSeed: "safeanchor-evento-encontro",
+    participants: 37,
+    capacity: 60,
+    description:
+      "Encontro mensal de proprietários para troca de experiências, palestras curtas e apresentação das novidades da temporada.",
+    highlights: ["Palestra: preparação para a temporada", "Networking", "Happy hour"],
+    ticket: "Gratuito para membros",
+  },
+  {
+    id: "evt-curso-seguranca",
+    name: "Curso de Segurança Náutica",
+    type: "Curso",
+    date: "14/10/2026",
+    time: "09:00",
+    location: "Marina Santa Catarina — Itajaí, SC",
+    organizer: "Escola Náutica SC",
+    imageSeed: "safeanchor-evento-curso",
+    participants: 22,
+    capacity: 30,
+    description:
+      "Curso teórico-prático de segurança a bordo: comunicação, uso de coletes, sinalização e procedimentos de emergência.",
+    highlights: ["Carga horária de 8h", "Certificado ao final", "Simulado de abandono"],
+    ticket: "R$ 290 por participante",
+  },
+  {
+    id: "evt-feira",
+    name: "Feira Náutica Sul",
+    type: "Feira",
+    date: "02/11/2026",
+    time: "10:00",
+    location: "CentroSul — Florianópolis, SC",
+    organizer: "Associação Náutica do Sul",
+    imageSeed: "safeanchor-evento-feira",
+    participants: 480,
+    capacity: 1200,
+    description:
+      "A maior feira náutica da região Sul. Lançamentos de embarcações, equipamentos, serviços e programação para toda a família.",
+    highlights: ["+80 expositores", "Teste no simulador de navegação", "Área kids"],
+    ticket: "R$ 40 por dia",
+  },
+];
+
+export const eventTypes = ["Regata", "Encontro", "Curso", "Feira"];

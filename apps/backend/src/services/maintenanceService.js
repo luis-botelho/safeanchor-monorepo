@@ -1,6 +1,14 @@
 import prisma from "../lib/prisma.js";
+import { getVesselById } from "./vesselService.js";
+import { buildVesselLinkedScopeFilter } from "./accessScopeService.js";
 
-export const createMaintenance = async (maintenanceData) => {
+export const createMaintenance = async (scope, maintenanceData) => {
+  const vessel = await getVesselById(scope, maintenanceData.vesselId);
+
+  if (!vessel) {
+    return null;
+  }
+
   return prisma.maintenance.create({
     data: {
       vesselId: maintenanceData.vesselId,
@@ -13,8 +21,10 @@ export const createMaintenance = async (maintenanceData) => {
   });
 };
 
-export const getMaintenances = async () => {
-  return prisma.maintenance.findMany();
+export const getMaintenances = async (scope) => {
+  return prisma.maintenance.findMany({
+    where: buildVesselLinkedScopeFilter(scope),
+  });
 };
 
 export const getMaintenanceById = async (id) => {
@@ -25,7 +35,13 @@ export const getMaintenanceById = async (id) => {
   });
 };
 
-export const getMaintenancesByVesselId = async (vesselId) => {
+export const getMaintenancesByVesselId = async (scope, vesselId) => {
+  const vessel = await getVesselById(scope, vesselId);
+
+  if (!vessel) {
+    return null;
+  }
+
   return prisma.maintenance.findMany({
     where: {
       vesselId,

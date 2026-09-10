@@ -1,4 +1,6 @@
 import prisma from "../lib/prisma.js";
+import { getVesselById } from "./vesselService.js";
+import { buildVesselLinkedScopeFilter } from "./accessScopeService.js";
 
 function calculateNextExecution(startDate, periodicity) {
   const nextExecution = new Date(startDate);
@@ -27,29 +29,33 @@ function calculateNextExecution(startDate, periodicity) {
   return nextExecution.toISOString().split("T")[0];
 }
 
-export const getPreventiveMaintenances = async () => {
-  return prisma.preventiveMaintenance.findMany();
+export const getPreventiveMaintenances = async (scope) => {
+  return prisma.preventiveMaintenance.findMany({
+    where: buildVesselLinkedScopeFilter(scope),
+  });
 };
 
-export const createPreventiveMaintenance = async ({
-  title,
-  description,
-  type,
-  status,
-  vesselId,
-  periodicity,
-  startDate,
-}) => {
-  const nextExecution = calculateNextExecution(startDate, periodicity);
+export const createPreventiveMaintenance = async (scope, maintenanceData) => {
+  const vessel = await getVesselById(scope, maintenanceData.vesselId);
+
+  if (!vessel) {
+    return null;
+  }
+
+  const nextExecution = calculateNextExecution(
+    maintenanceData.startDate,
+    maintenanceData.periodicity,
+  );
+
   return prisma.preventiveMaintenance.create({
     data: {
-      title,
-      description,
-      type,
-      status,
-      vesselId,
-      periodicity,
-      startDate,
+      title: maintenanceData.title,
+      description: maintenanceData.description,
+      type: maintenanceData.type,
+      status: maintenanceData.status,
+      vesselId: maintenanceData.vesselId,
+      periodicity: maintenanceData.periodicity,
+      startDate: maintenanceData.startDate,
       nextExecution,
     },
   });

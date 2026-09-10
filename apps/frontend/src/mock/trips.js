@@ -1,0 +1,258 @@
+// Mapa é totalmente mockado e substituível: os waypoints usam coordenadas
+// simplificadas [x,y] para a camada visual atual. Um provider real (Google
+// Maps etc.) pode trocar a camada sem alterar a estrutura dos dados.
+
+export const vesselSpecs = {
+  "ves-mar-azul": {
+    cruiseSpeedKt: 22,
+    autonomyNm: 220,
+    capacity: 11,
+    draftMs: 0.9,
+    fuelTankL: 600,
+    profile: "Lancha a motor · passeios em família",
+  },
+  "ves-horizonte": {
+    cruiseSpeedKt: 7,
+    autonomyNm: 350,
+    capacity: 8,
+    draftMs: 2.1,
+    fuelTankL: 380,
+    profile: "Veleiro de cruzeiro · travessias costeiras",
+  },
+  "ves-estrela": {
+    cruiseSpeedKt: 18,
+    autonomyNm: 180,
+    capacity: 6,
+    draftMs: 0.8,
+    fuelTankL: 300,
+    profile: "Lancha de trabalho · apoio a mergulho",
+  },
+  "ves-costa-norte": {
+    cruiseSpeedKt: 28,
+    autonomyNm: 260,
+    capacity: 7,
+    draftMs: 0.6,
+    fuelTankL: 240,
+    profile: "Jet / bow rider · esportes aquáticos",
+  },
+};
+
+export const crewRoles = [
+  { role: "Capitão / operador", icon: "anchor", skill: "navegação avançada" },
+  { role: "Marinheiro", icon: "users", skill: "segurança e apoio" },
+  { role: "Deckhand", icon: "wrench", skill: "manobras e serviço" },
+  { role: "Mecânico", icon: "wrench", skill: "motores embarcados" },
+  { role: "Chef", icon: "star", skill: "cozinha de bordo" },
+  { role: "Steward / garçom", icon: "users", skill: "serviço de bordo" },
+  { role: "Barman", icon: "star", skill: "bebidas e bar" },
+  { role: "Fotógrafo", icon: "camera", skill: "registro da viagem" },
+  { role: "Guia turístico", icon: "locationPin", skill: "roteiros e história" },
+  { role: "Mergulhador", icon: "boat", skill: "apoio subaquático" },
+  { role: "Técnico especializado", icon: "wrench", skill: "eletrônica/sistemas" },
+];
+
+export const readinessSections = [
+  {
+    id: "rd-boat",
+    title: "Embarcação",
+    icon: "fleet",
+    items: [
+      { label: "Combustível para a rota", status: "ok", note: "Tanque cheio + 20% de reserva" },
+      { label: "Motor e arrefecimento", status: "ok", note: "Revisão feita em 05/09" },
+      { label: "Baterias e carregador", status: "warning", note: "Bateria de serviço recarregar" },
+      { label: "Equipamentos de bordo", status: "ok", note: "Conforme checklist" },
+    ],
+  },
+  {
+    id: "rd-security",
+    title: "Segurança",
+    icon: "check",
+    items: [
+      { label: "Coletes para todos a bordo", status: "ok", note: "11 coletes validados" },
+      { label: "Comunicação (VHF/EPIRB)", status: "ok", note: "Rádio testado" },
+      { label: "Documentação e seguro", status: "warning", note: "Seguro renova dia 15/09" },
+      { label: "Equipamentos obrigatórios", status: "ok", note: "Extintores em validade" },
+    ],
+  },
+  {
+    id: "rd-people",
+    title: "Pessoas",
+    icon: "users",
+    items: [
+      { label: "Passageiros confirmados", status: "ok", note: "5 a bordo" },
+      { label: "Responsável pela viagem", status: "ok", note: "Luis Botelho (armador)" },
+      { label: "Contatos de emergência", status: "ok", note: "2 contatos em terra" },
+    ],
+  },
+  {
+    id: "rd-route",
+    title: "Rota",
+    icon: "locationPin",
+    items: [
+      { label: "Condições previstas", status: "ok", note: "Mar 1m · vento 12kt" },
+      { label: "Rotas alternativas", status: "ok", note: "Abrigo em Ilha da Gipoia" },
+      { label: "Pontos de parada", status: "ok", note: "3 ancoradouros definidos" },
+    ],
+  },
+];
+
+export const floatPlan = {
+  onboard: ["Luis Botelho (responsável)", "Mariana (companheira)", "Felipe", "João", "Marina"],
+  origin: "Marina Costa Azul — Florianópolis",
+  destination: "Trindade — Costa Verde",
+  route: "Florianópolis → Angra → Ilha Grande → Paraty → Trindade",
+  returnForecast: "Retorno previsto para 14/09 às 18h",
+  landContact: "Ana Costa · (48) 99999-0000 · ana.costa@email.com",
+};
+
+export const trips = [
+  {
+    id: "trip-costa-verde",
+    vesselId: "ves-horizonte",
+    title: "Costa Verde & Ilha Grande",
+    ownerId: "usr-luis",
+    startDate: "10/09/2026",
+    endDate: "14/09/2026",
+    status: "Planejada",
+    statusTone: "info",
+    routeName: "Costa Verde",
+    summary: "4 dias de cruzeiro pela Costa Verde com paradas em marinas conectadas e ancoradouros locais.",
+    stops: ["dst-angra", "dst-ilha-grande", "dst-paraty", "dst-trindade"],
+    waypoints: [
+      { id: "wp-1", label: "Florianópolis", coords: { x: 6, y: 92 }, kind: "start" },
+      { id: "wp-2", label: "Itajaí", coords: { x: 18, y: 82 }, kind: "waypoint" },
+      { id: "wp-3", label: "Angra dos Reis", coords: { x: 46, y: 58 }, kind: "stop" },
+      { id: "wp-4", label: "Ilha Grande", coords: { x: 54, y: 50 }, kind: "stop" },
+      { id: "wp-5", label: "Paraty", coords: { x: 38, y: 40 }, kind: "stop" },
+      { id: "wp-6", label: "Trindade", coords: { x: 52, y: 28 }, kind: "dest" },
+    ],
+    totalDistanceNm: 214,
+    totalHours: "1d 6h",
+    legs: [
+      { name: "Florianópolis → Angra dos Reis", distance: 112, eta: "8h30", start: "05:30", wind: "12–15kt" },
+      { name: "Angra → Ilha Grande", distance: 12, eta: "1h20", start: "07:00", wind: "8–10kt" },
+      { name: "Ilha Grande → Paraty", distance: 24, eta: "2h40", start: "08:30", wind: "10kt" },
+      { name: "Paraty → Trindade", distance: 46, eta: "4h10", start: "06:00", wind: "10–14kt" },
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "Florianópolis → Angra dos Reis",
+        start: "05:30",
+        distance: "112 nm",
+        eta: "Tarde",
+        stop: "Angra dos Reis",
+        marina: "Yacht Club Angra",
+        activities: ["Trilha da Praia do Anil", "Pôr do sol no cais"],
+        restaurants: ["Restaurante do Porto"],
+        lodging: ["Marina (pernoite no cais)"],
+        services: ["Abastecimento", "Água e energia"],
+        notes: "Saída antes do amanhecer para aproveitar mar de lebre.",
+      },
+      {
+        day: 2,
+        title: "Angra → Ilha Grande (Vila do Abraão)",
+        start: "07:00",
+        distance: "12 nm",
+        eta: "08:20",
+        stop: "Ilha Grande · Vila do Abraão",
+        marina: "Cais local (fundeio)",
+        activities: ["Praia de Lopes Mendes", "Trilha leve"],
+        restaurants: ["Bar da Vila"],
+        lodging: ["Pousada Dois Rios"],
+        services: ["Mercado do Cais"],
+        notes: "Marina não cadastrada no SafeAnchor — solicitação de contato enviada.",
+      },
+      {
+        day: 3,
+        title: "Ilha Grande → Paraty",
+        start: "08:30",
+        distance: "24 nm",
+        eta: "11:10",
+        stop: "Paraty",
+        marina: "Paraty Yacht Marina",
+        activities: ["Centro histórico", "Pesca esportiva"],
+        restaurants: ["Restaurante do Cais"],
+        lodging: ["Paraty Yacht Marina"],
+        services: ["Combustível", "Café náutico"],
+        notes: "Reserva de vaga confirmada na Paraty Yacht Marina.",
+      },
+      {
+        day: 4,
+        title: "Paraty → Trindade",
+        start: "06:00",
+        distance: "46 nm",
+        eta: "Manhã",
+        stop: "Trindade",
+        marina: "Ancoradouro local",
+        activities: ["Cachoeiras de Trindade", "Mergulho"],
+        restaurants: ["Quiosque do Farol"],
+        lodging: ["Pousada Raízes"],
+        services: ["Mercado local"],
+        notes: "Fundeio livre com batedor de rota na entrada.",
+      },
+    ],
+    crew: {
+      needed: [
+        { role: "Capitão / operador", required: 1, selected: 0 },
+        { role: "Marinheiro", required: 1, selected: 0 },
+        { role: "Chef", required: 1, selected: 0 },
+      ],
+      selected: [
+        { role: "Capitão / operador", person: "Luis Botelho (armador)", status: "Confirmado" },
+      ],
+    },
+    requests: [
+      {
+        id: "trip-req-1",
+        role: "Marinheiro",
+        duration: "4 dias (10–14/09)",
+        location: "Costa Verde · saída Florianópolis",
+        value: "R$ 1.400",
+        requirements: "Experiência em lais e mochila; conhecimento básico de motores.",
+        status: "Aguardando resposta",
+      },
+    ],
+    aiSuggestion:
+      "Para seu perfil de cruzeiro tranquilo, reduzimos o trajeto diário para ~45 nm e reservamos píer na Paraty Yacht Marina. Considerando seu orçamento e a família a bordo, recomendamos pacote com chef para 2 dias e capitão local apenas no trecho Angra ↔ Ilha Grande.",
+    shares: 4,
+    views: 132,
+    communityPostId: null,
+  },
+  {
+    id: "trip-recarga-sul",
+    vesselId: "ves-mar-azul",
+    title: "Baia Norte · fim de semana",
+    ownerId: "usr-luis",
+    startDate: "19/09/2026",
+    endDate: "20/09/2026",
+    status: "Rascunho",
+    statusTone: "neutral",
+    routeName: "Ilhas de Florianópolis",
+    summary: "Passeio rápido entre as ilhas da Baía Norte com fundeio e estrutura leve.",
+    stops: ["dst-trindade"],
+    waypoints: [
+      { id: "wp-1", label: "Marina Costa Azul", coords: { x: 8, y: 84 }, kind: "start" },
+      { id: "wp-2", label: "Ilha do Francês", coords: { x: 34, y: 60 }, kind: "stop" },
+      { id: "wp-3", label: "Praia da Daniela", coords: { x: 56, y: 44 }, kind: "dest" },
+    ],
+    totalDistanceNm: 38,
+    totalHours: "3h10",
+    legs: [],
+    itinerary: [],
+    crew: { needed: [], selected: [] },
+    requests: [],
+    aiSuggestion:
+      "Curto fim de semana com a família: atividade certeira de fundeio na Ilha do Francês, almoço no quiosque e retorno antes da maré baixar na entrada da baía.",
+    shares: 0,
+    views: 9,
+    communityPostId: null,
+  },
+];
+
+export const tripStatusMeta = {
+  Planejada: "info",
+  "Pré-checklist": "warning",
+  Pronta: "success",
+  Rascunho: "neutral",
+};

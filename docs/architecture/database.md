@@ -1,11 +1,15 @@
 # Arquitetura de banco de dados
 
 O backend usa PostgreSQL hospedado no Supabase e Prisma 7 com
-`@prisma/adapter-pg`. O schema atual cobre somente os dominios ja existentes;
-autenticacao, documentos e Maritime Academy nao fazem parte desta fundacao.
+`@prisma/adapter-pg`. O schema atual cobre os dominios de autenticacao,
+autorizacao por scope de propriedade e os dominios operacionais ja existentes.
 
 ## Modelos atuais
 
+- `Party`
+- `User`
+- `Organization`
+- `Membership`
 - `Vessel`
 - `Maintenance`
 - `PreventiveMaintenance`
@@ -20,11 +24,21 @@ data permanecem `String` para preservar os contratos atuais da API. `items` e
 
 ```mermaid
 erDiagram
+  Party ||--o{ User : identifica
+  Party ||--o{ Organization : identifica
+  Party ||--o{ Vessel : e_dono
+  User ||--o{ Membership : participa
+  Organization ||--o{ Membership : tem
   Vessel ||--o{ Maintenance : possui
   Vessel ||--o{ PreventiveMaintenance : agenda
   Vessel ||--o{ ChecklistExecution : recebe
   ChecklistTemplate ||--o{ ChecklistExecution : define
 ```
+
+`Vessel` referencia um `Party` proprietario via `ownerPartyId`. Esse `Party`
+pode ser do tipo `USER` (recursos pessoais) ou `ORGANIZATION` (recursos da
+organizacao). `Membership` liga `User` e `Organization` garantindo acesso aos
+recursos de organizacoes das quais o usuario e membro.
 
 As quatro chaves estrangeiras possuem indice e usam `ON DELETE CASCADE` e
 `ON UPDATE CASCADE`.
@@ -39,13 +53,15 @@ Os valores reais ficam apenas em `apps/backend/.env`. O arquivo
 
 ## Seguranca de acesso
 
-As cinco tabelas de dominio usam RLS sem policies e tiveram todos os privilegios
+As tabelas de dominio usam RLS sem policies e tiveram todos os privilegios
 diretos de `anon` e `authenticated` revogados. Isso bloqueia o acesso pela Data
 API e mantem a conexao PostgreSQL do backend como unico caminho atual.
 
-As policies de propriedade serao definidas junto da futura camada de
-autenticacao e autorizacao. Elas nao devem ser criadas como policies publicas
-temporarias.
+O controle de acesso por propriedade e feito na camada de services do backend:
+`src/services/accessScopeService.js` calcula o scope do usuario autenticado
+(proprio `Party` + `Party` das organizacoes das quais e membro) e cada consulta
+de `Vessel` e dos recursos ligados a embarcacoes aplica esse scope. Usuarios com
+role `ADMIN` ignoram o filtro e acessam o escopo global.
 
 ## Baseline
 
