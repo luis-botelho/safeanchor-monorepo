@@ -1,7 +1,7 @@
 import { getMaintenances } from "./maintenanceService.js";
 
-export async function getDashboardStatistics() {
-  const maintenances = await getMaintenances();
+export async function getDashboardStatistics(scope) {
+  const maintenances = await getMaintenances(scope);
 
   return {
     total: maintenances.length,

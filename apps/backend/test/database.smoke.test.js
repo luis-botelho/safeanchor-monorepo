@@ -27,33 +27,47 @@ test(
   async () => {
     const marker = `codex-smoke-${Date.now()}`;
     const createdIds = {
+      ownerPartyId: `smoke-party-${marker}`,
       vesselId: null,
       maintenanceId: null,
       preventiveMaintenanceId: null,
       checklistTemplateId: null,
       checklistExecutionId: null,
     };
+    const adminScope = {
+      isAdmin: true,
+      partyId: createdIds.ownerPartyId,
+      partyIds: null,
+    };
 
     try {
-      const vessel = await createVessel({
+      await prisma.party.create({
+        data: {
+          id: createdIds.ownerPartyId,
+          type: "USER",
+        },
+      });
+
+      const vessel = await createVessel(adminScope, {
         name: marker,
         type: "smoke-test",
         status: "created",
       });
       createdIds.vesselId = vessel.id;
+      assert.equal(vessel.ownerPartyId, createdIds.ownerPartyId);
 
-      const vessels = await getAllVessels();
+      const vessels = await getAllVessels(adminScope);
       assert.ok(vessels.some(({ id }) => id === vessel.id));
-      assert.equal((await getVesselById(vessel.id))?.id, vessel.id);
+      assert.equal((await getVesselById(adminScope, vessel.id))?.id, vessel.id);
 
-      const updatedVessel = await updateVessel(vessel.id, {
+      const updatedVessel = await updateVessel(adminScope, vessel.id, {
         name: marker,
         type: "smoke-test",
         status: "updated",
       });
       assert.equal(updatedVessel.status, "updated");
 
-      const maintenance = await createMaintenance({
+      const maintenance = await createMaintenance(adminScope, {
         vesselId: vessel.id,
         title: marker,
         description: "Database smoke test",
@@ -63,10 +77,10 @@ test(
       });
       createdIds.maintenanceId = maintenance.id;
 
-      const vesselMaintenances = await getMaintenancesByVesselId(vessel.id);
+      const vesselMaintenances = await getMaintenancesByVesselId(adminScope, vessel.id);
       assert.ok(vesselMaintenances.some(({ id }) => id === maintenance.id));
 
-      const preventiveMaintenance = await createPreventiveMaintenance({
+      const preventiveMaintenance = await createPreventiveMaintenance(adminScope, {
         title: marker,
         description: "Database smoke test",
         type: "Preventiva",
@@ -84,17 +98,17 @@ test(
       });
       createdIds.checklistTemplateId = template.id;
 
-      const execution = await createExecution({
+      const execution = await createExecution(adminScope, {
         templateId: template.id,
         vesselId: vessel.id,
         responses: [{ itemId: `${marker}-item`, checked: true }],
       });
       createdIds.checklistExecutionId = execution.id;
 
-      const vesselExecutions = await getChecklistExecutionsByVesselId(vessel.id);
+      const vesselExecutions = await getChecklistExecutionsByVesselId(adminScope, vessel.id);
       assert.ok(vesselExecutions.some(({ id }) => id === execution.id));
 
-      assert.equal(await deleteVessel(vessel.id), true);
+      assert.equal(await deleteVessel(adminScope, vessel.id), true);
       assert.equal(await prisma.vessel.findUnique({ where: { id: vessel.id } }), null);
       assert.equal(
         await prisma.maintenance.findUnique({ where: { id: maintenance.id } }),
@@ -147,7 +161,14 @@ test(
         await prisma.vessel.deleteMany({ where: { id: createdIds.vesselId } });
       }
 
+      await prisma.party.deleteMany({
+        where: { id: createdIds.ownerPartyId },
+      });
+
       const remainingRecords = await Promise.all([
+        createdIds.ownerPartyId
+          ? prisma.party.findUnique({ where: { id: createdIds.ownerPartyId } })
+          : null,
         createdIds.vesselId
           ? prisma.vessel.findUnique({ where: { id: createdIds.vesselId } })
           : null,
@@ -181,7 +202,7 @@ test(
           ),
         ),
       );
-      assert.deepEqual(remainingRecords, [null, null, null, null, null]);
+      assert.deepEqual(remainingRecords, [null, null, null, null, null, null]);
       await prisma.$disconnect();
     }
   },
