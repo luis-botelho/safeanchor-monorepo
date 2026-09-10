@@ -2,79 +2,87 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useState,
 } from "react";
 
-import {
-  apiFetch,
-  clearToken,
-  getToken,
-  setToken,
-} from "../services/api";
+import { demoAccounts, demoProfile } from "../mock/users";
+
+const SESSION_KEY = "safeanchor:session";
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [initializing, setInitializing] = useState(true);
+function readSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
 
-  useEffect(() => {
-    async function restoreUser() {
-      const token = getToken();
-
-      if (!token) {
-        setInitializing(false);
-        return;
-      }
-
-      try {
-        const me = await apiFetch("/auth/me");
-        setUser(me);
-      } catch (error) {
-        if (error.status === 401) {
-          clearToken();
-        }
-      } finally {
-        setInitializing(false);
-      }
+    if (raw) {
+      return JSON.parse(raw);
     }
+  } catch {
+    // Sessão inválida; ignora.
+  }
 
-    restoreUser();
-  }, []);
+  return null;
+}
 
-  useEffect(() => {
-    const handleUnauthorized = () => {
-      setUser(null);
-    };
-
-    window.addEventListener("auth:unauthorized", handleUnauthorized);
-
-    return () =>
-      window.removeEventListener("auth:unauthorized", handleUnauthorized);
-  }, []);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(readSession);
+  const [initializing] = useState(false);
 
   const login = useCallback(async (email, password) => {
-    const data = await apiFetch("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+    const account =
+      demoAccounts.find(
+        (item) =>
+          item.email.toLowerCase() === email.toLowerCase() &&
+          item.password === password,
+      ) || null;
 
-    setToken(data.token);
-    setUser(data.user);
+    const profile = account
+      ? account.profile
+      : {
+          ...demoProfile,
+          id: "usr-demo",
+          name: email.split("@")[0] || demoProfile.name,
+          fullName: email.split("@")[0] || demoProfile.name,
+          email: email || demoProfile.email,
+          initials: (email.split("@")[0] || "U").slice(0, 2).toUpperCase(),
+        };
 
-    return data.user;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
+    setUser(profile);
+
+    return profile;
   }, []);
 
-  const register = useCallback(async (name, email, password) => {
-    await apiFetch("/auth/register", {
-      method: "POST",
-      body: JSON.stringify({ name, email, password }),
-    });
-  }, []);
+  const register = useCallback(
+    async (name, email, password) => {
+      const profile = {
+        id: `usr-${Date.now()}`,
+        name: name.split(" ")[0] || name,
+        fullName: name || "Novo Membro",
+        email,
+        role: "Proprietário",
+        company: "Minha embarcação",
+        location: "Florianópolis, SC",
+        since: "2026",
+        initials: name
+          .split(" ")
+          .map((part) => part[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase() || "NM",
+      };
+
+      localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
+      setUser(profile);
+
+      return profile;
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
-    clearToken();
+    localStorage.removeItem(SESSION_KEY);
     setUser(null);
   }, []);
 

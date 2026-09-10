@@ -1,6 +1,7 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import AppShell from "./AppShell";
 
 export default function ProtectedRoute() {
   const { user, initializing } = useAuth();
@@ -13,5 +14,5 @@ export default function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />;
+  return <AppShell />;
 }
