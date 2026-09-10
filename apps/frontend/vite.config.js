@@ -4,6 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  base: process.env.VITE_BASE_URL || "/",
   resolve: {
     alias: [
       { find: "react", replacement: path.resolve(__dirname, "node_modules/react") },
