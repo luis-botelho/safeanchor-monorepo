@@ -1,0 +1,44 @@
+flowchart TD
+    P(["Usuário acessa o SafeAnchor"]) --> V["Escolhe persona demo"]
+    V --> L["Login com conta de exemplo"]
+
+    L --> D{"Persona selecionada?"}
+
+    D -- "Proprietário / Gestor de frota" --> O1["Dashboard de prontidão das embarcações"]
+    D -- "Prestador de serviços" --> SP["Visão do prestador"]
+    D -- "Marina" --> MA["Visão da marina"]
+
+    O1 --> O2{"Ação do proprietário"}
+
+    O2 -- "Ver frota" --> F["Minha frota"]
+    F --> FD["Detalhes da embarcação (prontidão, docs, checklist)"]
+
+    O2 -- "Manutenção" --> M["Agenda de manutenção"]
+    M --> MN["Nova manutenção"]
+
+    O2 -- "Marinas" --> MR["Explorar marinas"]
+    MR --> MRD["Detalhe da marina (estrutura, serviços, avaliações)"]
+
+    SP --> SPA{"Ação do prestador"}
+
+    SPA -- "Inspeções" --> I["Lista de inspeções"]
+    I --> IN["Agendar inspeção"]
+    I --> ID["Checklist da inspeção"]
+    ID --> DC["Concluir itens do checklist"]
+    DC --> CC["Gerar certificado"]
+
+    SPA -- "Solicitações" --> SR["Solicitações recebidas"]
+
+    SPA -- "Jobs & Crew" --> J["Oportunidades"]
+
+    MA --> MA1{"Ação da marina"}
+
+    MA1 -- "Dashboard" --> MD["Visão operacional da marina"]
+    MA1 -- "Frota" --> MF["Embarcações sob gestão"]
+    MA1 -- "Equipe" --> MT["Colaboradores e dockmasters"]
+    MA1 -- "Reservas" --> MR2["Ocupação de vagas"]
+    MA1 -- "Serviços / Catálogo" --> MS["Catálogo de serviços"]
+
+    DD["Detalhe da embarcação"] --> READ["Score de prontidão (ex: 92%)"]
+    READ --> DS["Manutenção + documentação + checklists"]
+    DS --> DO["Pronto para navegar?"]

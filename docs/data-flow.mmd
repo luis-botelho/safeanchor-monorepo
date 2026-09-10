@@ -1,0 +1,39 @@
+flowchart LR
+    U["Usuário"]
+
+    subgraph F["Frontend React (MVVM)"]
+        V["Views<br/>(PageViews)"]
+        VM["ViewModels<br/>(use*ViewModel hooks)"]
+        SV["Services<br/>(camada de dados mock / API)"]
+    end
+
+    subgraph B["Backend Express 5"]
+        RT["Routes<br/>(rotas REST)"]
+        CT["Controllers<br/>(validação HTTP)"]
+        SR["Services<br/>(regras de negócio)"]
+        PR["Prisma ORM<br/>(acesso ao banco)"]
+    end
+
+    DB[("PostgreSQL<br/>(Supabase)")]
+
+    U -->|"navega entre páginas"| V
+    V -->|"chama hooks"| VM
+    VM -->|"recarrega dados"| SV
+
+    SV -->|"HTTP (futuro)"| RT
+    SV -->|"dados mock (MVP)"| M[("Mock Data<br/>(arquivos JS)")]
+
+    RT --> CT
+    CT -->|"valida payload"| SR
+    SR -->|"query estruturada"| PR
+    PR -->|"SQL"| DB
+    DB -->|"resultado"| PR
+    PR -->|"dados"| SR
+    SR -->|"response JSON"| CT
+    CT -->|"HTTP response"| SV
+
+    SV -->|"dados"| VM
+    VM -->|"atualiza estado"| V
+    V -->|"renderiza interface"| U
+
+    M -->|"retorna dados"| VM
