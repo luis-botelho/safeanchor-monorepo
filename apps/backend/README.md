@@ -148,6 +148,34 @@ API sobe em:
 http://localhost:3001
 ```
 
+## Deploy da API na Vercel
+
+O backend exporta a aplicação Express em `src/server.js`, que a Vercel pode
+executar como função Node. Crie um projeto Vercel ligado ao mesmo repositório e
+defina **Root Directory** como `apps/backend`. Mantenha a instalação padrão com
+`npm install`/`npm ci`; o `postinstall` do projeto gera o cliente Prisma.
+
+Configure estas variáveis no projeto Vercel, em **Settings → Environment
+Variables**:
+
+- `DATABASE_URL`: URL de runtime do pooler Supabase.
+- `DIRECT_URL`: URL direta ou de sessão necessária pela configuração do Prisma
+  durante a geração do cliente.
+- `JWT_SECRET`: segredo aleatório longo.
+- `FRONTEND_ORIGIN`: `https://luis-botelho.github.io`.
+- `RESEND_API_KEY`: chave secreta do Resend. Nunca use uma variável `VITE_*`.
+- `RESEARCH_FROM_EMAIL`: remetente verificado no Resend, por exemplo
+  `SafeAnchor <pesquisa@safeanchor.app>`.
+- `RESEARCH_INBOX`: destinatário das respostas; por padrão
+  `pesquisa@safeanchor.app`.
+
+Depois do deploy, confira `/health` na URL atribuída pela Vercel; ela deve
+retornar `status: "ok"` e `database: "up"`. A rota pública `POST /research` já
+encaminha o resumo pelo Resend. O domínio de `RESEARCH_FROM_EMAIL` precisa estar
+verificado na conta Resend. A API e o frontend no GitHub Pages são projetos
+separados; configure a URL pública da API como variável `VITE_API_URL` no GitHub
+Actions (Settings → Secrets and variables → Actions → Variables).
+
 <details>
 <summary><strong>Testando rapidamente com curl</strong></summary>
 
@@ -184,6 +212,7 @@ curl http://localhost:3001/vessels \
 | `GET` | `/health` | Health check (verifica conexao com o banco) |
 | `POST` | `/auth/register` | Cadastro de novo usuario |
 | `POST` | `/auth/login` | Login — retorna JWT |
+| `POST` | `/research` | Envia uma resposta da pesquisa pelo Resend |
 
 ### Autenticados (requer `Authorization: Bearer <token>`)
 

@@ -2,8 +2,10 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 
+import Intro from "../views/Intro";
 import LoginPage from "../views/LoginPage";
 import RegisterPage from "../views/RegisterPage";
+import ResearchPage from "../views/ResearchPage";
 
 import DashboardPage from "../views/PersonaDashboardPage";
 import FleetPage from "../views/FleetPage";
@@ -46,11 +48,14 @@ import NewInspectionPage from "../views/NewInspectionPage";
 export default function AppRouter() {
   return (
     <Routes>
+      {/* Públicas */}
+      <Route path="/" element={<Intro />} />
+      <Route path="/pesquisa" element={<ResearchPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
+      {/* Protegidas */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
 
         <Route path="/fleet" element={<FleetPage />} />
@@ -123,7 +128,7 @@ export default function AppRouter() {
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

@@ -40,6 +40,7 @@ jobs:
         working-directory: apps/frontend
         env:
           VITE_BASE_URL: /safeanchor-monorepo/
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
         run: npm run build
 
       - name: SPA fallback for client-side routes

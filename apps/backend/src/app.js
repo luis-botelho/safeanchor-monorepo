@@ -13,6 +13,7 @@ import preventiveMaintenanceRoutes from "./routes/preventiveMaintenanceRoutes.js
 import checklistTemplateRoutes from "./routes/checklistTemplateRoutes.js";
 import checklistExecutionRoutes from "./routes/checklistExecutionRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import researchRoutes from "./routes/researchRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
 
 const genReqId = (request) => request.headers["x-request-id"] || randomUUID();
@@ -37,8 +38,26 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
     }),
   );
 
-  app.use(cors());
-  app.use(express.json());
+  const allowedOrigins = [
+    process.env.FRONTEND_ORIGIN,
+    ...(process.env.NODE_ENV !== "production"
+      ? ["http://localhost:5173", "http://127.0.0.1:5173"]
+      : []),
+  ].filter(Boolean);
+
+  app.use(
+    cors({
+      origin(origin, callback) {
+        // Requests without Origin (health checks, curl, server-to-server) are valid.
+        if (!origin || allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+
+        return callback(new Error("Origin not allowed by CORS"));
+      },
+    }),
+  );
+  app.use(express.json({ limit: "32kb" }));
 
   // Public routes
   app.get("/", (request, response) => {
@@ -51,6 +70,7 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   app.get("/health", createHealthHandler(db));
 
   app.use("/auth", authRoutes);
+  app.use("/research", researchRoutes);
 
   if (beforeAuth) {
     beforeAuth(app);
@@ -80,3 +100,5 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
 
   return app;
 };
+
+export default createApp();
