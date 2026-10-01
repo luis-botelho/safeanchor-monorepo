@@ -7,8 +7,16 @@ export async function sendResearchResponse(summary) {
   const from = process.env.RESEARCH_FROM_EMAIL;
   const to = process.env.RESEARCH_INBOX || "pesquisa@safeanchor.app";
 
-  if (!apiKey || !from) {
-    throw new Error("Research email is not configured.");
+  const missingVariables = [
+    !apiKey && "RESEND_API_KEY",
+    !from && "RESEARCH_FROM_EMAIL",
+  ].filter(Boolean);
+
+  if (missingVariables.length > 0) {
+    const error = new Error("Research email configuration is incomplete.");
+    error.code = "EMAIL_CONFIG_MISSING";
+    error.missingVariables = missingVariables;
+    throw error;
   }
 
   if (typeof summary !== "string" || !summary.trim() || summary.length > MAX_SUMMARY_LENGTH) {
@@ -26,7 +34,9 @@ export async function sendResearchResponse(summary) {
   });
 
   if (error) {
-    throw new Error("Resend could not send the research email.", { cause: error });
+    const sendError = new Error("Resend rejected the research email.", { cause: error });
+    sendError.code = "RESEND_REJECTED";
+    throw sendError;
   }
 
   return data;

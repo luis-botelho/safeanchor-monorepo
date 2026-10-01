@@ -14,7 +14,24 @@ export async function submitResearch(request, response) {
     }
 
     request.log?.error({ err: error }, "Could not send research response");
+
+    if (error.code === "EMAIL_CONFIG_MISSING") {
+      return response.status(503).json({
+        code: error.code,
+        message: `Configure no ambiente Production: ${error.missingVariables.join(", ")}.`,
+      });
+    }
+
+    if (error.code === "RESEND_REJECTED") {
+      return response.status(503).json({
+        code: error.code,
+        message:
+          "O Resend rejeitou o envio. Confira a validade da chave, o remetente verificado e o endereço destinatário.",
+      });
+    }
+
     return response.status(503).json({
+      code: "RESEARCH_SEND_FAILED",
       message: "Não foi possível enviar agora. Tente novamente em instantes.",
     });
   }
