@@ -36,6 +36,11 @@ export async function sendResearchResponse(summary) {
   if (error) {
     const sendError = new Error("Resend rejected the research email.", { cause: error });
     sendError.code = "RESEND_REJECTED";
+    sendError.providerError = {
+      name: error.name,
+      statusCode: error.statusCode,
+      message: error.message,
+    };
     throw sendError;
   }
 

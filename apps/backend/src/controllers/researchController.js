@@ -1,4 +1,5 @@
 import { sendResearchResponse } from "../services/researchService.js";
+import logger from "../lib/logger.js";
 
 export async function submitResearch(request, response) {
   try {
@@ -13,7 +14,14 @@ export async function submitResearch(request, response) {
       return response.status(400).json({ message: error.message });
     }
 
-    request.log?.error({ err: error }, "Could not send research response");
+    if (error.code === "RESEND_REJECTED") {
+      logger.error(
+        { requestId: request.id, resendError: error.providerError },
+        "Could not send research response",
+      );
+    } else {
+      request.log?.error({ err: error }, "Could not send research response");
+    }
 
     if (error.code === "EMAIL_CONFIG_MISSING") {
       return response.status(503).json({
