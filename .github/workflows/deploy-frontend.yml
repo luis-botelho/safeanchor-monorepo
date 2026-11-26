@@ -41,6 +41,8 @@ jobs:
         env:
           VITE_BASE_URL: /safeanchor-monorepo/
           VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_RESEARCH_WHATSAPP: ${{ vars.VITE_RESEARCH_WHATSAPP }}
+          VITE_RESEARCH_INBOX: ${{ vars.VITE_RESEARCH_INBOX }}
         run: npm run build
 
       - name: SPA fallback for client-side routes

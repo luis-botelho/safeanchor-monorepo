@@ -6,6 +6,7 @@ import Intro from "../views/Intro";
 import LoginPage from "../views/LoginPage";
 import RegisterPage from "../views/RegisterPage";
 import ResearchPage from "../views/ResearchPage";
+import PrivacyPage from "../views/PrivacyPage";
 
 import DashboardPage from "../views/PersonaDashboardPage";
 import FleetPage from "../views/FleetPage";
@@ -55,6 +56,7 @@ export default function AppRouter() {
       <Route path="/pesquisa" element={<ResearchPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/privacidade" element={<PrivacyPage />} />
 
       {/* Protegidas */}
       <Route element={<ProtectedRoute />}>

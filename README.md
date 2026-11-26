@@ -623,10 +623,18 @@ Flags de operacao (avaliacao do proprio contexto):
 |---|---|---|
 | `VITE_API_URL` | sim | URL da API (`http://localhost:3001` no exemplo; URL publica da Vercel em producao) |
 | `VITE_BASE_URL` | sim (GH Pages) | Base do build; no CI e `/safeanchor-monorepo/` |
-| `VITE_RESEARCH_WHATSAPP` | nao | Numero para o botao de compartilhar da pesquisa |
+| `VITE_RESEARCH_WHATSAPP` | nao | Numero (55 + DDD) do botao flutuante de contato e do link da pesquisa |
 | `VITE_RESEARCH_INBOX` | nao | Destino sugerido no link manual de e-mail |
 
 > Na raiz nao ha `.env`; o `apps/frontend/.env.example` esta versionado.
+
+> **Privacidade e contato na demo:** a SPA publica a rota publica `/privacidade`
+> (politica LGPD), mostra um aviso de armazenamento local com aceite registrado
+> em `safeanchor.cookieConsent` e exibe um botao flutuante de WhatsApp quando
+> `VITE_RESEARCH_WHATSAPP` e configurado no build. O formulario `/pesquisa` envia
+> o resumo por e-mail via Resend e oferece links manuais para WhatsApp/e-mail;
+> o envio por e-mail foi validado em 26/11/2026 (resposta `202` e recebimento
+> confirmado).
 
 ---
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 import Avatar from "./Avatar";
@@ -190,6 +190,9 @@ export default function AppShell() {
           <span className="app-shell__version">
             SafeAnchor · dados sincronizados com a API
           </span>
+          <Link className="app-shell__privacy" to="/privacidade">
+            Privacidade e LGPD
+          </Link>
         </div>
       </aside>
 

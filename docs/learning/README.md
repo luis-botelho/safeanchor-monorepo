@@ -32,6 +32,9 @@ apps/
       router/        # rotas da SPA
       mock/          # dados falsos para áreas ainda não conectadas
       styles/        # CSS com BEM
+      views/PrivacyPage.jsx         # política LGPD (/privacidade)
+      components/CookieNotice.jsx   # aviso de armazenamento local
+      components/WhatsAppButton.jsx # botão flutuante de contato
   backend/
     src/
       routes/        # definição dos endpoints
@@ -54,6 +57,9 @@ apps/
 - Inspeções: listar, criar, marcar checklist, concluir com certificado e cancelar.
 - Isolamento de dados por usuário/organização (`accessScopeService.js`).
 - `/health` no backend e smoke tests de produção.
+- Formulário `/pesquisa`: rascunho local e envio por e-mail via Resend (validado).
+- Rota pública `/privacidade` (LGPD), aviso de armazenamento local e botão
+  flutuante de WhatsApp (link `wa.me`, não envio automático).
 
 ## O que ainda é mock ou está pendente
 

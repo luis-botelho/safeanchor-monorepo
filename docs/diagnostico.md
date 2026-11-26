@@ -207,7 +207,9 @@ Endpoints principais (os protegidos vêm depois de `requireAuth` em `app.js`):
 
 ### 5.1 Mapa de rotas da SPA
 
-Públicas: `/` (introdução), `/pesquisa`, `/login`, `/register`.
+Públicas: `/` (introdução), `/pesquisa`, `/login`, `/register` e `/privacidade`
+(política LGPD). O aviso de armazenamento local (`CookieNotice`) e o botão
+flutuante de WhatsApp aparecem em todas as páginas quando configurados.
 
 Protegidas: `/dashboard`, `/fleet`, `/fleet/:id`, `/fleet/new`, `/maintenance`,
 `/maintenance/new`, `/documents`, `/documents/new`, `/inspections`,
@@ -226,8 +228,12 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
    `demo@safeanchor.test` / `demo123456`.
 2. **Pesquisa (opcional)** — `/pesquisa` guarda um rascunho em `localStorage`
    (`safeanchor.research.draft`), envia `POST /research` e mantém respostas em
-   `safeanchor.researchResponses`. No backend, o e-mail sai pelo Resend. Há
-   alternativas manuais (mailto/WhatsApp) na própria página.
+   `safeanchor.researchResponses`. No backend, o e-mail sai **automaticamente**
+   pelo Resend para `RESEARCH_INBOX` (envio validado em 26/11/2026, com
+   recebimento confirmado). Há alternativas manuais na própria página: link
+   `mailto:` e link `wa.me` com o resumo preenchido, ambos exibidos após a
+   confirmação. O botão flutuante `WhatsAppButton` usa o mesmo número e aparece
+   em todas as telas quando `VITE_RESEARCH_WHATSAPP` está definido no build.
 3. **Autenticar** — `LoginPage` → `AuthContext.login` → `POST /auth/login`. O
    token é salvo em `localStorage` e o perfil em `safeanchor:session`.
    `/register` envia `POST /auth/register` (nome, e-mail, senha mínima de 6
@@ -296,6 +302,10 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 | CORS com `Origin: https://luis-botelho.github.io` | `Access-Control-Allow-Origin` correto em todas |
 | `/health` em produção | `200`, `database: "up"` |
 | Endpoint temporário `/__setup` | removido (retorna `401` do `requireAuth`) |
+| `POST /research` (formulário de feedback) | `202` + id do Resend; e-mail recebido e confirmado |
+| Rota pública `/privacidade` | política LGPD com controlador, bases legais, compartilhamento, retenção e direitos |
+| `VITE_RESEARCH_WHATSAPP` no bundle | número `24992772357` presente; `wa.me` gerado com mensagem inicial |
+| Aviso de armazenamento local | `CookieNotice` com aceite em `safeanchor.cookieConsent` |
 
 > **Nota para a apresentação:** o dashboard e as listagens core mostram dados
 > reais; as áreas de catálogo e o feed de atividade são mock. A tela inicial
@@ -331,6 +341,7 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 | JWT de 1h sem refresh, em `localStorage` | Sessão cai e exige novo login; risco XSS | Aceitável no MVP; no roadmap |
 | Persona não autoriza no backend; `ProtectedRoute` só checa presença de usuário | Menus por persona são decorativos | Separar autorização de apresentação |
 | 16 views não roteadas e links que caem no `/` | APIs prontas parecem inexistentes | Corrigir `AppRouter` e links do `AppShell` |
+| WhatsApp é link manual (`wa.me`), não envio automático | Depende de clique do usuário; sem disparo server-side | Aceito na demo; automatizar exige API business/Twilio |
 | Upload de documentos ausente | Documentos são só metadados | Pendente (Supabase Storage) |
 | Prontidão calculada no cliente; detalhe devolve `readiness: null` | Métricas inconsistentes | Levar regra para o backend |
 | Status/tipo em texto livre nos formulários | Valores como "Ativa" vs "OPERACIONAL" | Usar enums/selects |

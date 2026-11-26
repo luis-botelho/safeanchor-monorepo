@@ -71,12 +71,34 @@ Executada com `Origin: https://luis-botelho.github.io` para exercitar o CORS rea
 | `Access-Control-Allow-Origin` nas respostas | `https://luis-botelho.github.io` |
 | `GET /__setup` | `401` (rota inexistente, cai no `requireAuth`) |
 
+## Formulário de feedback, privacidade e WhatsApp
+
+- O formulário público `/pesquisa` salva o rascunho em `localStorage`, envia
+  `POST /research` e o backend dispara o e-mail via Resend para `RESEARCH_INBOX`.
+  Teste em 26/11/2026: `202` com id do Resend, CORS correto para a origem do
+  Pages e **recebimento confirmado pelo usuário**.
+- O WhatsApp **não é envio automático**: é um link `wa.me` com mensagem
+  preenchida, disponível no botão flutuante do site e na tela de confirmação da
+  pesquisa. O número `24992772357` é injetado no build por
+  `VITE_RESEARCH_WHATSAPP` (variável do GitHub Actions). Envio automático exigiria
+  credenciais de WhatsApp Business API/Twilio.
+- A rota pública `/privacidade` documenta controlador, dados coletados, bases
+  legais, compartilhamento (Supabase, Vercel, Resend, GitHub Pages e WhatsApp),
+  retenção, segurança e direitos da LGPD (art. 18).
+- O `CookieNotice` explica o armazenamento local e registra o aceite em
+  `safeanchor.cookieConsent`. Não existem cookies de rastreamento ou publicidade.
+- Links para a política foram adicionados ao rodapé da introdução, ao menu
+  autenticado e ao rodapé da pesquisa.
+
 ## Configuração fora do repositório
 
 - Produção (Vercel): `DATABASE_URL` (runtime), `DIRECT_URL` (Prisma CLI),
   `JWT_SECRET`, `FRONTEND_ORIGIN=https://luis-botelho.github.io` e as variáveis
   sincronizadas pela integração Supabase (`POSTGRES_*`, `SUPABASE_*`). Nenhum
   valor está versionado.
+- GitHub Actions (variáveis do repositório): `VITE_API_URL`,
+  `VITE_RESEARCH_WHATSAPP=24992772357` e, se quiser alterar o link manual de
+  e-mail, `VITE_RESEARCH_INBOX`. Nenhuma chave do Resend vai para o frontend.
 - Preview (Vercel): `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET` e
   `FRONTEND_ORIGIN` próprios, apontando para o Neon temporário
   `wispy-forest-67479829` (branch `br-cold-river-bdl1t5dl`), que expira em
