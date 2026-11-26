@@ -47,12 +47,6 @@
   --neutral-bg: #eef2f0;
   --neutral-fg: #475467;
 
-  /* Aliases usados por views antigas (evita var(--color-danger) quebrada) */
-  --color-success: var(--success-fg);
-  --color-warning: var(--warning-fg);
-  --color-danger: var(--danger-fg);
-  --color-info: var(--info-fg);
-
   /* Geometria instrumental: cantos rígidos, bordas hairline */
   --radius: 4px;
   --radius-sm: 4px;
@@ -1130,6 +1124,10 @@ textarea {
 .mnt__due-date {
   font-size: 13.5px;
   font-weight: 700;
+}
+
+.mnt__due-date--success {
+  color: var(--success-fg);
 }
 
 .mnt__due-label {
@@ -4235,6 +4233,10 @@ textarea {
   font-size: 13px;
 }
 
+.alert--spaced {
+  margin-top: 18px;
+}
+
 .alert--error {
   border-color: var(--danger-border);
   border-left-color: var(--danger-fg);
@@ -4265,12 +4267,6 @@ textarea {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .app-shell__content {
-    animation: fade-in var(--motion-base) var(--ease) both;
   }
 }
 

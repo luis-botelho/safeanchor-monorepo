@@ -61,12 +61,8 @@ export default function NewInspectionPage() {
       </p>
 
       {(error || validationError) && (
-        <div className="card" style={{ marginTop: 18, borderColor: "var(--color-danger)" }}>
-          <div className="card--padding">
-            <p className="page-header__subtitle" style={{ color: "var(--color-danger)" }}>
-              {error || validationError}
-            </p>
-          </div>
+        <div className="alert alert--error alert--spaced" role="alert">
+          {error || validationError}
         </div>
       )}
 

@@ -73,12 +73,8 @@ export default function InspectionDetailPage() {
       <BackLink to="/inspections" label="Voltar para inspeções" />
 
       {error && (
-        <div className="card" style={{ marginTop: 18, borderColor: "var(--color-danger)" }}>
-          <div className="card--padding">
-            <p className="page-header__subtitle" style={{ color: "var(--color-danger)" }}>
-              {error}
-            </p>
-          </div>
+        <div className="alert alert--error alert--spaced" role="alert">
+          {error}
         </div>
       )}
 
@@ -227,12 +223,8 @@ export default function InspectionDetailPage() {
       )}
 
       {hasFailure && inspection.status === "in_progress" && (
-        <div className="card" style={{ marginTop: 18, borderColor: "var(--color-danger)" }}>
-          <div className="card--padding">
-            <p className="page-header__subtitle" style={{ color: "var(--color-danger)" }}>
-              Esta inspeção contém itens reprovados. Corrija os problemas antes de concluir.
-            </p>
-          </div>
+        <div className="alert alert--warning alert--spaced" role="status">
+          Esta inspeção contém itens reprovados. Corrija os problemas antes de concluir.
         </div>
       )}
 
