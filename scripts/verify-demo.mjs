@@ -178,7 +178,8 @@ async function verifyFrontend() {
   check(
     "Manifest da marca",
     manifestResponse.status === 200 &&
-      manifest?.name === "SafeAnchor" &&
+      manifest?.short_name === "SafeAnchor" &&
+      String(manifest?.name || "").startsWith("SafeAnchor") &&
       (manifest?.icons?.length || 0) >= 2,
   );
 
