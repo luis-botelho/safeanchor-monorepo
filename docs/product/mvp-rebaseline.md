@@ -96,12 +96,15 @@ O produto é organizado em torno dessa jornada. Cada feature do rebaseline contr
 | 038 | ✅ | Pages no ar; `/health` 200 com banco up no Preview e na produção. |
 
 O Preview usa um Postgres temporário (Neon claim) com migrations e seed aplicados.
-A produção passou a responder `200` após a conexão do Supabase à Vercel; o usuário
-demo foi criado por `/auth/register` e o login/consulta de listas foi validado.
-A proteção por login da Vercel foi desativada para que o Preview seja público.
-A produção ainda executa o código de `main`: as rotas de documentos e inspeções
-entram nela somente após o merge do PR #175. As mudanças de `develop` serão
-promovidas a `main` somente por pull request.
+A produção passou a responder `200` após a conexão do Supabase à Vercel; as três
+migrations faltantes foram aplicadas e o deploy foi limpo (sem endpoint
+temporário). O PR #175 foi mergeado em `main`, então as rotas de documentos e
+inspeções já estão no ar. O usuário demo foi criado por `/auth/register` e os
+dados de demonstração foram semeados pela API: 3 embarcações, 5 manutenções,
+5 documentos e 3 inspeções. Login, listagens, dashboard e CORS com a origem do
+GitHub Pages foram validados em produção. A proteção por login da Vercel foi
+desativada para que os deploys sejam públicos. Mudanças futuras em `develop`
+serão promovidas a `main` somente por pull request.
 
 ## Definição de Pronto (DoD)
 

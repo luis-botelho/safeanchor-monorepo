@@ -476,7 +476,8 @@ export default function ResearchPage() {
       <footer className="survey__footer">
         <p className="survey__footer-note">
           Seu rascunho fica salvo neste navegador. Ao finalizar, a resposta é enviada
-          para a equipe SafeAnchor.
+          para a equipe SafeAnchor.{" "}
+          <Link to="/privacidade">Política de Privacidade e LGPD</Link>
         </p>
       </footer>
 

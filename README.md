@@ -106,7 +106,7 @@ Features definidas no rebaseline 2026 (Features **031–038**):
 | **035** | Expiration & Compliance | ✅ status por validade e indicadores no dashboard |
 | **036** | Safety Completion & Mobile Polish | 🔶 inspeções via API; checklist desktop, sem mobile/offline |
 | **037** | MVP UX Polish | 🔶 loading/empty/error nos fluxos core |
-| **038** | CI/CD & Production Deploy | ✅ Preview e producao com `/health` 200 e banco up; aguardando merge do PR para levar as rotas novas a `main` |
+| **038** | CI/CD & Production Deploy | ✅ PR #175 mergeado; Pages e Vercel no ar; `/health` 200, migrations aplicadas, seed demo e deploy limpo |
 
 A **Definition of Ready** completa esta em
 [`docs/product/mvp-rebaseline.md`](./docs/product/mvp-rebaseline.md): a jornada
@@ -415,13 +415,13 @@ Itens do rebaseline ainda incompletos em `develop`:
 
 ### Next
 
-1. Revisar o PR `develop` → `main` e promover as mudancas apos aprovacao (a producao ainda roda o codigo antigo).
-2. Reivindicar o Postgres temporario do Preview antes que expire (`npx neon claim accept wispy-forest-67479829`) ou criar outro.
-3. Upload de documentos (Supabase Storage) e polish mobile do checklist.
+1. Reivindicar o Postgres temporario do Preview antes que expire (`npx neon claim accept wispy-forest-67479829`) ou criar outro.
+2. Upload de documentos (Supabase Storage) e polish mobile do checklist.
+3. Para novas migrations em producao, fornecer `DIRECT_URL` do Supabase — a Vercel nao devolve segredos via CLI. Ver `docs/handoff-freeze.md`.
 
 ### Blocked
 
-- **Banco de producao na Vercel** — `/health` retorna `{"status":"degraded","database":"down"}`; sem credenciais/acesso ao Supabase para corrigir.
+- **Novas migrations em producao** — a Vercel nao devolve segredos via CLI; exige `DIRECT_URL` do Supabase fornecida pelo usuario. O banco atual esta saudavel (`/health` 200, `database: "up"`) e as migrations ja aplicadas. Ver `docs/handoff-freeze.md`.
 - **Upload de documentos** — depende de Supabase Storage e politicas de acesso.
 
 ### Known Limitations (verificadas)
@@ -623,10 +623,18 @@ Flags de operacao (avaliacao do proprio contexto):
 |---|---|---|
 | `VITE_API_URL` | sim | URL da API (`http://localhost:3001` no exemplo; URL publica da Vercel em producao) |
 | `VITE_BASE_URL` | sim (GH Pages) | Base do build; no CI e `/safeanchor-monorepo/` |
-| `VITE_RESEARCH_WHATSAPP` | nao | Numero para o botao de compartilhar da pesquisa |
+| `VITE_RESEARCH_WHATSAPP` | nao | Numero (55 + DDD) do botao flutuante de contato e do link da pesquisa |
 | `VITE_RESEARCH_INBOX` | nao | Destino sugerido no link manual de e-mail |
 
 > Na raiz nao ha `.env`; o `apps/frontend/.env.example` esta versionado.
+
+> **Privacidade e contato na demo:** a SPA publica a rota publica `/privacidade`
+> (politica LGPD), mostra um aviso de armazenamento local com aceite registrado
+> em `safeanchor.cookieConsent` e exibe um botao flutuante de WhatsApp quando
+> `VITE_RESEARCH_WHATSAPP` e configurado no build. O formulario `/pesquisa` envia
+> o resumo por e-mail via Resend e oferece links manuais para WhatsApp/e-mail;
+> o envio por e-mail foi validado em 26/11/2026 (resposta `202` e recebimento
+> confirmado).
 
 ---
 
@@ -689,12 +697,12 @@ para ser validado por investidores, parceiros e PTM.
 
 > **Next Action**
 
-**Revisar e publicar o PR `develop` → `main`:** o ciclo de Features 031–037
-(autenticacao, frota, manutencao, documentos, inspecoes e dashboard) esta
-implementado e validado em `develop`. O proximo passo e o review do PR, sem
-merge direto. A Feature 038 esta concluida: com o Supabase conectado na Vercel,
-`/health` responde `200` com `database: "up"` em producao e no Preview. Ate o
-merge, a producao continua executando o codigo antigo de `main`.
+**Demo publicada e validada:** o PR #175 (`develop` → `main`) foi mergeado; o
+frontend roda no GitHub Pages e a API na Vercel, com `/health` `200`, migrations
+aplicadas, usuario demo e dados de demonstracao carregados. O proximo passo e
+continuar em `develop` com novas mudancas via PR. Antes de mexer, leia
+`docs/handoff-freeze.md` (estado operacional) e `docs/diagnostico.md` (stack e
+fluxo de uso).
 
 ---
 

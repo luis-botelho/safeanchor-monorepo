@@ -88,6 +88,9 @@ export default function Intro() {
           Sem resposta certa ou errada. Você pode pular qualquer pergunta e deixar seu
           contato de lado.
         </p>
+        <Link className="welcome__privacy" to="/privacidade">
+          Política de Privacidade e LGPD
+        </Link>
       </footer>
     </div>
   );

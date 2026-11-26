@@ -169,6 +169,18 @@ npm run preview  # previsualiza o build
 
 > Nao ha script de lint neste projeto (sem ESLint configurado).
 
+### Variaveis de build e privacidade
+
+- `VITE_API_URL`: URL da API; no GitHub Pages vem da variavel de repositorio.
+- `VITE_RESEARCH_WHATSAPP`: numero somente com digitos (`55` + DDD + numero).
+  Quando preenchido, aparece o botao flutuante `WhatsAppButton` em todas as
+  paginas e o link "Enviar por WhatsApp" na confirmacao da pesquisa.
+- `VITE_RESEARCH_INBOX`: destino do link manual de e-mail na confirmacao.
+
+A rota publica `/privacidade` traz a politica de privacidade/LGPD. O
+`CookieNotice` avisa sobre o armazenamento local (sessao, rascunho da pesquisa e
+o proprio aceite); nao ha cookies de rastreamento.
+
 ---
 
 ## Fluxo de dados
