@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
@@ -11,7 +12,7 @@ export default function ChecklistExecutionsPage() {
   }, []);
 
   if (viewModel.isLoadingList) {
-    return <p>Carregando...</p>;
+    return <LoadingFallback label="Carregando..." />;
   }
 
   if (viewModel.error) {

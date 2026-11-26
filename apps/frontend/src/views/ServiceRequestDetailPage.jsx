@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -44,7 +45,7 @@ export default function ServiceRequestDetailPage() {
   }, [id]);
 
   if (!request) {
-    return <p>Carregando solicitação...</p>;
+    return <LoadingFallback label="Carregando solicitação..." />;
   }
 
   const isProvider = user?.persona === "SERVICE_PROVIDER";

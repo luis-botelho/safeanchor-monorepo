@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { Link } from "react-router-dom";
 import { usePreventiveMaintenancesViewModel } from "../viewmodels/usePreventiveMaintenancesViewModel";
 
@@ -5,7 +6,7 @@ export default function PreventiveMaintenancesPage() {
   const viewModel = usePreventiveMaintenancesViewModel();
 
   if (viewModel.isLoading) {
-    return <p>Carregando...</p>;
+    return <LoadingFallback label="Carregando..." />;
   }
 
   if (viewModel.error) {

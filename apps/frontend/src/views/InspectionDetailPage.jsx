@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useParams } from "react-router-dom";
 
 import {
@@ -25,7 +26,7 @@ export default function InspectionDetailPage() {
   } = useInspectionDetailViewModel(id);
 
   if (isLoading) {
-    return <p>Carregando inspeção...</p>;
+    return <LoadingFallback label="Carregando inspeção..." />;
   }
 
   if (error || !inspection) {

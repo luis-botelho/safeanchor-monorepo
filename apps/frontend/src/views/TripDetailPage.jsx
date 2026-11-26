@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -42,7 +43,7 @@ export default function TripDetailPage() {
   const stops = useMemo(() => (trip ? trip.stops.map(getDestinationById) : []), [trip]);
 
   if (!trip) {
-    return <p>Carregando viagem...</p>;
+    return <LoadingFallback label="Carregando viagem..." />;
   }
 
   function handleShare() {

@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 
 import PageHeader from "../components/PageHeader";
@@ -21,7 +22,7 @@ export default function ProviderAcademyPage() {
   }, []);
 
   if (!academy) {
-    return <p>Carregando Academy...</p>;
+    return <LoadingFallback label="Carregando Academy..." />;
   }
 
   return (

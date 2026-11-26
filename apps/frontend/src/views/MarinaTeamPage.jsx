@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -27,7 +28,7 @@ export default function MarinaTeamPage() {
   }, [marinaId]);
 
   if (!marina) {
-    return <p>Carregando equipe...</p>;
+    return <LoadingFallback label="Carregando equipe..." />;
   }
 
   const active = team.filter((member) => member.status !== "Em folga").length;

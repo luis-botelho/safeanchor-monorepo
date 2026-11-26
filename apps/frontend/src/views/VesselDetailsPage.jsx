@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useVesselDetailsViewModel } from "../viewmodels/useVesselDetailsViewModel";
 import { useParams, Link, useNavigate } from "react-router-dom";
 
@@ -20,7 +21,7 @@ export default function VesselDetailsPage() {
   };
 
   if (viewModel.isLoading) {
-    return <p>Carregando...</p>;
+    return <LoadingFallback label="Carregando..." />;
   }
 
   if (viewModel.error) {

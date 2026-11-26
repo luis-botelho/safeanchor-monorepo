@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -161,7 +162,7 @@ function ProviderProfile({ user }) {
   }, [user]);
 
   if (!provider) {
-    return <p>Carregando perfil...</p>;
+    return <LoadingFallback label="Carregando perfil..." />;
   }
 
   return (
@@ -251,7 +252,7 @@ function MarinaProfile({ user }) {
   }, [user]);
 
   if (!marina) {
-    return <p>Carregando perfil...</p>;
+    return <LoadingFallback label="Carregando perfil..." />;
   }
 
   return (

@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -22,7 +23,7 @@ export default function ProviderProfilePage() {
   }, [id]);
 
   if (!provider) {
-    return <p>Carregando prestador...</p>;
+    return <LoadingFallback label="Carregando prestador..." />;
   }
 
   const matches = getMatchesForProvider(provider.id);

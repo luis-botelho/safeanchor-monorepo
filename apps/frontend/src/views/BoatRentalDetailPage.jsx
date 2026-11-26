@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -48,7 +49,7 @@ export default function BoatRentalDetailPage() {
   }
 
   if (!rental) {
-    return <p>Carregando anúncio...</p>;
+    return <LoadingFallback label="Carregando anúncio..." />;
   }
 
   const current = CHARTER_STEPS[step];

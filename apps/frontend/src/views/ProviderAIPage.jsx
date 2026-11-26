@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -23,7 +24,7 @@ export default function ProviderAIPage() {
   }, [user]);
 
   if (!ai) {
-    return <p>Carregando assistente...</p>;
+    return <LoadingFallback label="Carregando assistente..." />;
   }
 
   return (

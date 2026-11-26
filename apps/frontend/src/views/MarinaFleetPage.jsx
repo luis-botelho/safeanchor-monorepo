@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -28,7 +29,7 @@ export default function MarinaFleetPage() {
   }, [marinaId]);
 
   if (vessels.length === 0) {
-    return <p>Carregando frota da organização...</p>;
+    return <LoadingFallback label="Carregando frota da organização..." />;
   }
 
   const readinessValues = vessels
