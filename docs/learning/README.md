@@ -3,7 +3,8 @@
 Este resumo ajuda quem está começando a entender o projeto e a escolher uma
 primeira tarefa. Para o estado operacional da demo, veja
 [`../handoff-freeze.md`](../handoff-freeze.md). Para tecnologias e fluxo de uso,
-veja [`../diagnostico.md`](../diagnostico.md).
+veja [`../diagnostico.md`](../diagnostico.md). Para o tema visual e as regras de
+loading e animação, veja [`../visual-system.md`](../visual-system.md).
 
 ## Visão geral
 
@@ -13,7 +14,7 @@ O SafeAnchor é um projeto de estudo em monorepo:
 - Backend: Express 5, hospedado na Vercel.
 - Persistência: PostgreSQL (Supabase) com Prisma 7.
 - Frontend em MVVM; backend em Route → Controller → Service → Prisma.
-- CSS em arquivos `.css` com convenção BEM.
+- CSS em um único arquivo `.css` com convenção BEM e tokens semânticos.
 
 Objetivo: aprender o fluxo completo entre interface, viewmodel, service, API e
 banco, sem frameworks extras como Next.js, TypeScript ou Tailwind nesta fase.
@@ -31,10 +32,16 @@ apps/
       context/       # autenticação e estado global
       router/        # rotas da SPA
       mock/          # dados falsos para áreas ainda não conectadas
-      styles/        # CSS com BEM
-      views/PrivacyPage.jsx         # política LGPD (/privacidade)
-      components/CookieNotice.jsx   # aviso de armazenamento local
+      styles/global.css          # tokens Maritime Precision + BEM
+      views/PrivacyPage.jsx      # política LGPD (/privacidade)
+      components/CookieNotice.jsx# aviso de armazenamento local
       components/WhatsAppButton.jsx # botão flutuante de contato
+      components/Skeleton.jsx    # bloco de skeleton e região com aria-busy
+      components/PageSkeletons.jsx # skeletons por contexto de tela
+      components/LoadingFallback.jsx # fallback para telas secundárias
+      components/ErrorState.jsx  # erro com mensagem e ação
+      components/SubmitButton.jsx # submit com spinner e aria-busy
+      components/InlineSpinner.jsx # spinner decorativo de ação
   backend/
     src/
       routes/        # definição dos endpoints
@@ -60,6 +67,9 @@ apps/
 - Formulário `/pesquisa`: rascunho local e envio por e-mail via Resend (validado).
 - Rota pública `/privacidade` (LGPD), aviso de armazenamento local e botão
   flutuante de WhatsApp (link `wa.me`, não envio automático).
+- Carregamento com skeletons contextuais nas telas principais, fallback nas
+  secundárias e spinner inline em ações — todos com `aria-busy` e respeitando
+  `prefers-reduced-motion`.
 
 ## O que ainda é mock ou está pendente
 
@@ -67,6 +77,7 @@ apps/
 - Feed de atividades do dashboard e cálculo de prontidão no cliente.
 - Upload de arquivos de documentos (Supabase Storage).
 - Refresh token e documentação OpenAPI.
+- Testes automatizados no frontend (não há script de lint).
 
 ## Tarefas boas para começar
 
@@ -81,11 +92,16 @@ apps/
    o service, o viewmodel e a rota correspondentes.
 4. **Escrever um teste:** use os testes existentes em `apps/backend/test/` como
    modelo para cobrir uma regra de negócio simples.
-5. **Melhorar o empty state:** ajuste um dos componentes `EmptyState` sem mudar
-   a API.
+5. **Melhorar um skeleton:** troque o `LoadingFallback` de uma tela secundária
+   por uma variante em `PageSkeletons.jsx` que espelhe o layout real. Antes,
+   leia o checklist de aceite em `docs/visual-system.md` e rode o build.
 
 ## Cuidados
 
 - Nunca versione `.env` nem credenciais do Supabase.
 - `DATABASE_URL` é usada no runtime; `DIRECT_URL` é usada pelo Prisma CLI.
 - Trabalhe em `develop` e promova para `main` somente por pull request.
+- Não use `transition: all`, shimmer agressivo ou animação infinita: o contrato
+  de movimento está em `docs/visual-system.md`.
+- Para validar o build no Windows, use `npm.cmd run build` dentro de
+  `apps/frontend` (o script não existe na raiz).

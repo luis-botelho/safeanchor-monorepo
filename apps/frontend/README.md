@@ -31,6 +31,7 @@ de negocio da camada de apresentacao.
 - [Como rodar](#como-rodar)
 - [Fluxo de dados](#fluxo-de-dados)
 - [Modulos implementados](#modulos-implementados)
+- [Sistema visual e loading](#sistema-visual-e-loading)
 - [Decisoes tecnicas](#decisoes-tecnicas)
 - [Deploy](#deploy)
 - [Roadmap](#roadmap)
@@ -65,7 +66,7 @@ flowchart LR
 - **React 19** — UI library
 - **Vite 7** — dev server e build
 - **react-router-dom v7** — roteamento SPA com basename dinamico
-- **CSS puro com BEM** — co-localizado por componente
+- **CSS puro com BEM** — um único `src/styles/global.css`, com tokens semânticos
 - `fetch` nativo para comunicacao com a API (sem lib de requisicao)
 
 ---
@@ -89,6 +90,12 @@ apps/frontend/
 │   │   ├── ReadinessGauge.jsx         # gauge de prontidao
 │   │   ├── PageHeader.jsx             # cabecalho de pagina
 │   │   ├── EmptyState.jsx             # estado vazio
+│   │   ├── ErrorState.jsx             # erro com mensagem e ação
+│   │   ├── Skeleton.jsx               # skeleton + região com aria-busy
+│   │   ├── PageSkeletons.jsx          # skeletons por contexto de tela
+│   │   ├── LoadingFallback.jsx        # fallback de telas secundárias
+│   │   ├── SubmitButton.jsx           # submit com disabled/aria-busy/spinner
+│   │   ├── InlineSpinner.jsx          # spinner decorativo de ação
 │   │   ├── Icon.jsx                   # icones SVG
 │   │   └── ...                        # outros componentes
 │   ├── context/
@@ -265,6 +272,38 @@ sequencia para abrir a sessao.
 
 ---
 
+## Sistema visual e loading
+
+O tema **Maritime Precision** vem da referência
+`stitch_safeanchor_maritime_ux_architecture/` e vive em `src/styles/global.css`
+como tokens: Light Mist `#F2F6F5`, Deep Ocean Navy `#102A43`, Abyss Teal
+`#123C43`, Sea Teal `#167D83`, bordas hairline de 1 px e raio 4 px. Não há
+Tailwind, lib de ícones ou lib de animação. O contrato completo está em
+[`../../docs/visual-system.md`](../../docs/visual-system.md).
+
+| Componente | Quando usar |
+|---|---|
+| `Skeleton` / `SkeletonRegion` | formas internas; a região avisa leitores de tela com `aria-busy` + `.sr-only` |
+| `PageSkeletons` | dashboard, grid de embarcações, lista, tabela e detalhe — a mesma geometria da tela final |
+| `LoadingFallback` | telas secundárias e validação de sessão (`ProtectedRoute`) |
+| `ErrorState` | falha com explicação e botão de nova tentativa |
+| `SubmitButton` | ações assíncronas: `disabled`, `aria-busy`, spinner e rótulo estável |
+
+Regras que o próximo agente precisa preservar:
+
+1. Skeleton só para layout conhecido (1–10 s). Botão/input/modal/toast não
+   recebem skeleton — usam `SubmitButton`/`InlineSpinner`.
+2. `ErrorState` e `EmptyState` encerram a espera com uma saída clara, nunca com
+   parágrafo solto ou tela presa em "Carregando...".
+3. Pulse do skeleton tem 2 ciclos finitos; `fade-in`, `survey-in` e
+   `whatsapp-card-in` só rodam sob `prefers-reduced-motion: no-preference`.
+4. `transition: all` foi banido: animar apenas `color`, `background-color`,
+   `border-color`, `box-shadow`, `opacity` e `transform`.
+5. Validação local: `npm.cmd run build` dentro de `apps/frontend` com
+   `VITE_BASE_URL`, `VITE_API_URL` e `VITE_RESEARCH_WHATSAPP`.
+
+---
+
 ## Decisoes tecnicas
 
 - **MVVM em vez de tudo no componente.**
@@ -276,9 +315,10 @@ sequencia para abrir a sessao.
   `documentService` e `inspectionService` convertem o contrato do backend no
   formato que as views ja esperavam — nada nos ViewModels precisou mudar.
 
-- **CSS co-localizado por componente.**
-  Cada componente mantém seu arquivo `.css` na mesma pasta. Facilita localizar,
-  alterar e remover estilos sem procurar em um CSS monolitico.
+- **CSS BEM centralizado em `global.css`.**
+  Como o projeto não usa módulos CSS nem Tailwind, todos os estilos ficam em um
+  único arquivo organizado por seções e tokens semânticos. Isso facilita
+  localizar uma classe por nome BEM e manter o tema consistente entre telas.
 
 - **AppShell com navegacao por persona.**
   O `AppShell` renderiza itens de navegacao diferentes conforme a `persona` do
@@ -319,6 +359,7 @@ O frontend e deployado automaticamente via **GitHub Actions** no branch `main`:
 - [x] Dashboard com prontidao calculada a partir da API
 - [x] Deploy no GitHub Pages
 - [x] CI com build (sem lint configurado)
+- [x] Tema Maritime Precision e skeletons com acessibilidade (em `develop`)
 - [ ] Conectar marinas ao backend
 - [ ] Conectar marketplace ao backend
 - [ ] Upload de arquivos de documentos

@@ -83,7 +83,17 @@ nada sobre o que vem.
 - Carregamentos simultâneos devem pulsar **em sincronia**; não use delays por
   item.
 
-### 3.3 Microinterações
+### 3.3 Componentes do projeto
+
+| Componente (`apps/frontend/src/components/`) | Responsabilidade |
+|---|---|
+| `Skeleton.jsx` | `Skeleton`, `SkeletonText` (decorativos) e `SkeletonRegion` (`role=status`, `aria-busy`, `.sr-only`) |
+| `PageSkeletons.jsx` | `DashboardSkeleton`, `VesselGridSkeleton`, `ListSkeleton`, `TableSkeleton`, `DetailSkeleton` |
+| `LoadingFallback.jsx` | fallback único para telas secundárias e `ProtectedRoute` |
+| `ErrorState.jsx` | falha com título, mensagem e ação de nova tentativa |
+| `SubmitButton.jsx` + `InlineSpinner.jsx` | submit com `disabled`, `aria-busy`, spinner e rótulo de largura estável |
+
+### 3.4 Microinterações
 
 - Hover/foco: `140–220ms ease-out`, animando apenas `opacity` e `transform`.
 - Entrada de tela/card: `240–320ms ease-out`, uma única vez, com `translateY(8px)`

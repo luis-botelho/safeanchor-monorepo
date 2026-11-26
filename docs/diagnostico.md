@@ -96,6 +96,22 @@ foram conferidas na documentação oficial em 2026-11-26.
 > inspeções seguem o padrão, mas várias listagens ainda fazem `useEffect` +
 > `fetch` direto na View. Existem também views e viewmodels órfãos (ver §8).
 
+### 3.1.1 Sistema visual e estados de carregamento
+
+A reformulação visual segue o tema **Maritime Precision**, vindo da pasta de
+referência `stitch_safeanchor_maritime_ux_architecture/`. Ele foi traduzido para
+tokens semânticos em `src/styles/global.css` (Light Mist, Deep Ocean Navy,
+Abyss Teal e Sea Teal; bordas hairline e raio 4 px), mantendo BEM e sem Tailwind.
+O contrato e as fontes consultadas estão em
+[`visual-system.md`](./visual-system.md).
+
+Antes da reformulação não existia nenhum skeleton: o carregamento era sempre
+`<p>Carregando...</p>` e uma animação `fade-in` estava declarada sem `@keyframes`.
+Agora há quatro primitivas — `Skeleton`/`SkeletonRegion`, `PageSkeletons`,
+`LoadingFallback`, `ErrorState` — e `SubmitButton`/`InlineSpinner` para ações.
+Skeleton é para layout conhecido (1–10 s); ação usa spinner inline; erro e vazio
+têm explicação e saída. Tudo respeita `prefers-reduced-motion`.
+
 ### 3.2 Backend
 
 | Tecnologia | Versão | O que é / por que usar | Uso no SafeAnchor | Referência |
@@ -306,6 +322,8 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 | Rota pública `/privacidade` | política LGPD com controlador, bases legais, compartilhamento, retenção e direitos |
 | `VITE_RESEARCH_WHATSAPP` no bundle | número `5524992772357` (55 + DDD) no build corrente; `wa.me` gerado com mensagem inicial |
 | Aviso de armazenamento local | `CookieNotice` com aceite em `safeanchor.cookieConsent` |
+| Skeletons contextuais | 8 telas principais + `LoadingFallback` nas secundárias; `aria-busy` e pulse finito |
+| Submit assíncrono | 10 formulários com spinner inline, `disabled` e rótulo de largura estável |
 
 > **Nota para a apresentação:** o dashboard e as listagens core mostram dados
 > reais; as áreas de catálogo e o feed de atividade são mock. A tela inicial
@@ -348,7 +366,7 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 | RLS habilitado sem policies e ausente nas tabelas novas | Falsa sensação de segurança | Revisar policies ou documentar que o escopo é só na API |
 | Templates de checklist globais e execução sem validar template | Escopo pode ser burlado via API | Aplicar `accessScopeService` também ali |
 | Muitos catálogos em mock + texto "dados sincronizados com a API" | Demo mistura real/falso | Ajustar textos ou conectar dados |
-| Divergências de doc/config | Node 22 no `engines` vs README "20+"; README diz CSS por componente, mas há só `global.css` | Atualizar READMEs |
+| Divergência de doc/config | Node 22 no `engines` vs README "20+" | Atualizar READMEs; a divergência sobre CSS por componente foi corrigida: os READMEs agora descrevem o `global.css` com tokens |
 | 3 vulnerabilidades high transitivas do Prisma 7 (`effect`) | Alerta no audit | Downgrade seria breaking; aceito por enquanto |
 | Sem lint, testes de componente, OpenAPI, rate limiting ou scanner no CI | Dívida de engenharia | Priorizar após a demo |
 
