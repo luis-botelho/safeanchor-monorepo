@@ -29,6 +29,7 @@ de negocio da camada de apresentacao.
 - [Stack](#stack)
 - [Estrutura de pastas](#estrutura-de-pastas)
 - [Como rodar](#como-rodar)
+- [Acessos de demonstracao](#acessos-de-demonstracao)
 - [Fluxo de dados](#fluxo-de-dados)
 - [Modulos implementados](#modulos-implementados)
 - [Sistema visual e loading](#sistema-visual-e-loading)
@@ -176,6 +177,15 @@ npm run preview  # previsualiza o build
 
 > Nao ha script de lint neste projeto (sem ESLint configurado).
 
+Build local validado no Windows (dentro de `apps/frontend`, com `npm.cmd`):
+
+```powershell
+$env:VITE_BASE_URL="/safeanchor-monorepo/"
+$env:VITE_API_URL="https://safeanchor-monorepo.vercel.app"
+$env:VITE_RESEARCH_WHATSAPP="5524992772357"
+npm.cmd run build
+```
+
 ### Variaveis de build e privacidade
 
 - `VITE_API_URL`: URL da API; no GitHub Pages vem da variavel de repositorio.
@@ -187,6 +197,41 @@ npm run preview  # previsualiza o build
 A rota publica `/privacidade` traz a politica de privacidade/LGPD. O
 `CookieNotice` avisa sobre o armazenamento local (sessao, rascunho da pesquisa e
 o proprio aceite); nao ha cookies de rastreamento.
+
+---
+
+## Acessos de demonstracao
+
+A tela `/login` mostra o bloco **"Acessos de demonstracao"**: um clique em
+Proprietario, Prestador ou Marina preenche e-mail e senha. **Nao** ha picker de
+persona — as contas existem de verdade na API de producao e foram criadas via
+`/auth/register`.
+
+| Botao | Conta | Senha | Persona |
+|---|---|---|---|
+| Proprietario | `demo@safeanchor.app` | `demo123` | `OWNER` |
+| Prestador | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` |
+| Marina | `gestao@marinacostaazul.com` | `demo123` | `MARINA` |
+| (sem botao, legado) | `demo@safeanchor.test` | `demo123456` | `OWNER` |
+
+Depois do preenchimento, o botao **Entrar** chama `/auth/login` (JWT de 1h, sem
+refresh). A persona vem do usuario autenticado e define apenas a navegacao: a
+autorizacao e por `role` (todas essas contas sao `USER`) e o isolamento por
+`Party`. Trocar a persona no login nao concede permissoes extras.
+
+Cada conta enxerga dados proprios: `demo@safeanchor.app` e
+`demo@safeanchor.test` tem 3 vessels, 5 maintenances, 5 documents, 4 inspections
+(1 concluida com certificado), 1 preventive e 1 checklist execution;
+`carlos@tecno.boat` e `gestao@marinacostaazul.com` tem 2 vessels, 2 maintenances,
+2 documents, 1 inspection concluida, 1 preventive e 1 execution. O template
+global e "Checklist de segurança — demo".
+
+API real: auth, vessels, maintenances, documents, inspections,
+preventive-maintenances, checklist templates/executions e research. Mock/localStorage:
+marinas, prestadores, jobs, eventos, viagens, locacoes, marketplace,
+comunidade, academy e IA, além do feed de atividades e do indicador de
+"prontidao" do dashboard (a API nao expoe `readiness`). O roteiro autorizado
+esta em [`../../docs/demo-apresentacao.md`](../../docs/demo-apresentacao.md).
 
 ---
 
@@ -268,7 +313,9 @@ sequencia para abrir a sessao.
 
 > `documentService.js` e `inspectionService.js` adaptam o formato da API ao
 > formato esperado pelas views e calculam status/prontidao no cliente. A API nao
-> fornece um campo `readiness`.
+> fornece um campo `readiness` e o feed de atividades do dashboard tambem e mock.
+> Nos modulos core a fonte e a API de producao; os catalogos da tabela acima
+> leem `src/mock/`/localStorage e nao devem ser apresentados como dados reais.
 
 ---
 
@@ -343,6 +390,14 @@ O frontend e deployado automaticamente via **GitHub Actions** no branch `main`:
 3. Deploy via `actions/upload-pages-artifact` + `actions/deploy-pages`
 
 **URL:** https://luis-botelho.github.io/safeanchor-monorepo/
+
+A API e https://safeanchor-monorepo.vercel.app (`/health`). O CORS de producao
+aceita somente `https://luis-botelho.github.io`: um frontend local nao deve
+apontar para a API publica. Deep links no Pages (`/login`, `/pesquisa`,
+`/privacidade`) respondem `404` com o HTML da SPA — comportamento esperado do
+fallback. O JWT dura 1h sem refresh; se a sessao expirar, faca login novamente.
+Apresente sempre a producao: o Preview da Vercel usa Neon temporario que expira
+em `2026-11-29T14:19:24Z`.
 
 ---
 
