@@ -36,7 +36,7 @@ migration nem por campo enviado no cadastro.
 | SA-03 | JWT com `jti`, `iss`, `aud`, algoritmo HS256 explícito e validade de 15 minutos; revogação em memória por `jti` via `POST /auth/logout`; `requireAuth` reconsulta `role` no banco. Tokens antigos deixam de ser aceitos após o deploy. |
 | SA-04 | Token de acesso e perfil ficam apenas na memória da aba; não há `localStorage` para sessão. Logout chama `/auth/logout`, e um `401` dispara limpeza local. |
 | SA-05 | `GET /research/nonce` emite nonce assinado pelo servidor, com validade de 10 minutos; `POST /research` valida nonce, versão e aceite. IP, user-agent e timestamp do servidor são gravados em `DirectorAction` (auditoria mínima), sem migration nova. |
-| SA-07 | `helmet()` e `app.disable("x-powered-by")` no backend; headers de segurança no `vercel.json` e em `public/_headers`; CSP em `Content-Security-Policy-Report-Only` no frontend. |
+| SA-07 | `helmet()` e `app.disable("x-powered-by")` no backend; headers de segurança no `vercel.json` e em `public/_headers`; CSP em `Content-Security-Policy-Report-Only` com `report-uri` para `/api/csp-report`, que registra violações de forma saneada e limitada por IP. |
 | SA-06/SA-11 | Validação simples de tipos e tamanhos em register/login e em vessels, documents, inspections e maintenances, retornando `400` em vez de `500`. |
 | SA-08 | Links `wa.me` e `mailto:` usam resumo sem contato por padrão; checkbox explícita permite incluir nome/contato. WhatsApp continua manual, sem envio automático. |
 | SA-09 | Rascunho local expira em 24 horas e é saneado; o envio limpa o rascunho; `safeanchor.researchResponses` guarda só o último envio, sem contato, também com expiração de 24 horas. |
@@ -46,12 +46,12 @@ migration nem por campo enviado no cadastro.
 
 ## Validação local
 
-- Backend: `npm test` — 35 testes passaram, 3 integrações puladas, 0 falhas.
+- Backend: `npm test` — 37 testes passaram, 3 integrações puladas, 0 falhas.
 - Frontend: `npm run build` concluído (inclui prerender estático).
 - Bundle local sem `diretoria@safeanchor.app`, `safeanchor:session` ou
   `localStorage.getItem("token")`.
 - `vercel.json` válido e `dist/_headers` presente.
-- `npm run verify:local` — verificações offline dos artefatos (sem rede).
+- `npm run verify:local` — 18 verificações offline dos artefatos (sem rede).
 - `npm audit` no backend — 0 vulnerabilidades após o override do `effect`.
 - Nenhuma requisição foi feita contra a API de produção; nenhum login ou teste
   de IDOR ao vivo foi executado.
@@ -63,4 +63,6 @@ migration nem por campo enviado no cadastro.
   credencial vazada; a revogação em memória vale apenas por instância.
 - Decidir sobre a limpeza do histórico Git onde a credencial foi versionada.
 - Rotacionar segredos do Vercel/GitHub Actions se houver suspeita de exposição.
-- CSP permanece em modo `Report-Only`: monitorar violações antes de bloquear.
+- CSP permanece em modo `Report-Only`: as violações agora são enviadas ao
+  backend, mas ainda não bloqueiam a demo. Antes de trocar para bloqueio,
+  acompanhe os logs e ajuste as diretivas necessárias.

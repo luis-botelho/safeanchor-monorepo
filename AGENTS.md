@@ -65,11 +65,12 @@ Este projeto agora e uma base simples para estudo.
   `DirectorAction`. Links wa.me/mailto omitem contato por padrao. Rascunho e
   copia local expiram em 24h.
 - Backend aplica `helmet`, esconde `X-Powered-By`, limita auth/research por IP e
-  e-mail e valida payloads com `400`. Frontend tem headers no `vercel.json` e
-  `public/_headers`, com CSP em `Report-Only`. Detalhes em
+  e-mail, recebe relatórios em `/api/csp-report` e valida payloads com `400`.
+  Frontend tem headers no `vercel.json` e `public/_headers`, com CSP em
+  `Report-Only` e `report-uri` para o backend. Detalhes em
   `docs/security-hardening.md`.
-- `npm test` no backend passa (35 testes, 3 integrações puladas),
-  incluindo `test/research-consent.test.js`, logout, headers e validacao. As migrations
+- `npm test` no backend passa (37 testes, 3 integrações puladas),
+  incluindo `test/research-consent.test.js`, logout, headers, CSP e validacao. As migrations
   `20261127000000_add_director_role` e
   `20261127000100_add_research_consent_and_director` foram aplicadas em
   produção por bootstrap temporário removido no mesmo ciclo.

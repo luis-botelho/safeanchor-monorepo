@@ -308,6 +308,7 @@ curl http://localhost:3001/vessels \
 | `POST` | `/auth/login` | Login — retorna JWT com `jti`, `iss`/`aud` e 15 min de validade |
 | `GET` | `/research/nonce` | Emite nonce assinado, com validade de 10 min, para o aceite |
 | `POST` | `/research` | Envia uma resposta da pesquisa pelo Resend; so grava e envia com nonce valido e versao `2026-11-26` |
+| `POST` | `/api/csp-report` | Recebe violações de CSP do frontend (limitado por IP; campos saneados antes do log) |
 
 ### Autenticados (requer `Authorization: Bearer <token>`)
 
@@ -504,10 +505,11 @@ que exigem banco real são pulados; os demais rodam com banco em memoria/fake.
 - `documents.inspections.routes.test.js` — controllers/rotas HTTP com banco injetado
 - `research-consent.test.js` — recusa sem captura, nonce assinado, aceite
   versionado, auditoria do consentimento e decisoes da diretoria
-- `auth-logout.routes.test.js`, `security-headers.test.js`, `rate-limit.test.js`
-  e `input-validation.test.js` — correcoes da auditoria de seguranca
+- `auth-logout.routes.test.js`, `security-headers.test.js`, `rate-limit.test.js`,
+  `csp-report.test.js` e `input-validation.test.js` — correcoes da auditoria de
+  seguranca
 
-Resultado atual: 35 testes passando e 3 integracoes puladas sem banco (`npm test`).
+Resultado atual: 37 testes passando e 3 integracoes puladas sem banco (`npm test`).
 
 ### Smoke test contra o banco
 

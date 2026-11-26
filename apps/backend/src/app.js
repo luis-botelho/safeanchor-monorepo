@@ -15,6 +15,7 @@ import checklistTemplateRoutes from "./routes/checklistTemplateRoutes.js";
 import checklistExecutionRoutes from "./routes/checklistExecutionRoutes.js";
 import { createAuthRouter } from "./routes/authRoutes.js";
 import { createResearchRouter } from "./routes/researchRoutes.js";
+import { createCspRouter } from "./routes/cspRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import inspectionRoutes from "./routes/inspectionRoutes.js";
 import directorRoutes from "./routes/directorRoutes.js";
@@ -99,6 +100,8 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
     }),
   );
   app.use(express.json({ limit: "32kb" }));
+  // Navegadores enviam relatórios CSP como application/csp-report.
+  app.use(express.text({ type: "application/csp-report", limit: "32kb" }));
 
   // Public routes
   app.get("/", (request, response) => {
@@ -112,6 +115,7 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
 
   app.use("/auth", createAuthRouter());
   app.use("/research", createResearchRouter());
+  app.use("/api", createCspRouter());
 
   if (beforeAuth) {
     beforeAuth(app);
