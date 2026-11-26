@@ -7,20 +7,31 @@ export function useVesselDetailsViewModel(id) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
+
     async function loadVessel() {
       try {
         setIsLoading(true);
         setError("");
         const loadedVessel = await getVesselById(id);
+
+        if (!active) return;
+
         setVessel(loadedVessel.vessel);
       } catch (error) {
-        setError("Não foi possível carregar a embarcação.");
+        if (!active) return;
+
+        setError(error.message || "Não foi possível carregar a embarcação.");
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     }
 
     loadVessel();
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   async function removeVessel() {

@@ -1,12 +1,20 @@
+import { useNavigate } from "react-router-dom";
+
 import { useCreateVesselViewModel } from "../viewmodels/useCreateVesselViewModel";
 import VesselForm from "../components/VesselForm";
 
-export default function CreateVesselPage({ onSuccess }) {
+export default function CreateVesselPage() {
+  const navigate = useNavigate();
   const viewModel = useCreateVesselViewModel();
 
   return (
-    <main>
-      <VesselForm title={"Cadastrar Embarcação"}viewModel={viewModel} onSuccess={onSuccess} button='Cadastrar'/>
+    <main className="card card--padding">
+      <VesselForm
+        title="Cadastrar embarcação"
+        viewModel={viewModel}
+        onSuccess={() => navigate("/fleet")}
+        button="Cadastrar"
+      />
     </main>
   );
 }

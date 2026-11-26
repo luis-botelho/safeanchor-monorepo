@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { getVesselsByOwner, getVesselStatus } from "../services/vesselService";
+import { getFleetVessels, getVesselStatus } from "../services/vesselService";
 import { getMarinaById } from "../services/marinaService";
 import { useAuth } from "../context/AuthContext";
 import CoverImage from "../components/CoverImage";
@@ -20,7 +20,7 @@ export default function MarinaFleetPage() {
 
   useEffect(() => {
     async function load() {
-      setVessels(await getVesselsByOwner("usr-marina"));
+      setVessels(await getFleetVessels());
       setMarina(await getMarinaById(marinaId));
     }
 
@@ -31,9 +31,15 @@ export default function MarinaFleetPage() {
     return <p>Carregando frota da organização...</p>;
   }
 
-  const avgReadiness = Math.round(
-    vessels.reduce((sum, vessel) => sum + vessel.readiness, 0) / vessels.length,
-  );
+  const readinessValues = vessels
+    .map((vessel) => vessel.readiness)
+    .filter((value) => typeof value === "number");
+  const avgReadiness = readinessValues.length
+    ? Math.round(
+        readinessValues.reduce((sum, value) => sum + value, 0) /
+          readinessValues.length,
+      )
+    : 0;
   const inMaintenance = vessels.filter(
     (vessel) => vessel.status === "EM MANUTENÇÃO",
   ).length;

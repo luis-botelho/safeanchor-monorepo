@@ -6,7 +6,7 @@ import Icon from "../components/Icon";
 import StatusBadge from "../components/StatusBadge";
 import TripMap from "../components/TripMap";
 
-import { getVesselsByOwner } from "../services/vesselService";
+import { getFleetVessels } from "../services/vesselService";
 import {
   getVesselProfile,
   buildItinerary,
@@ -40,7 +40,7 @@ export default function TripPlannerPage() {
   const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
-    getVesselsByOwner("usr-luis").then((list) => {
+    getFleetVessels().then((list) => {
       setVessels(list);
       if (list.length > 0 && !list.some((v) => v.id === vesselId)) {
         setVesselId(list[0].id);

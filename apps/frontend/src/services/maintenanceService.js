@@ -1,52 +1,83 @@
 import {
-  maintenanceRecords,
   maintenancePriorityMeta,
   maintenanceStatusMeta,
 } from "../mock/maintenance";
-import { vessels } from "../mock/vessels";
+import { apiFetch } from "./api";
+import { getFleetVessels } from "./vesselService";
 
-function enrich(record) {
-  const vessel = vessels.find((item) => item.id === record.vesselId);
+const completedStatuses = ["Concluída", "COMPLETED"];
+const cancelledStatuses = ["Cancelada", "CANCELLED"];
 
+function formatDate(value) {
+  if (!value) return "—";
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-");
+    return `${day}/${month}/${year}`;
+  }
+
+  return value;
+}
+
+function toMaintenance(record, vesselNames) {
   return {
     ...record,
-    vesselName: vessel ? vessel.name : "Embarcação",
+    sortDate: record.date || "",
+    date: formatDate(record.date),
+    category: record.type,
+    priority: "—",
+    cost: "—",
+    vesselName: vesselNames.get(record.vesselId) || "Embarcação",
     statusTone: maintenanceStatusMeta[record.status]?.tone || "neutral",
     statusLabel: record.status,
   };
 }
 
+async function loadRecords() {
+  const [records, vessels] = await Promise.all([
+    apiFetch("/maintenances"),
+    getFleetVessels(),
+  ]);
+
+  const vesselNames = new Map(vessels.map((vessel) => [vessel.id, vessel.name]));
+
+  return records.map((record) => toMaintenance(record, vesselNames));
+}
+
 export async function getMaintenances() {
-  return maintenanceRecords.map(enrich);
+  return loadRecords();
 }
 
 export async function getMaintenanceById(id) {
-  const record = maintenanceRecords.find((item) => item.id === id);
+  const records = await loadRecords();
 
-  return record ? enrich(record) : null;
+  return records.find((record) => record.id === id) || null;
 }
 
 export async function getMaintenancesByVesselId(vesselId) {
-  return maintenanceRecords
-    .filter((item) => item.vesselId === vesselId)
-    .map(enrich);
+  const records = await loadRecords();
+
+  return records.filter((record) => record.vesselId === vesselId);
 }
 
 export async function getUpcomingMaintenance() {
-  return maintenanceRecords
-    .filter((item) => item.status !== "Concluída" && item.status !== "Cancelada")
-    .sort((a, b) => {
-      const [da, db] = [a.date.split("/").reverse().join(""), b.date.split("/").reverse().join("")];
-      return da.localeCompare(db);
-    })
-    .map(enrich);
+  const records = await loadRecords();
+
+  return records
+    .filter(
+      (record) =>
+        !completedStatuses.includes(record.status) &&
+        !cancelledStatuses.includes(record.status),
+    )
+    .sort((a, b) => a.sortDate.localeCompare(b.sortDate));
 }
 
 export async function getMaintenanceHistory() {
-  return maintenanceRecords
-    .filter((item) => item.status === "Concluída")
-    .sort((a, b) => b.date.split("/").reverse().join("").localeCompare(a.date.split("/").reverse().join("")))
-    .map(enrich);
+  const records = await loadRecords();
+
+  return records
+    .filter((record) => completedStatuses.includes(record.status))
+    .sort((a, b) => b.sortDate.localeCompare(a.sortDate));
 }
 
 export function getPriorityTone(priority) {
@@ -57,13 +88,21 @@ export function getStatusMeta(status) {
   return maintenanceStatusMeta[status] || { tone: "neutral" };
 }
 
-// Mocks preservados para compatibilidade com telas anteriores.
-export async function createMaintenance() {
-  return null;
+export async function createMaintenance(data) {
+  return apiFetch("/maintenances", {
+    method: "POST",
+    body: JSON.stringify({
+      vesselId: data.vesselId,
+      title: data.title,
+      description: data.description,
+      type: data.type,
+      date: data.date,
+      status: data.status,
+    }),
+  });
 }
-export async function createPreventiveMaintenance() {
-  return null;
-}
-export async function getPreventiveMaintenances() {
-  return [];
-}
+
+export {
+  createPreventiveMaintenance,
+  getPreventiveMaintenances,
+} from "./preventiveMaintenanceService";

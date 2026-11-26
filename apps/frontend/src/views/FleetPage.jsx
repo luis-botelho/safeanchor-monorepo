@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { getFleetVessels } from "../services/vesselService";
-import { getVesselStatus } from "../services/vesselService";
+import { getFleetVessels, getVesselStatus } from "../services/vesselService";
 import CoverImage from "../components/CoverImage";
 import ReadinessGauge from "../components/ReadinessGauge";
 import StatusBadge from "../components/StatusBadge";
@@ -11,13 +10,34 @@ import Icon from "../components/Icon";
 
 export default function FleetPage() {
   const [vessels, setVessels] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getFleetVessels().then(setVessels);
+    let active = true;
+
+    getFleetVessels()
+      .then((list) => {
+        if (active) setVessels(list);
+      })
+      .catch((error) => {
+        if (active) setError(error.message || "Não foi possível carregar a frota.");
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  if (vessels.length === 0) {
+  if (isLoading) {
     return <p>Carregando frota...</p>;
+  }
+
+  if (error) {
+    return <p className="field__error">{error}</p>;
   }
 
   return (
@@ -25,7 +45,7 @@ export default function FleetPage() {
       <PageHeader
         eyebrow="Minha frota"
         title="Embarcações"
-        subtitle="Acompanhe a prontidão operacional, o checklist mais recente e a próxima manutenção de cada embarcação."
+        subtitle="Acompanhe as embarcações cadastradas e seus dados de operação."
         actions={
           <Link className="btn btn--ghost" to="/fleet/new">
             <Icon name="plus" size={17} />
@@ -34,36 +54,44 @@ export default function FleetPage() {
         }
       />
 
-      <div className="grid grid--3">
-        {vessels.map((vessel) => {
-          const status = getVesselStatus(vessel.status);
+      {vessels.length === 0 ? (
+        <div className="card card--padding">
+          <p className="page-header__subtitle">
+            Nenhuma embarcação cadastrada. Comece pela primeira da sua frota.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid--3">
+          {vessels.map((vessel) => {
+            const status = getVesselStatus(vessel.status);
 
-          return (
-            <Link className="card vessel-card" to={`/fleet/${vessel.id}`} key={vessel.id}>
-              <CoverImage
-                seed={vessel.imageSeed}
-                hint={vessel.name}
-                className="vessel-card__cover"
-              />
-              <div className="vessel-card__body">
-                <div className="vessel-card__top">
-                  <span className="vessel-card__type">{vessel.type}</span>
-                  <ReadinessGauge value={vessel.readiness} size={52} />
+            return (
+              <Link className="card vessel-card" to={`/fleet/${vessel.id}`} key={vessel.id}>
+                <CoverImage
+                  seed={vessel.imageSeed}
+                  hint={vessel.name}
+                  className="vessel-card__cover"
+                />
+                <div className="vessel-card__body">
+                  <div className="vessel-card__top">
+                    <span className="vessel-card__type">{vessel.type}</span>
+                    <ReadinessGauge value={vessel.readiness} size={52} />
+                  </div>
+                  <h3 className="vessel-card__title">{vessel.name}</h3>
+                  <div className="vessel-card__meta">
+                    <span>{vessel.length}</span>
+                    <span>· {vessel.year}</span>
+                    <span>· {vessel.engine}</span>
+                  </div>
+                  <div className="vessel-card__footer">
+                    <StatusBadge label={status.label} tone={status.tone} />
+                  </div>
                 </div>
-                <h3 className="vessel-card__title">{vessel.name}</h3>
-                <div className="vessel-card__meta">
-                  <span>{vessel.length}</span>
-                  <span>· {vessel.year}</span>
-                  <span>· {vessel.engine}</span>
-                </div>
-                <div className="vessel-card__footer">
-                  <StatusBadge label={status.label} tone={status.tone} />
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

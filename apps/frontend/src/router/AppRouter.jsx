@@ -40,7 +40,8 @@ import MarinaAIPage from "../views/MarinaAIPage";
 import MarinaPlanPage from "../views/MarinaPlanPage";
 import EcosystemPage from "../views/EcosystemPage";
 import ServiceRequestDetailPage from "../views/ServiceRequestDetailPage";
-import ComingSoonPage from "../views/ComingSoonPage";
+import CreateVesselPage from "../views/CreateVesselPage";
+import CreateMaintenancePage from "../views/CreateMaintenancePage";
 import InspectionsPage from "../views/InspectionsPage";
 import InspectionDetailPage from "../views/InspectionDetailPage";
 import NewInspectionPage from "../views/NewInspectionPage";
@@ -60,26 +61,10 @@ export default function AppRouter() {
 
         <Route path="/fleet" element={<FleetPage />} />
         <Route path="/fleet/:id" element={<VesselDetailPage />} />
-        <Route
-          path="/fleet/new"
-          element={
-            <ComingSoonPage
-              title="Cadastro de embarcação em breve"
-              description="Nesta demonstração a frota de exemplo já está carregada. Explore os detalhes de cada embarcação."
-            />
-          }
-        />
+        <Route path="/fleet/new" element={<CreateVesselPage />} />
 
         <Route path="/maintenance" element={<MaintenancePage />} />
-        <Route
-          path="/maintenance/new"
-          element={
-            <ComingSoonPage
-              title="Agendar manutenção em breve"
-              description="A agenda de manutenção já mostra as próximas manutenções preventivas e corretivas da frota."
-            />
-          }
-        />
+        <Route path="/maintenance/new" element={<CreateMaintenancePage />} />
 
         <Route path="/documents" element={<DocumentsPage />} />
 

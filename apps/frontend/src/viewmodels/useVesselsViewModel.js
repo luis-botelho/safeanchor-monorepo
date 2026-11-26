@@ -8,16 +8,33 @@ export function useVesselsViewModel() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function loadVessels() {
-      const result = await getVessels();
+    let active = true;
 
-      setVessels(result.vessels);
-      setSource(result.source);
-      setHasError(result.error);
-      setIsLoading(false);  
+    async function loadVessels() {
+      try {
+        const result = await getVessels();
+
+        if (!active) return;
+
+        setVessels(result.vessels);
+        setSource(result.source);
+        setHasError(result.error);
+      } catch {
+        if (!active) return;
+
+        setVessels([]);
+        setSource("error");
+        setHasError(true);
+      } finally {
+        if (active) setIsLoading(false);
+      }
     }
 
     loadVessels();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return {

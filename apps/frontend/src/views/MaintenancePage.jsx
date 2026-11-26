@@ -13,11 +13,40 @@ import Icon from "../components/Icon";
 export default function MaintenancePage() {
   const [upcoming, setUpcoming] = useState([]);
   const [history, setHistory] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getUpcomingMaintenance().then(setUpcoming);
-    getMaintenanceHistory().then(setHistory);
+    let active = true;
+
+    Promise.all([getUpcomingMaintenance(), getMaintenanceHistory()])
+      .then(([open, done]) => {
+        if (!active) return;
+
+        setUpcoming(open);
+        setHistory(done);
+      })
+      .catch((error) => {
+        if (active) {
+          setError(error.message || "Não foi possível carregar as manutenções.");
+        }
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
+
+  if (isLoading) {
+    return <p>Carregando manutenções...</p>;
+  }
+
+  if (error) {
+    return <p className="field__error">{error}</p>;
+  }
 
   return (
     <div>
@@ -56,7 +85,9 @@ export default function MaintenancePage() {
                 <p className="mnt__meta">
                   <span>{item.vesselName}</span>
                   <StatusBadge label={item.status} tone={item.statusTone} />
-                  <StatusBadge label={item.priority} tone={getPriorityTone(item.priority)} />
+                  {item.priority !== "—" && (
+                    <StatusBadge label={item.priority} tone={getPriorityTone(item.priority)} />
+                  )}
                 </p>
               </div>
               <div className="mnt__due">
