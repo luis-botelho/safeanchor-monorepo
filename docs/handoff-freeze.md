@@ -92,6 +92,8 @@ momento:
 
 ```powershell
 node scripts/verify-demo.mjs
+# ou, na raiz do repositório:
+npm.cmd run verify:demo
 ```
 
 - Pages `200` com o bundle novo (`index-DRIWQwSE.js` / `index-C7oaZ_ox.css`).
@@ -204,8 +206,9 @@ Executada com `Origin: https://luis-botelho.github.io` para exercitar o CORS rea
 4. Se o login voltar a falhar com `P2022`, rode `npx prisma migrate status` com
    `DIRECT_URL` e aplique as migrations pendentes antes de mexer no frontend.
 5. Depois de qualquer alteração em `main`, confirme Pages + Vercel e rode
-   `node scripts/verify-demo.mjs`. O script cobre bundle, rotas SPA, quatro
-   contas, listagens, CORS, certificados e isolamento.
+   `node scripts/verify-demo.mjs` (ou `npm.cmd run verify:demo` na raiz). O
+   script cobre bundle, rotas SPA, quatro contas, listagens, CORS, certificados
+   e isolamento.
 6. Leia [`demo-apresentacao.md`](./demo-apresentacao.md) antes de apresentar e
    [`diagnostico.md`](./diagnostico.md) para entender a arquitetura antes de
    mexer nela.

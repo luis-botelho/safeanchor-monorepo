@@ -22,8 +22,9 @@ não afeta a produção.
 ## 2. Contas de demonstração
 
 Na tela de login há um bloco **“Acessos de demonstração”**: um clique preenche
-e-mail e senha. As três contas existem de verdade na API (foram criadas por
-`/auth/register`, com `persona` correspondente) e têm dados próprios.
+e-mail e senha. As quatro contas abaixo existem de verdade na API (foram criadas
+por `/auth/register`, com `persona` correspondente) e têm dados próprios; três
+delas têm botão na tela de login.
 
 | Perfil | E-mail | Senha | Persona no token | O que mostrar |
 |---|---|---|---|---|
