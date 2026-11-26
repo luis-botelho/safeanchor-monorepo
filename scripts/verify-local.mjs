@@ -87,6 +87,21 @@ check(
   readIfExists(join(backend, ".env.example")).includes('JWT_SECRET=""'),
 );
 
+const backendPackage = JSON.parse(readIfExists(join(backend, "package.json")) || "{}");
+const backendLock = JSON.parse(readIfExists(join(backend, "package-lock.json")) || "{}");
+const effectVersion = backendLock.packages?.["node_modules/effect"]?.version || "";
+const [effectMajor, effectMinor, effectPatch] = effectVersion.split(".").map(Number);
+
+check(
+  "backend fixa override do effect",
+  backendPackage.overrides?.effect === "3.22.5",
+);
+check(
+  "backend sem effect vulnerável (<=3.22.0)",
+  effectMajor > 3 ||
+    (effectMajor === 3 && (effectMinor > 22 || (effectMinor === 22 && effectPatch > 0))),
+);
+
 if (failures.length > 0) {
   console.error("verify:local falhou:");
   for (const failure of failures) console.error(`  - ${failure}`);
