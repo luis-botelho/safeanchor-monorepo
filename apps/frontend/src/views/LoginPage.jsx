@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Icon from "../components/Icon";
 import SubmitButton from "../components/SubmitButton";
+import { personaAccounts as personasForDemo } from "../mock/users";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -98,6 +99,36 @@ export default function LoginPage() {
                 className="btn btn--primary btn--block"
               />
             </form>
+
+            <div className="demo-access">
+              <p className="demo-access__title">Acessos de demonstração</p>
+              <p className="demo-access__hint">
+                Escolha um perfil para preencher o login e percorrer o fluxo completo.
+              </p>
+              <div className="demo-access__list">
+                {personasForDemo.map((account) => (
+                  <button
+                    type="button"
+                    className="demo-access__item"
+                    key={account.persona}
+                    onClick={() => {
+                      setEmail(account.email);
+                      setPassword(account.password);
+                      setError("");
+                    }}
+                  >
+                    <span className="demo-access__icon">
+                      <Icon name={account.icon} size={16} />
+                    </span>
+                    <span className="demo-access__text">
+                      <strong>{account.label}</strong>
+                      <small>{account.email}</small>
+                    </span>
+                    <span className="demo-access__action">Usar</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <p className="auth__footer">
               Ainda não tem conta? <Link to="/register">Criar conta</Link>

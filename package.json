@@ -6,7 +6,8 @@
     "install:all": "npm install --prefix apps/frontend && npm install --prefix apps/backend",
     "dev:frontend": "npm run dev --prefix apps/frontend",
     "dev:backend": "npm run dev --prefix apps/backend",
-    "start:backend": "npm run start --prefix apps/backend"
+    "start:backend": "npm run start --prefix apps/backend",
+    "verify:demo": "node scripts/verify-demo.mjs"
   },
   "dependencies": {
   }

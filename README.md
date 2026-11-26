@@ -89,6 +89,38 @@ O produto e organizado em torno dessa jornada. Cada feature do rebaseline
 contribui para uma etapa dela, do acesso (Login) ate a decisao de prontidao
 operacional.
 
+### Demo funcional (26/11/2026)
+
+| Camada | URL |
+|---|---|
+| App publicada | https://luis-botelho.github.io/safeanchor-monorepo/ |
+| API de producao | https://safeanchor-monorepo.vercel.app |
+| Saude da API | https://safeanchor-monorepo.vercel.app/health |
+
+O login tem botoes **"Acessos de demonstracao"** que preenchem email e senha
+das contas reais criadas via `/auth/register`:
+
+| Conta | Senha | Persona |
+|---|---|---|
+| `demo@safeanchor.app` | `demo123` | `OWNER` |
+| `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` |
+| `gestao@marinacostaazul.com` | `demo123` | `MARINA` |
+| `demo@safeanchor.test` (legado, sem botao) | `demo123456` | `OWNER` |
+
+Todas sao `USER`: a persona so define a navegacao; a autorizacao e por `role`
+e o isolamento por `Party`. O roteiro autorizado para apresentacao esta em
+[`docs/demo-apresentacao.md`](./docs/demo-apresentacao.md).
+
+**Limites da demo:** a API real cobre auth, vessels, maintenances, documents,
+inspections, preventive-maintenances, checklist templates/executions e research.
+Marinas, prestadores, jobs, eventos, viagens, locacoes, marketplace, comunidade,
+academy e IA sao catalogos mock/localStorage; o feed de atividades e a
+"prontidao" do dashboard tambem sao mock (a API nao expoe `readiness`). O CORS
+de producao aceita somente `https://luis-botelho.github.io`; deep links no Pages
+respondem `404` com o HTML da SPA (comportamento esperado); o JWT dura 1h sem
+refresh. Apresente sempre a producao — o Preview usa um Neon temporario que
+expira em `2026-11-29T14:19:24Z`.
+
 ---
 
 ## MVP Scope
@@ -105,15 +137,15 @@ Features definidas no rebaseline 2026 (Features **031–038**):
 | **034** | Documents Core | 🔶 API + cadastro/listagem na UI (sem upload/Storage) |
 | **035** | Expiration & Compliance | ✅ status por validade e indicadores no dashboard |
 | **036** | Safety Completion & Mobile Polish | 🔶 inspeções via API; checklist desktop, sem mobile/offline |
-| **037** | MVP UX Polish | ✅ skeletons contextuais, estados vazios/erro e spinner nos fluxos core (PR #177 mergeado) |
-| **038** | CI/CD & Production Deploy | ✅ PR #175 mergeado; Pages e Vercel no ar; `/health` 200, migrations aplicadas, seed demo e deploy limpo |
+| **037** | MVP UX Polish | ✅ tema Maritime Precision em produção: skeletons contextuais, estados vazios/erro e spinner nos fluxos core (PR #177 mergeado) |
+| **038** | CI/CD & Production Deploy | ✅ PRs #175, #177, #178 e #179 mergeados; Pages e Vercel no ar, `/health` 200, migrations aplicadas, contas demo via API e deploy limpo |
 
 A **Definition of Ready** completa esta em
 [`docs/product/mvp-rebaseline.md`](./docs/product/mvp-rebaseline.md): a jornada
-Login → Prontidao funciona de ponta a ponta, dados isolados por ownership,
-dashboard com dados reais, documentos com vencimentos, checklist mobile
-funcional, UI consistente e backend + frontend publicados com health check e
-smoke test.
+Login → Prontidao funciona de ponta a ponta na demo, dados isolados por
+ownership, dashboard com dados reais, documentos com vencimentos, execucao de
+checklist via API (desktop), UI consistente e backend + frontend publicados com
+health check e validacao da demo.
 
 ### Out of Scope
 
@@ -167,7 +199,9 @@ e personas **`OWNER`**, **`SERVICE_PROVIDER`** e **`MARINA`** (`enum Persona`).
 Escritas em vessels, maintenances, checklists, preventivas, documentos e
 inspecoes aceitam `USER`, `MANAGER` e `ADMIN`, sempre limitadas ao escopo do
 usuario (`accessScopeService`). A persona e retornada em register/login/me,
-viaja no JWT e define a navegacao no frontend. Nao ha mais contas demo mock.
+viaja no JWT e define a navegacao no frontend. As contas demo sao reais, foram
+criadas via `/auth/register` na API de producao e aparecem nos botoes "Acessos
+de demonstracao" do login.
 
 ---
 
@@ -192,7 +226,7 @@ Mapa das areas de produto e seu estado atual no repositorio.
 
 | Area | Descricao | Estado |
 |---|---|---|
-| **Autenticacao** | Cadastro, login, JWT, persona e roles | ✅ API real + frontend conectado (register e login automatico) |
+| **Autenticacao** | Cadastro, login, JWT, persona e roles | ✅ API real + frontend conectado (register, login automatico e botoes de acessos demo) |
 | **Fleet Management** | CRUD de embarcacoes + prontidao | ✅ API + CRUD na UI; prontidao calculada no cliente |
 | **Maintenance** | Agenda, historico, dashboard, preventiva | ✅ API + UI conectadas |
 | **Safety Checklists** | Templates + execucoes | ✅ Backend + frontend conectados via API |
@@ -295,7 +329,7 @@ o recurso pertença ao escopo (owner ou organizacao) do usuario autenticado.
 |---|---|
 | Frontend | React 19, Vite 7, react-router-dom v7 |
 | CSS | BEM em `apps/frontend/src/styles/global.css`, com tokens semânticos (Maritime Precision) |
-| Backend | Node.js 20+, Express 5, pino (logging) |
+| Backend | Node.js 22, Express 5, pino (logging) |
 | Persistencia | PostgreSQL (Supabase) via Prisma 7 |
 | Auth | JWT (bcrypt + jsonwebtoken) |
 | Deploy frontend | GitHub Pages (Vite build + SPA fallback) |
@@ -309,9 +343,10 @@ Sem TypeScript, sem Tailwind, sem Next.js — por decisao explícita
 ### Sistema visual — Maritime Precision
 
 O tema da pasta `stitch_safeanchor_maritime_ux_architecture/` foi traduzido para
-tokens BEM sem novas dependencias: Light Mist, Deep Ocean Navy, Abyss Teal e Sea
-Teal, bordas de 1 px, raio 4 px e numerais tabulares. O contrato de carregamento
-e movimento esta em [`docs/visual-system.md`](./docs/visual-system.md):
+tokens BEM sem novas dependencias e esta em produção desde 26/11/2026 (PR #177):
+Light Mist, Deep Ocean Navy, Abyss Teal e Sea Teal, bordas de 1 px, raio 4 px e
+numerais tabulares. O contrato de carregamento e movimento esta em
+[`docs/visual-system.md`](./docs/visual-system.md):
 
 - **Skeleton** so para layout conhecido (1–10 s), com `aria-busy` e texto
   `.sr-only`; o pulse e finito e opt-in via `prefers-reduced-motion`.
@@ -410,6 +445,7 @@ safeanchor-monorepo/
 - [x] Arquitetura MVVM (views → viewmodels → services)
 - [x] AppShell com navegacao por persona vinda do usuario autenticado
 - [x] Autenticacao real via `/auth/register`, `/auth/login` e `/auth/me` (JWT no localStorage, logout em 401)
+- [x] Botoes "Acessos de demonstracao" no login (preenchem as tres contas principais; nao ha picker de persona)
 - [x] Cadastro faz register e login automatico (register nao devolve token)
 - [x] Services conectados a API: vessels, maintenance, preventive-maintenances, checklists, modules, documents, inspections e dashboard
 - [x] Telas reais de cadastro de vessel, manutencao, documento e inspecao; detalhe de inspecao com checklist
@@ -428,13 +464,15 @@ Itens do rebaseline ainda incompletos em `develop`:
 
 - [ ] **034** — upload de arquivos e Supabase Storage (metadados, validade e listagem ja funcionam)
 - [ ] **036** — checklist mobile/offline e revalidacao de QR Code
-- [x] **038** — producao: `/health` da Vercel responde `200` com `database: up` após conexão do Supabase
+
+**038 concluida:** Pages e Vercel no ar; `/health` da Vercel responde `200` com
+`database: up`, PRs #175, #177, #178 e #179 mergeados em `main`.
 
 ### Next
 
-1. Reivindicar o Postgres temporario do Preview antes que expire (`npx neon claim accept wispy-forest-67479829`) ou criar outro.
+1. Apresentar sempre a producao; o Preview usa Neon temporario que expira em `2026-11-29T14:19:24Z`.
 2. Upload de documentos (Supabase Storage) e polish mobile do checklist.
-3. Para novas migrations em producao, fornecer `DIRECT_URL` do Supabase — a Vercel nao devolve segredos via CLI. Ver `docs/handoff-freeze.md`.
+3. Para novas migrations em producao, fornecer `DIRECT_URL` do Supabase — a Vercel nao devolve segredos via CLI. Nao rodar seed/migrations contra producao. Ver `docs/handoff-freeze.md`.
 
 ### Blocked
 
@@ -447,6 +485,9 @@ Itens do rebaseline ainda incompletos em `develop`:
 - O feed de atividades do dashboard ainda e mock.
 - Documentos nao tem upload/download de arquivos — a API guarda metadados/URLs.
 - A prontidao e calculada no cliente; a API nao expoe endpoint de `readiness`.
+- O CORS de producao so aceita `https://luis-botelho.github.io`; um frontend local nao deve apontar para a API publica.
+- Deep links no Pages (`/login`, `/pesquisa`, `/privacidade`) respondem `404` com o HTML da SPA — esperado pelo fallback.
+- O JWT dura 1h e nao ha refresh; se expirar, faca login novamente.
 - Nao ha testes automatizados no frontend e nao ha script de lint.
 - Restam 3 vulnerabilidades high transitivas do Prisma 7 (`effect`); corrigi-las exigiria downgrade breaking.
 
@@ -459,7 +500,7 @@ Mapa em blocos sequenciais. O objetivo aqui e mostrar o mapa, nao detalha-lo.
 1. **Product / UX** — Rebaseline 2026 validado; jornada Login → Prontidao com telas conectadas. Proximo: upload de documentos e mobile polish.
 2. **Frontend** — MVVM pronto; modulos core conectados a API. Proximo: catalogos (marinas/jobs/community) e testes automatizados.
 3. **Backend / API** — Nucleo REST pronto (auth, vessels, maintenances, checklists, documents, inspections, modules, research). Pendente: notificacoes, OpenAPI/Swagger, refresh token.
-4. **Database** — Prisma + PostgreSQL + migrations e RLS sem policies prontos, com modelos `Document` e `Inspection`. Pendente: politicas de Storage e correcao do banco de producao.
+4. **Database** — Prisma + PostgreSQL + migrations e RLS sem policies prontos, com modelos `Document` e `Inspection`. Pendente: politicas de Storage; novas migrations exigem `DIRECT_URL` fora da operacao rotineira.
 5. **Authentication** — JWT + bcrypt no backend e login/cadastro reais no frontend. Pendente: refresh token.
 6. **Authorization** — Roles + ownership + persona prontos. Pendente: permissoes por modulo e por organizacao.
 7. **Core Maritime Domain** — Frota, manutencao, preventiva, checklists, documentos e inspecoes prontos. Proximo: compliance avancado.
@@ -468,10 +509,10 @@ Mapa em blocos sequenciais. O objetivo aqui e mostrar o mapa, nao detalha-lo.
 10. **Testing** — Backend com 15 testes (incluindo rotas de documentos/inspecoes). Faltam testes no frontend.
 11. **Security** — Base presente (hashing, JWT, ownership, RLS, redacao de logs, `npm audit` manual). Pendente: rate limiting, upload security e scanner no CI.
 12. **Observability** — Logging estruturado + health check prontos. Pendente: metricas, tracing e alertas.
-13. **Infrastructure** — Dev local funciona e backend esta na Vercel, mas com banco degradado.
-14. **CI/CD** — CI e deploy do frontend prontos. Pendente: banco de producao saudavel e smoke test (Feature 038).
-15. **Production Readiness** — Pendente (Feature 038 + Definition of Ready).
-16. **Pilot / Validation** — Pendente; validacao com PTM, parceiros e investidores.
+13. **Infrastructure** — Frontend no GitHub Pages e API na Vercel, com Supabase saudavel (`/health` 200).
+14. **CI/CD** — CI e deploys (Pages + Vercel) prontos; verificacao da demo em `scripts/verify-demo.mjs` e roteiro em `docs/demo-apresentacao.md`.
+15. **Production Readiness** — ✅ Feature 038 concluida; demo de apresentacao validada em 26/11/2026.
+16. **Pilot / Validation** — Em preparacao; validacao com PTM, parceiros e investidores.
 
 ---
 
@@ -551,6 +592,9 @@ npm install --prefix apps/backend
 npm install --prefix apps/frontend
 ```
 
+> **Windows (PowerShell):** use `npm.cmd`, `Copy-Item .env.example .env` e
+> `$env:VARIAVEL="valor"` (ex.: `$env:ALLOW_DATABASE_SEED="true"`).
+
 ### Backend
 
 ```bash
@@ -573,6 +617,15 @@ npm run preview          # previsualiza o build
 ```
 
 Aplicacao em `http://localhost:5173`.
+
+Build local validado no Windows (dentro de `apps/frontend`):
+
+```powershell
+$env:VITE_BASE_URL="/safeanchor-monorepo/"
+$env:VITE_API_URL="https://safeanchor-monorepo.vercel.app"
+$env:VITE_RESEARCH_WHATSAPP="5524992772357"
+npm.cmd run build
+```
 
 > Rodar pela raiz (scripts do monorepo): `npm run dev:frontend`,
 > `npm run dev:backend`, `npm run start:backend`.
@@ -623,6 +676,10 @@ valor sensivel aqui** — nunca versione `.env`.
 | `DIRECT_URL` | sim* | Conexao para Prisma CLI (migrations/generate/validate) |
 | `JWT_SECRET` | sim | Assinatura dos tokens JWT (valor aleatorio longo) |
 | `PORT` | nao | Porta do servidor (padrao `3001`) |
+| `FRONTEND_ORIGIN` | sim em prod | Origem liberada no CORS: `https://luis-botelho.github.io` |
+| `RESEND_API_KEY` | sim (para `/research`) | Chave da API Resend; nunca usar variavel `VITE_*` |
+| `RESEARCH_FROM_EMAIL` | sim (para `/research`) | Remetente verificado no Resend |
+| `RESEARCH_INBOX` | nao | Destinatario das respostas (padrao `pesquisa@safeanchor.app`) |
 
 `*` `DIRECT_URL` e obrigatoria para comandos do Prisma CLI; em runtime o backend usa apenas `DATABASE_URL`.
 
@@ -630,8 +687,12 @@ Flags de operacao (avaliacao do proprio contexto):
 
 | Flag | Efeito |
 |---|---|
-| `ALLOW_DATABASE_SEED` | Libera a execucao do seed |
+| `ALLOW_DATABASE_SEED` | Libera a execucao do seed (somente banco local) |
 | `ALLOW_DATABASE_SMOKE` | Libera o smoke test contra o banco |
+
+> Em producao nao rodar migrations nem `prisma db seed` sem `DIRECT_URL`
+> operacional, nao reintroduzir `/__setup` ou `SETUP_TOKEN` e nunca versionar
+> `.env`. As contas demo foram criadas pela propria API.
 
 ### Frontend
 
@@ -703,11 +764,11 @@ Decisoes ja tomadas. Datas aproximadas pelo historico do git.
 
 > **O que estamos tentando resolver AGORA?**
 
-Completar o **MVP de apresentacao (Rebaseline 2026 — Operational Readiness)**:
-entregar a jornada **Login → Dashboard → Frota → Embarcacao →
-Manutencao/Checklists/Documentos → Prontidao Operacional** com dados reais,
-ownership aplicado de ponta a ponta e frontend + backend publicados — pronto
-para ser validado por investidores, parceiros e PTM.
+Apresentar o **MVP de apresentacao (Rebaseline 2026 — Operational Readiness)**:
+a jornada **Login → Dashboard → Frota → Embarcacao →
+Manutencao/Checklists/Documentos → Prontidao Operacional** ja esta publicada com
+dados reais e ownership aplicado de ponta a ponta, pronta para validacao com
+investidores, parceiros e PTM.
 
 ---
 
@@ -715,15 +776,17 @@ para ser validado por investidores, parceiros e PTM.
 
 > **Next Action**
 
-**Demo publicada e validada:** os PRs #175, #176 e #177 (`develop` → `main`)
-foram mergeados; o frontend roda no GitHub Pages e a API na Vercel, com `/health`
-`200`, migrations aplicadas, usuario demo e dados de demonstracao carregados. A
-reformulação visual (tema Maritime Precision, skeletons, estados de erro e
-spinner de submit) esta em produção desde 26/11/2026 — validação pos-merge
-29/29 checks. Para novas mudancas, trabalhe em `develop` e abra PR: **nao fazer
-merge direto em `main`**. Antes de mexer, leia `docs/handoff-freeze.md` (estado
-operacional e validação), `docs/diagnostico.md` (stack e fluxo de uso) e
-`docs/visual-system.md` (tema e contrato de carregamento).
+**Demo publicada e validada:** os PRs #175, #176, #177, #178 e #179 (`develop` →
+`main`) foram mergeados; a promoção final saiu de `develop` (`13442e1`), que
+levou os botoes de acessos de demonstracao no login. O frontend roda no GitHub
+Pages, a API na Vercel com `/health` `200`, migrations aplicadas e quatro contas
+demo criadas via `/auth/register`. O tema Maritime Precision (skeletons, estados
+de erro e spinner de submit) esta em produção desde 26/11/2026 — validação
+pos-merge 110/110 checks. Para novas mudancas, trabalhe em `develop` e abra PR:
+**nao fazer merge direto em `main`**. Antes de apresentar,
+leia `docs/demo-apresentacao.md` (roteiro e verificacao via
+`node scripts/verify-demo.mjs`); antes de mexer, leia `docs/handoff-freeze.md`,
+`docs/diagnostico.md` e `docs/visual-system.md`.
 
 ---
 

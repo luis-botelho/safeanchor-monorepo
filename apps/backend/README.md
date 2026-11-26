@@ -4,7 +4,7 @@
 
 **API REST em Express 5 para o MVP de apresentacao do SafeAnchor**
 
-![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=flat&logo=node.js&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22-339933?style=flat&logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5-000000?style=flat)
 ![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?style=flat&logo=prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?style=flat&logo=postgresql&logoColor=white)
@@ -29,6 +29,7 @@ e persiste os dados em PostgreSQL via Prisma ORM.
 - [Stack](#stack)
 - [Estrutura de pastas](#estrutura-de-pastas)
 - [Como rodar](#como-rodar)
+- [Contas de demonstracao](#contas-de-demonstracao)
 - [Endpoints](#endpoints)
 - [Regras de negocio](#regras-de-negocio)
 - [Decisoes tecnicas](#decisoes-tecnicas)
@@ -63,7 +64,7 @@ flowchart LR
 
 ## Stack
 
-- **Node.js 20+**
+- **Node.js 22** (exigido pelo `engines` e pelo CI)
 - **Express 5** — framework HTTP
 - **Prisma 7** — ORM com type-safety e migracoes declarativas
 - **PostgreSQL** (Supabase) — banco de dados gerenciado
@@ -187,37 +188,61 @@ verificado na conta Resend. A API e o frontend no GitHub Pages são projetos
 separados; configure a URL pública da API como variável `VITE_API_URL` no GitHub
 Actions (Settings → Secrets and variables → Actions → Variables).
 
-> **Estado atual da implantação:** o frontend está no ar no GitHub Pages e a API
-> responde em `https://safeanchor-monorepo.vercel.app` com `/health` `200` e
-> `database: "up"`. O PR #175 foi mergeado em `main`: documentos e inspeções já
-> estão em produção, com migrations aplicadas, seed demo carregado e deploy limpo
-> (sem o endpoint temporário de setup). O `postinstall` executa
-> `prisma generate`, que exige `DIRECT_URL` também nos deployments de Preview —
-> sem essa variável o build falha antes de iniciar.
+> **Estado atual da implantação:** a SPA está no GitHub Pages
+> (`https://luis-botelho.github.io/safeanchor-monorepo/`) e a API responde em
+> `https://safeanchor-monorepo.vercel.app` com `/health` `200` e
+> `database: "up"`. Os PRs #175, #177, #178 e #179 foram mergeados em `main`:
+> documentos, inspeções e o tema Maritime Precision já estão em produção, com
+> migrations aplicadas e deploy limpo (sem endpoint temporário). As contas e os
+> dados demo foram criados pela própria API, não por `prisma db seed` em
+> produção. O `postinstall` executa `prisma generate`, que exige `DIRECT_URL`
+> também nos deployments de Preview — sem essa variável o build falha antes de
+> iniciar.
 >
 > **Banco do Preview:** os deployments de Preview usam um Postgres temporário
-> configurado em `DATABASE_URL`/`DIRECT_URL` no ambiente de Preview da Vercel.
-> Projetos temporários expiram; para recriar, rode `npx neon claim create`,
-> aplique `npx prisma migrate deploy` + `npx prisma db seed` e atualize as
-> variáveis de Preview. Producao continua usando o Supabase configurado no
-> projeto Vercel.
->
-> **Preview validado:** `https://safeanchor-monorepo-git-develop-luisbotelhos-projects.vercel.app`
-> responde `200` em `/health` com `database: "up"`. Login demo
-> (`demo@safeanchor.test` / `demo123456`) e as listagens de vessels,
-> maintenances, documents e inspections retornam `200` com dados do seed.
-> A proteção por login da Vercel (`ssoProtection`) foi desativada no projeto
-> para que o Preview seja acessível sem autenticação; reative em
-> Settings → Deployment Protection se preferir.
+> configurado em `DATABASE_URL`/`DIRECT_URL` no ambiente de Preview da Vercel;
+> ele expira em `2026-11-29T14:19:24Z`. Apresente sempre a produção. A produção
+> continua usando o Supabase configurado no projeto Vercel.
 >
 > **Produção validada:** `https://safeanchor-monorepo.vercel.app` responde
-> `200` em `/health`, login demo e nas quatro listagens, com CORS liberado para
+> `200` em `/health`, login demo e nas listagens, com CORS restrito à origem
 > `https://luis-botelho.github.io`. As migrations de `persona`, campos de perfil
 > da embarcação e tabelas de documentos/inspeções já estão aplicadas no
 > Supabase. O endpoint temporário `/__setup` e a variável `SETUP_TOKEN` foram
-> removidos. Para novas migrations, a Vercel não devolve segredos via CLI: é
-> necessário fornecer `DIRECT_URL` com acesso ao banco (ver
-> `docs/handoff-freeze.md`).
+> removidos e não devem ser reintroduzidos. O JWT dura 1h e não há refresh; deep
+> links no Pages respondem `404` com o HTML da SPA (esperado). Para novas
+> migrations, a Vercel não devolve segredos via CLI: é necessário fornecer
+> `DIRECT_URL` com acesso ao banco (ver
+> [`../../docs/handoff-freeze.md`](../../docs/handoff-freeze.md)). Não rode
+> migrations nem `prisma db seed` contra a produção sem essa providência
+> explícita.
+
+## Contas de demonstracao
+
+As contas abaixo existem de verdade na API de producao e foram criadas por
+`/auth/register` (nao por seed). O login do frontend tem botoes **"Acessos de
+demonstracao"** que preenchem e-mail e senha das tres principais.
+
+| Conta | Senha | Persona |
+|---|---|---|
+| `demo@safeanchor.app` | `demo123` | `OWNER` |
+| `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` |
+| `gestao@marinacostaazul.com` | `demo123` | `MARINA` |
+| `demo@safeanchor.test` (legado, sem botao) | `demo123456` | `OWNER` |
+
+Todas sao `USER`: `persona` e metadado de navegacao; a autorizacao e por `role`
+(`authorizeRoles`) e o isolamento por `Party` (`accessScopeService`).
+
+Dados demo em producao (via API, nao via seed): `demo@safeanchor.app` e
+`demo@safeanchor.test` tem 3 vessels, 5 maintenances, 5 documents,
+4 inspections (1 concluida com certificado), 1 preventive e 1 checklist
+execution; `carlos@tecno.boat` e `gestao@marinacostaazul.com` tem 2 vessels,
+2 maintenances, 2 documents, 1 inspection concluida, 1 preventive e 1 execution.
+Existe um template global "Checklist de segurança — demo". A API cobre auth,
+vessels, maintenances, documents, inspections, preventive-maintenances,
+checklist templates/executions e research; marinas, prestadores, jobs, eventos,
+viagens, locacoes, marketplace, comunidade, academy e IA sao catalogos mock no
+frontend, assim como o feed e a "prontidao" do dashboard.
 
 <details>
 <summary><strong>Testando rapidamente com curl</strong></summary>
@@ -342,15 +367,21 @@ filtrados pelo `partyId` do usuario e pelas organizacoes das quais ele e membro.
 
 ### Seed de desenvolvimento
 
-O seed (`prisma/seed.js`) cria dados de demonstracao com IDs deterministicos
-usando `upsert`. Execucao bloqueada sem autorizacao explicita:
+O seed (`prisma/seed.js`) cria mais de 12 registros de demonstracao com IDs
+deterministicos usando `upsert`, cobrindo `Party`, `User`, `Organization`,
+`Membership`, `Vessel`, `ChecklistTemplate`, `Maintenance`,
+`PreventiveMaintenance`, `ChecklistExecution`, `Document` e `Inspection`.
+Execucao bloqueada sem autorizacao explicita e restrita a banco local:
 
 ```bash
 ALLOW_DATABASE_SEED=true npx prisma db seed
 ```
 
 Cria um usuario demo (`demo@safeanchor.test`, senha `demo123456`) com membership
-na organizacao demo e vincula a embarcacao de demonstracao ao `Party` da organizacao.
+na organizacao demo e vincula a embarcacao de demonstracao ao `Party` da
+organizacao. Em producao as contas e os dados demo vem da API autenticada;
+nunca execute este seed nem migrations contra o banco de producao como
+operacao rotineira (sem `DIRECT_URL` operacional).
 
 ---
 

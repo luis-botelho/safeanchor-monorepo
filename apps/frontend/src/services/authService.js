@@ -1,10 +1,17 @@
 import { apiFetch, setToken } from "./api";
+import { demoAccounts } from "../mock/users";
 
 const roleLabels = {
   USER: "Proprietário",
   MANAGER: "Gestor de frota",
   ADMIN: "Administrador",
 };
+
+// A API não tem modelos de Marina/Prestador, então estes IDs de catálogo
+// vêm dos perfis de demonstração versionados no frontend.
+const demoProfilesByEmail = new Map(
+  demoAccounts.map(({ email, profile }) => [email.toLowerCase(), profile]),
+);
 
 export function toProfile(user) {
   const name = user.name || "Usuário";
@@ -15,15 +22,21 @@ export function toProfile(user) {
     .join("")
     .toUpperCase();
 
+  const demoProfile =
+    demoProfilesByEmail.get(String(user.email || "").toLowerCase()) || {};
+
   return {
+    ...demoProfile,
     id: user.id,
     partyId: user.partyId,
     name: name.split(" ")[0] || name,
     fullName: name,
     email: user.email,
-    role: roleLabels[user.role] || "Proprietário",
-    persona: user.persona || "OWNER",
-    initials,
+    role: demoProfile.role || roleLabels[user.role] || "Proprietário",
+    persona: user.persona || demoProfile.persona || "OWNER",
+    initials: demoProfile.initials || initials,
+    providerId: user.providerId || demoProfile.providerId,
+    marinaId: user.marinaId || demoProfile.marinaId,
   };
 }
 
