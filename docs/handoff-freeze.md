@@ -71,7 +71,10 @@ fonte de decisão, não código para copiar. O contrato completo está em
   propriedades explícitas; `fade-in`, `survey-in` e `whatsapp-card-in` também são
   opt-in. Com movimento desligado, o estado final continua visível.
 - Commits em `develop`: `2b3f1a1`, `ba8533c`, `7440477`, `cef53e6`, `5854bd1`,
-  `fd3036d`, `f3c3388`, `214e69a`, `7d33a3b`.
+  `fd3036d`, `f3c3388`, `214e69a`, `7d33a3b`, `e830dc9`, `aa62062`.
+- **PR #177** (`develop` → `main`) aberto em 26/11/2026: `MERGEABLE`, checks
+  verdes (backend `generate/validate/test`, frontend `build`, Vercel Preview).
+  Aguardando **autorização explícita** para merge — não fazer merge direto.
 
 ## Dados de demonstração em produção
 
