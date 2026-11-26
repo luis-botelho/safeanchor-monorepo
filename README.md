@@ -783,7 +783,7 @@ Principios de seguranca do MVP — marcados pelos que **ja existem** no reposito
 | Upload security | ⬜ depende de Supabase Storage (ainda nao implementado) |
 | Logging | ✅ pino estruturado com redacao de headers/body sensiveis |
 | Backups | 🔶 via Supabase (gerenciado; fora do codigo) |
-| Dependency / security scanning | 🔶 `npm audit` manual: frontend 0 e backend 0 após fixar `effect@3.22.5`; `verify:local` roda no CI, mas ainda sem scanner de dependências |
+| Dependency / security scanning | ✅ `npm audit`: frontend 0 e backend 0 após fixar `effect@3.22.5`; CI falha em alertas `high` e roda `verify:local` |
 
 ---
 
