@@ -411,7 +411,7 @@ bootstrap temporário removido no mesmo ciclo |
 | Templates de checklist globais e execução sem validar template | Escopo pode ser burlado via API | Aplicar `accessScopeService` também ali |
 | Muitos catálogos em mock + texto "dados sincronizados com a API" | Demo mistura real/falso | Ajustar textos ou conectar dados |
 | Divergência de doc/config | Node 22 e CSS BEM global precisavam de alinhamento | Resolvido: READMEs atualizados para Node 22 e `global.css` com tokens |
-| 3 vulnerabilidades high transitivas do Prisma 7 (`effect`) | Alerta no audit | Downgrade seria breaking; aceito por enquanto |
+| 3 vulnerabilidades high transitivas do Prisma 7 (`effect`) | Alerta no audit | Resolvido com override para `effect@3.22.5`; Prisma 7 mantido e `npm audit` 0 |
 | Sem lint, testes de componente, OpenAPI ou scanner no CI | Dívida de engenharia | Rate limiting e validação já implementados; priorizar o restante |
 
 ---

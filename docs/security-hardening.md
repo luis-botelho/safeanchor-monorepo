@@ -42,6 +42,7 @@ migration nem por campo enviado no cadastro.
 | SA-09 | Rascunho local expira em 24 horas e é saneado; o envio limpa o rascunho; `safeanchor.researchResponses` guarda só o último envio, sem contato, também com expiração de 24 horas. |
 | SA-10/SA-12/SA-13/SA-14 | Resolvidos indiretamente por SA-03/SA-04: sem sessão em storage, `jwt.verify` com opções explícitas, segredo com tamanho mínimo validado e `x-request-id` sempre gerado no servidor. |
 | SA-15 | `console.error` removido de `ChecklistTemplatesPage.jsx`; falha de carregamento exibe mensagem genérica. |
+| SA-16 | `effect` transitivo do `@prisma/config` fixado em `3.22.5` via `overrides`, sem downgrade do Prisma 7. `npm audit` do backend passou de 3 `high` para 0 vulnerabilidades. |
 
 ## Validação local
 
@@ -50,6 +51,8 @@ migration nem por campo enviado no cadastro.
 - Bundle local sem `diretoria@safeanchor.app`, `safeanchor:session` ou
   `localStorage.getItem("token")`.
 - `vercel.json` válido e `dist/_headers` presente.
+- `npm run verify:local` — verificações offline dos artefatos (sem rede).
+- `npm audit` no backend — 0 vulnerabilidades após o override do `effect`.
 - Nenhuma requisição foi feita contra a API de produção; nenhum login ou teste
   de IDOR ao vivo foi executado.
 
@@ -60,7 +63,4 @@ migration nem por campo enviado no cadastro.
   credencial vazada; a revogação em memória vale apenas por instância.
 - Decidir sobre a limpeza do histórico Git onde a credencial foi versionada.
 - Rotacionar segredos do Vercel/GitHub Actions se houver suspeita de exposição.
-- `npm audit --omit=dev` ainda reporta 3 `high` transitivas em
-  `prisma@7.10.1 → @prisma/config → effect` (ReDoS em tempo de build). O
-  downgrade sugerido para 6.12.0 é breaking e não foi aplicado sem avaliação.
 - CSP permanece em modo `Report-Only`: monitorar violações antes de bloquear.
