@@ -12,8 +12,8 @@ import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import preventiveMaintenanceRoutes from "./routes/preventiveMaintenanceRoutes.js";
 import checklistTemplateRoutes from "./routes/checklistTemplateRoutes.js";
 import checklistExecutionRoutes from "./routes/checklistExecutionRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import researchRoutes from "./routes/researchRoutes.js";
+import { createAuthRouter } from "./routes/authRoutes.js";
+import { createResearchRouter } from "./routes/researchRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import inspectionRoutes from "./routes/inspectionRoutes.js";
 import directorRoutes from "./routes/directorRoutes.js";
@@ -24,6 +24,8 @@ const genReqId = (request) => request.headers["x-request-id"] || randomUUID();
 export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   const app = express();
 
+  // A Vercel Termina o TLS e repassa o IP real em X-Forwarded-For.
+  app.set("trust proxy", 1);
   app.locals.prisma = db;
 
   app.use(
@@ -77,8 +79,8 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
 
   app.get("/health", createHealthHandler(db));
 
-  app.use("/auth", authRoutes);
-  app.use("/research", researchRoutes);
+  app.use("/auth", createAuthRouter());
+  app.use("/research", createResearchRouter());
 
   if (beforeAuth) {
     beforeAuth(app);

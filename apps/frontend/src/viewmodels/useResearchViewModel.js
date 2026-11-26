@@ -164,6 +164,7 @@ export default function useResearchViewModel() {
         contact: contactData?.contato || null,
         city: contactData?.cidade || null,
         profile: contactData?.perfil || answers.perfil || null,
+        website: contactData?.website || null,
         answers,
       };
 

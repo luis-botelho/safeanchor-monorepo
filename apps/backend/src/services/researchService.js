@@ -105,6 +105,19 @@ export async function submitResearchResponse(payload, db = prisma) {
     throw error;
   }
 
+  // Campo escondido do formulario: bots preenchem, pessoas nao veem.
+  // Responde como "nao capturado" para nao sinalizar o filtro ao bot.
+  if (
+    typeof payload?.response?.website === "string" &&
+    payload.response.website.trim()
+  ) {
+    return {
+      captured: false,
+      emailSent: false,
+      message: "Consentimento nao concedido; nenhuma resposta foi capturada.",
+    };
+  }
+
   const consent = payload?.consent;
 
   // Sem aceite explicito, nada e enviado ao servidor nem gravado no banco.

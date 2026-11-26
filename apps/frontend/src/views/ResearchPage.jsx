@@ -18,7 +18,13 @@ import {
 } from "../services/researchConsent";
 import useResearchViewModel from "../viewmodels/useResearchViewModel";
 
-const EMPTY_CONTACT = { nome: "", contato: "", cidade: "", perfil: "" };
+const EMPTY_CONTACT = {
+  nome: "",
+  contato: "",
+  cidade: "",
+  perfil: "",
+  website: "",
+};
 
 function ConsentGate({ onDecide }) {
   return (
@@ -164,6 +170,16 @@ function ContactForm({ onSubmit, isSubmitting, submissionError }) {
 
   return (
     <form className="survey__contact" onSubmit={handleSubmit}>
+      <input
+        type="text"
+        name="website"
+        value={form.website}
+        onChange={(event) => update("website", event.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        hidden
+      />
       <div className="field">
         <label className="field__label" htmlFor="research-nome">
           Como podemos te chamar?
