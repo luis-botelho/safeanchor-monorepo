@@ -16,6 +16,8 @@ const seedIds = {
   preventiveMaintenance: "seed-demo-preventive-oil-change",
   checklistTemplate: "seed-demo-template-pre-departure",
   checklistExecution: "seed-demo-execution-pre-departure",
+  document: "seed-demo-document-insurance",
+  inspection: "seed-demo-inspection-safety",
 };
 
 const { default: prisma } = await import("../src/lib/prisma.js");
@@ -167,6 +169,44 @@ async function seed() {
     where: { id: seedIds.checklistExecution },
     update: executionData,
     create: { id: seedIds.checklistExecution, ...executionData },
+  });
+
+  const documentData = {
+    vesselId: seedIds.vessel,
+    name: "Seguro obrigatório",
+    category: "Seguro",
+    number: "SAFE-2026-001",
+    validFrom: "2026-01-01",
+    expiresAt: "2027-01-01",
+    provider: "SafeAnchor Demo",
+  };
+
+  await prisma.document.upsert({
+    where: { id: seedIds.document },
+    update: documentData,
+    create: { id: seedIds.document, ...documentData },
+  });
+
+  const inspectionData = {
+    vesselId: seedIds.vessel,
+    type: "safety",
+    status: "SCHEDULED",
+    scheduledAt: "2026-12-10T10:00:00.000Z",
+    completedAt: null,
+    inspector: "Carlos Mendes",
+    notes: "Inspeção de segurança de demonstração.",
+    checklist: [
+      { item: "Casco e tubulação", status: "pending", notes: "" },
+      { item: "Motor e propulsão", status: "pending", notes: "" },
+    ],
+    certificate: null,
+    createdAt: "2026-09-01T12:00:00.000Z",
+  };
+
+  await prisma.inspection.upsert({
+    where: { id: seedIds.inspection },
+    update: inspectionData,
+    create: { id: seedIds.inspection, ...inspectionData },
   });
 
   console.log("Seed de desenvolvimento concluído sem remover outros dados.");

@@ -26,6 +26,8 @@ model Vessel {
   maintenances           Maintenance[]
   preventiveMaintenances PreventiveMaintenance[]
   checklistExecutions    ChecklistExecution[]
+  documents              Document[]
+  inspections            Inspection[]
 
   @@index([ownerPartyId])
 }
@@ -79,6 +81,46 @@ model ChecklistExecution {
   vessel   Vessel            @relation(fields: [vesselId], references: [id], onDelete: Cascade)
 
   @@index([templateId])
+  @@index([vesselId])
+}
+
+model Document {
+  id         String @id @default(cuid())
+  vesselId   String
+  name       String
+  category   String
+  number     String
+  validFrom  String
+  expiresAt  String
+  provider   String?
+
+  vessel Vessel @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+
+  @@index([vesselId])
+}
+
+enum InspectionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Inspection {
+  id          String           @id @default(cuid())
+  vesselId    String
+  type        String
+  status      InspectionStatus @default(SCHEDULED)
+  scheduledAt String
+  completedAt String?
+  inspector   String
+  notes       String?
+  checklist   Json
+  certificate Json?
+  createdAt   String
+
+  vessel Vessel @relation(fields: [vesselId], references: [id], onDelete: Cascade)
+
   @@index([vesselId])
 }
 
