@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "../components/ProtectedRoute";
+import SeoRoute from "../seo/SeoRoute";
 
 import Intro from "../views/Intro";
 import LoginPage from "../views/LoginPage";
@@ -50,7 +51,9 @@ import NewInspectionPage from "../views/NewInspectionPage";
 
 export default function AppRouter() {
   return (
-    <Routes>
+    <>
+      <SeoRoute />
+      <Routes>
       {/* Públicas */}
       <Route path="/" element={<Intro />} />
       <Route path="/pesquisa" element={<ResearchPage />} />
@@ -117,7 +120,8 @@ export default function AppRouter() {
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
