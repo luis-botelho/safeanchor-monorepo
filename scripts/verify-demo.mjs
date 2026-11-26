@@ -200,12 +200,15 @@ async function verifyFrontend() {
     check(`Sitemap ${url}`, sitemapResponse.status === 200 && sitemap.includes(`<loc>${url}</loc>`));
   }
 
-  for (const route of ["/", "/pesquisa/", "/privacidade/"]) {
+  for (const [route, expectedTitle] of [
+    ["", "SafeAnchor"],
+    ["pesquisa/", "Pesquisa de produto"],
+    ["privacidade/", "Privacidade"],
+  ]) {
     const page = await fetch(new URL(route, pagesUrl));
     const pageHtml = await page.text();
-    const expectedTitle = route === "/" ? "SafeAnchor" : route === "/pesquisa/" ? "Pesquisa de produto" : "Privacidade";
     check(
-      `Prerender ${route}`,
+      `Prerender /${route}`,
       page.status === 200 &&
         pageHtml.includes(`<title>${expectedTitle}`) &&
         pageHtml.includes('class="seo-static"'),
