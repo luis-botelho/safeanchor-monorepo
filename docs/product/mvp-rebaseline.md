@@ -92,30 +92,53 @@ O produto é organizado em torno dessa jornada. Cada feature do rebaseline contr
 | 034 | 🔶 | Modelo `Document`, API e cadastro/listagem na UI prontos; faltam upload e Supabase Storage. |
 | 035 | ✅ | Status por validade (válido/próximo/vencido) e indicadores no dashboard. |
 | 036 | 🔶 | Inspeções via API com checklist e certificado; falta mobile/offline e revalidação de QR Code. |
-| 037 | 🔶 | Loading/empty/error nos fluxos core; demais catálogos seguem mock. |
-| 038 | ✅ | Pages no ar; `/health` 200 com banco up no Preview e na produção. |
+| 037 | ✅ | Concluída: tema Maritime Precision, skeletons contextuais, estados vazios/erro e spinner de submit no PR #177; demais catálogos seguem mock. |
+| 038 | ✅ | Concluída: Pages e Vercel no ar, `/health` 200 com banco up; PRs #175, #177, #178 e #179 mergeados em `main`. |
 
-O Preview usa um Postgres temporário (Neon claim) com migrations e seed aplicados.
-A produção passou a responder `200` após a conexão do Supabase à Vercel; as três
-migrations faltantes foram aplicadas e o deploy foi limpo (sem endpoint
-temporário). O PR #175 foi mergeado em `main`, então as rotas de documentos e
-inspeções já estão no ar. O usuário demo foi criado por `/auth/register` e os
-dados de demonstração foram semeados pela API: 3 embarcações, 5 manutenções,
-5 documentos e 3 inspeções. Login, listagens, dashboard e CORS com a origem do
-GitHub Pages foram validados em produção. A proteção por login da Vercel foi
-desativada para que os deploys sejam públicos. Mudanças futuras em `develop`
-serão promovidas a `main` somente por pull request.
+O PR #175 levou as rotas de documentos e inspeções para `main`; o #177 levou a
+reformulação visual, o #178 a documentação da demo e o #179 os acessos de
+demonstração, a correção de perfil e a verificação versionada. `main` estava em
+`a870351` antes da promoção do #179, que publicou os botões de **“Acessos de
+demonstração”** no login. A produção responde `200` em `/health`
+após a conexão do Supabase à Vercel, com as migrations aplicadas e deploy limpo
+(sem `/__setup` ou `SETUP_TOKEN` — não reintroduzir).
+
+As contas demo foram criadas em produção por `/auth/register` (não por
+`prisma db seed`): `demo@safeanchor.app`/`demo123` (`OWNER`),
+`carlos@tecno.boat`/`demo123` (`SERVICE_PROVIDER`),
+`gestao@marinacostaazul.com`/`demo123` (`MARINA`) e a conta legada
+`demo@safeanchor.test`/`demo123456` (`OWNER`). Os três primeiros são
+preenchidos automaticamente pelos botões do login. Todas são `USER`: `persona`
+é metadado de navegação; a autorização é por `role` e o isolamento por `Party`.
+
+Os dados de demonstração foram semeados pela própria API: `demo@safeanchor.app`
+e `demo@safeanchor.test` têm 3 embarcações, 5 manutenções, 5 documentos,
+4 inspeções (1 concluída com certificado), 1 preventiva e 1 execução de
+checklist; `carlos@tecno.boat` e `gestao@marinacostaazul.com` têm 2 embarcações,
+2 manutenções, 2 documentos, 1 inspeção concluída, 1 preventiva e 1 execução.
+Existe um template global “Checklist de segurança — demo”. Login, listagens,
+dashboard e CORS com a origem do GitHub Pages foram validados em produção.
+
+O Preview usa um Postgres temporário (Neon) que expira em
+`2026-11-29T14:19:24Z`: apresente sempre a produção. Restam como limites
+conhecidos os catálogos mock/localStorage (marinas, prestadores, jobs, eventos,
+viagens, locações, marketplace, comunidade, academy e IA), o feed de atividades
+e a “prontidão” calculada no cliente (a API não expõe `readiness`), o CORS
+restrito a `https://luis-botelho.github.io`, deep links com `404` HTML da SPA e
+o JWT de 1h sem refresh. Mudanças futuras em `develop` são promovidas a `main`
+por pull request; o roteiro em [`../demo-apresentacao.md`](../demo-apresentacao.md)
+é a referência autorizada, com verificação via `node scripts/verify-demo.mjs`.
 
 ## Definição de Pronto (DoD)
 
 - O usuário consegue percorrer a jornada completa (Login → Prontidão) sem erros.
 - Dados de um usuário não vazam para outro (ownership/isolamento).
 - Dashboard reflete frota, manutenção, inspeções e documentos com dados reais.
-- Documentos podem ser listados, baixados e vencimentos são visíveis.
+- Documentos podem ser listados e cadastrados, com vencimentos visíveis (sem upload de arquivos).
 - Indicadores de compliance aparecem no dashboard e por embarcação.
-- Execução mobile de checklist e histórico é funcional.
+- Execução de checklist via API e histórico são funcionais (desktop; mobile/offline segue pendente).
 - UI consistente, sem artifacts de desenvolvimento visíveis.
-- Backend e frontend publicados em produção com health check e smoke test.
+- Backend e frontend publicados em produção com health check e verificação da demo.
 
 ## Itens Pós-MVP
 
@@ -130,6 +153,6 @@ Este rebaseline reorganiza o backlog do MVP anterior:
 - **Features 016–020**: escopo relevante absorvido pelas Features 034 e 035.
 - **Features 021–025**: movidas para pós-MVP; a Maritime Academy permanece no roadmap.
 - **QR Code / Safety Reports (029 e 030)**: revalidados funcionalmente durante a Feature 036.
-- **Feature 030 CI/CD (#152)**: trabalho preparado permanece válido; o deploy real será concluído na Feature 038.
+- **Feature 030 CI/CD (#152)**: trabalho preparado permanece válido; o deploy real foi concluído na Feature 038 (#175, #177, #178 e #179).
 
 Nenhuma issue antiga foi fechada ou deletada; apenas comentários de replanejamento foram adicionados para preservar o histórico.

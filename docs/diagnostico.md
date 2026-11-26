@@ -240,8 +240,9 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 ### 5.2 Jornada principal, passo a passo
 
 1. **Entrar** — a tela inicial tem dois cards: "Responder a pesquisa" e "Ver a
-   demonstração". Atenção: o texto diz "Não precisa criar conta", mas hoje
-   `/login` exige credenciais reais. Para a demo use
+   demonstração". O texto "Não precisa criar conta" vale para a pesquisa; a área
+   autenticada exige credenciais reais. Em `/login`, use os botões **"Acessos de
+   demonstração"** (proprietário, prestador e marina) ou a conta legada
    `demo@safeanchor.test` / `demo123456`.
 2. **Pesquisa (opcional)** — `/pesquisa` guarda um rascunho em `localStorage`
    (`safeanchor.research.draft`), envia `POST /research` e mantém respostas em
@@ -297,10 +298,9 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
   `AppRouter`, incluindo `MaintenanceDashboardPage`, `MaintenanceHistoryPage`,
   `PreventiveMaintenancesPage`, `CreatePreventiveMaintenancePage`,
   `ChecklistTemplatesPage`, `ChecklistExecutionsPage`, `InspectionHistoryPage`,
-  `EditVesselPage`, `VesselsPage` e `VesselDetailsPage`. Links para
-  `/checklist-templates`, `/checklist-executions`, `/preventive-maintenances`,
-  `/maintenances` e `/profiles` caem no redirecionamento para `/`. APIs prontas
-  para preventivas e checklists, portanto, não são alcançáveis pela interface.
+  `EditVesselPage`, `VesselsPage` e `VesselDetailsPage`. Os links antigos que
+  caíam no redirecionamento para `/` foram removidos do `AppShell`; ainda assim,
+  as APIs de preventivas e checklists não são alcançáveis pela interface.
 
 ---
 
@@ -310,12 +310,12 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 |---|---|
 | Página no GitHub Pages | `200` |
 | Bundle contém a URL da API de produção | sim |
-| `POST /auth/login` (`demo@safeanchor.test` / `demo123456`) | `200` + JWT |
-| `GET /vessels` | `200` · 3 itens |
-| `GET /maintenances` | `200` · 5 itens |
-| `GET /maintenances/dashboard` | `200` · `total=5`, `preventive=3`, `corrective=2`, `pending=2`, `completed=2` |
-| `GET /documents` | `200` · 5 itens |
-| `GET /inspections` | `200` · 3 itens |
+| `POST /auth/login` (quatro contas demo) | `200` + JWT para cada uma |
+| `GET /vessels` | `200` · 3 itens no proprietário (2 no prestador e na marina) |
+| `GET /maintenances` | `200` · 5 itens no proprietário (2 no prestador e na marina) |
+| `GET /maintenances/dashboard` | `200` · `total=5` no proprietário, `total=2` no prestador e na marina |
+| `GET /documents` | `200` · 5 itens no proprietário (2 no prestador e na marina) |
+| `GET /inspections` | `200` · 4 itens no proprietário (1 no prestador e na marina), com certificado |
 | CORS com `Origin: https://luis-botelho.github.io` | `Access-Control-Allow-Origin` correto em todas |
 | `/health` em produção | `200`, `database: "up"` |
 | Endpoint temporário `/__setup` | removido (retorna `401` do `requireAuth`) |
@@ -358,16 +358,16 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 | Migrations em produção dependem de segredo não lido pela CLI | Bloqueia evolução do schema | Mitigado agora; exige `DIRECT_URL` fornecida pelo usuário na próxima |
 | Banco do Preview é temporário (expira 29/11) | Preview pode quebrar | Reivindicar ou substituir |
 | JWT de 1h sem refresh, em `localStorage` | Sessão cai e exige novo login; risco XSS | Aceitável no MVP; no roadmap |
-| Persona não autoriza no backend; `ProtectedRoute` só checa presença de usuário | Menus por persona são decorativos | Separar autorização de apresentação |
-| 16 views não roteadas e links que caem no `/` | APIs prontas parecem inexistentes | Corrigir `AppRouter` e links do `AppShell` |
+| Persona é só navegação; `ProtectedRoute` checa presença, não `role` | Menu por persona não autoriza | Endurecer checagem de `role` nas rotas |
+| 16 views não roteadas (links órfãos antigos já removidos) | APIs prontas parecem inexistentes | Corrigir `AppRouter` para preventivas e checklists |
 | WhatsApp é link manual (`wa.me`), não envio automático | Depende de clique do usuário; sem disparo server-side | Aceito na demo; automatizar exige API business/Twilio |
 | Upload de documentos ausente | Documentos são só metadados | Pendente (Supabase Storage) |
 | Prontidão calculada no cliente; detalhe devolve `readiness: null` | Métricas inconsistentes | Levar regra para o backend |
 | Status/tipo em texto livre nos formulários | Valores como "Ativa" vs "OPERACIONAL" | Usar enums/selects |
-| RLS habilitado sem policies e ausente nas tabelas novas | Falsa sensação de segurança | Revisar policies ou documentar que o escopo é só na API |
+| RLS habilitado sem policies; escopo real está no backend | Falsa sensação de segurança | Documentar policies ou reforçar defesa em profundidade |
 | Templates de checklist globais e execução sem validar template | Escopo pode ser burlado via API | Aplicar `accessScopeService` também ali |
 | Muitos catálogos em mock + texto "dados sincronizados com a API" | Demo mistura real/falso | Ajustar textos ou conectar dados |
-| Divergência de doc/config | Node 22 no `engines` vs README "20+" | Atualizar READMEs; a divergência sobre CSS por componente foi corrigida: os READMEs agora descrevem o `global.css` com tokens |
+| Divergência de doc/config | Node 22 e CSS BEM global precisavam de alinhamento | Resolvido: READMEs atualizados para Node 22 e `global.css` com tokens |
 | 3 vulnerabilidades high transitivas do Prisma 7 (`effect`) | Alerta no audit | Downgrade seria breaking; aceito por enquanto |
 | Sem lint, testes de componente, OpenAPI, rate limiting ou scanner no CI | Dívida de engenharia | Priorizar após a demo |
 
@@ -375,9 +375,9 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 
 ## 9. Recomendações priorizadas
 
-1. **Manter a demo congelada** após o merge do PR #177 (reformulação visual
-   publicada e validada com 29/29 checks); novos trabalhos seguem em `develop`
-   via PR, sem merge direto em `main`.
+1. **Manter a demo congelada** após o merge do PR #179 (acessos de demonstração,
+   correção de perfil e verificação versionada; 110/110 checks); novos trabalhos
+   seguem em `develop` via PR, sem merge direto em `main`.
 2. **Corrigir as rotas órfãs e os links quebrados** do `AppShell`, pelo menos para
    `/maintenances`, `/preventive-maintenances`, `/checklist-templates` e
    `/checklist-executions` — hoje parecem features faltando quando estão prontas.
