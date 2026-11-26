@@ -12,6 +12,7 @@ import FleetPage from "../views/FleetPage";
 import VesselDetailPage from "../views/VesselDetailPage";
 import MaintenancePage from "../views/MaintenancePage";
 import DocumentsPage from "../views/DocumentsPage";
+import CreateDocumentPage from "../views/CreateDocumentPage";
 import ServiceProvidersPage from "../views/ServiceProvidersPage";
 import ProviderProfilePage from "../views/ProviderProfilePage";
 import ServiceRequestsPage from "../views/ServiceRequestsPage";
@@ -66,6 +67,7 @@ export default function AppRouter() {
         <Route path="/maintenance" element={<MaintenancePage />} />
         <Route path="/maintenance/new" element={<CreateMaintenancePage />} />
 
+        <Route path="/documents/new" element={<CreateDocumentPage />} />
         <Route path="/documents" element={<DocumentsPage />} />
 
         <Route path="/service-providers" element={<ServiceProvidersPage />} />

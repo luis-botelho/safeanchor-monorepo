@@ -11,11 +11,38 @@ import { getFleetVessels } from "../services/vesselService";
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState([]);
   const [vessels, setVessels] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getDocuments().then(setDocuments);
-    getFleetVessels().then(setVessels);
+    let active = true;
+
+    Promise.all([getDocuments(), getFleetVessels()])
+      .then(([loadedDocuments, loadedVessels]) => {
+        if (!active) return;
+
+        setDocuments(loadedDocuments);
+        setVessels(loadedVessels);
+      })
+      .catch((error) => {
+        if (active) setError(error.message || "Não foi possível carregar os documentos.");
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
+
+  if (isLoading) {
+    return <p>Carregando documentos...</p>;
+  }
+
+  if (error) {
+    return <p className="field__error">{error}</p>;
+  }
 
   const summary = getDocumentsSummary(documents);
 
@@ -30,6 +57,12 @@ export default function DocumentsPage() {
         eyebrow="Conformidade"
         title="Documentos"
         subtitle="Acompanhe seguros, vistorias, registros e certificados de cada embarcação."
+        actions={
+          <Link className="btn btn--ghost" to="/documents/new">
+            <Icon name="plus" size={17} />
+            Novo documento
+          </Link>
+        }
       />
 
       <div className="grid grid--3" style={{ marginBottom: 20 }}>
@@ -41,7 +74,9 @@ export default function DocumentsPage() {
       <section className="card">
         {documents.length === 0 ? (
           <div className="card--padding">
-            <p className="page-header__subtitle">Nenhum documento cadastrado.</p>
+            <p className="page-header__subtitle">
+              Nenhum documento cadastrado. Comece pelo primeiro documento da sua frota.
+            </p>
           </div>
         ) : (
           documents.map((document) => (

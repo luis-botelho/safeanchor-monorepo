@@ -23,8 +23,8 @@ export function useInspectionsViewModel() {
         setIsLoading(true);
         const data = await getInspections();
         setInspections(data);
-      } catch {
-        setError("Não foi possível carregar as inspeções.");
+      } catch (error) {
+        setError(error.message || "Não foi possível carregar as inspeções.");
       } finally {
         setIsLoading(false);
       }
@@ -47,8 +47,8 @@ export function useInspectionDetailViewModel(id) {
         setIsLoading(true);
         const data = await getInspectionById(id);
         setInspection(data);
-      } catch {
-        setError("Não foi possível carregar a inspeção.");
+      } catch (error) {
+        setError(error.message || "Não foi possível carregar a inspeção.");
       } finally {
         setIsLoading(false);
       }
@@ -58,23 +58,38 @@ export function useInspectionDetailViewModel(id) {
 
   const handleUpdateChecklist = useCallback(
     async (itemIndex, status, notes) => {
-      const updated = await updateChecklistItem(id, itemIndex, status, notes);
-      if (updated) setInspection({ ...updated });
-      return updated;
+      try {
+        const updated = await updateChecklistItem(id, itemIndex, status, notes);
+        if (updated) setInspection(updated);
+        return updated;
+      } catch (error) {
+        setError(error.message || "Não foi possível atualizar o checklist.");
+        return null;
+      }
     },
     [id],
   );
 
   const handleComplete = useCallback(async () => {
-    const updated = await completeInspection(id);
-    if (updated) setInspection({ ...updated });
-    return updated;
+    try {
+      const updated = await completeInspection(id);
+      if (updated) setInspection(updated);
+      return updated;
+    } catch (error) {
+      setError(error.message || "Não foi possível concluir a inspeção.");
+      return null;
+    }
   }, [id]);
 
   const handleCancel = useCallback(async () => {
-    const updated = await cancelInspection(id);
-    if (updated) setInspection({ ...updated });
-    return updated;
+    try {
+      const updated = await cancelInspection(id);
+      if (updated) setInspection(updated);
+      return updated;
+    } catch (error) {
+      setError(error.message || "Não foi possível cancelar a inspeção.");
+      return null;
+    }
   }, [id]);
 
   return {
@@ -93,7 +108,11 @@ export function useNewInspectionViewModel() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    getVessels().then((result) => setVessels(result.vessels || []));
+    getVessels()
+      .then((result) => setVessels(result.vessels || []))
+      .catch((error) => {
+        setError(error.message || "Não foi possível carregar as embarcações.");
+      });
   }, []);
 
   const handleSubmit = useCallback(async (data) => {
@@ -102,8 +121,8 @@ export function useNewInspectionViewModel() {
       setError("");
       const result = await createInspection(data);
       return result;
-    } catch {
-      setError("Não foi possível criar a inspeção.");
+    } catch (error) {
+      setError(error.message || "Não foi possível criar a inspeção.");
       return null;
     } finally {
       setIsSubmitting(false);

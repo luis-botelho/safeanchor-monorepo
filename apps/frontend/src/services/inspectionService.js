@@ -1,112 +1,122 @@
 import {
-  inspections as mockInspections,
   inspectionTypes,
   inspectionStatuses,
   checklistItemStatuses,
 } from "../mock/inspections";
+import { apiFetch } from "./api";
+import { getFleetVessels } from "./vesselService";
 
-let inspections = [...mockInspections];
+const statusAliases = {
+  SCHEDULED: "scheduled",
+  IN_PROGRESS: "in_progress",
+  COMPLETED: "completed",
+  CANCELLED: "cancelled",
+};
+
+export const defaultChecklist = [
+  { item: "Casco e tubulação", status: "pending", notes: "" },
+  { item: "Motor e propulsão", status: "pending", notes: "" },
+  { item: "Sistema elétrico", status: "pending", notes: "" },
+  { item: "Equipamentos de segurança", status: "pending", notes: "" },
+  { item: "Navegação e comunicação", status: "pending", notes: "" },
+];
+
+async function loadVesselNames() {
+  const vessels = await getFleetVessels();
+
+  return new Map(vessels.map((vessel) => [vessel.id, vessel]));
+}
+
+function toInspection(row, vesselNames) {
+  const vessel = vesselNames.get(row.vesselId);
+
+  return {
+    ...row,
+    status: statusAliases[row.status] || row.status,
+    vesselName: vessel ? vessel.name : "Embarcação",
+    vesselType: vessel ? vessel.type : "",
+    checklist: Array.isArray(row.checklist) ? row.checklist : [],
+  };
+}
+
+async function withVessels(rows) {
+  const vesselNames = await loadVesselNames();
+
+  return rows.map((row) => toInspection(row, vesselNames));
+}
+
+async function withVesselsById(row) {
+  const vesselNames = await loadVesselNames();
+
+  return toInspection(row, vesselNames);
+}
 
 export async function getInspections() {
-  return inspections;
+  return withVessels(await apiFetch("/inspections"));
 }
 
 export async function getInspectionById(id) {
-  return inspections.find((item) => item.id === id) || null;
+  return withVesselsById(
+    await apiFetch(`/inspections/${encodeURIComponent(id)}`),
+  );
 }
 
 export async function getInspectionsByProvider(providerId) {
+  const inspections = await getInspections();
+
   return inspections.filter((item) => item.providerId === providerId);
 }
 
 export async function getInspectionsByVessel(vesselId) {
-  return inspections.filter((item) => item.vesselId === vesselId);
+  return withVessels(
+    await apiFetch(`/inspections/vessel/${encodeURIComponent(vesselId)}`),
+  );
 }
 
 export async function createInspection(data) {
-  const newInspection = {
-    id: `insp-${String(inspections.length + 1).padStart(3, "0")}`,
-    vesselId: data.vesselId,
-    vesselName: data.vesselName,
-    vesselType: data.vesselType,
-    providerId: data.providerId,
-    type: data.type,
-    status: "scheduled",
-    scheduledAt: data.scheduledAt,
-    completedAt: null,
-    inspector: data.inspector,
-    checklist: data.checklist || [
-      { item: "Casco e tubulação", status: "pending", notes: "" },
-      { item: "Motor e propulsão", status: "pending", notes: "" },
-      { item: "Sistema elétrico", status: "pending", notes: "" },
-      { item: "Equipamentos de segurança", status: "pending", notes: "" },
-      { item: "Navegação e comunicação", status: "pending", notes: "" },
-    ],
-    certificate: null,
-    notes: data.notes || "",
-    createdAt: new Date().toISOString(),
-  };
+  const row = await apiFetch("/inspections", {
+    method: "POST",
+    body: JSON.stringify({
+      vesselId: data.vesselId,
+      type: data.type,
+      scheduledAt: data.scheduledAt,
+      inspector: data.inspector,
+      notes: data.notes || "",
+      checklist: data.checklist || defaultChecklist,
+    }),
+  });
 
-  inspections = [...inspections, newInspection];
-  return newInspection;
+  return withVesselsById(row);
 }
 
 export async function updateChecklistItem(inspectionId, itemIndex, status, notes) {
-  const inspection = inspections.find((item) => item.id === inspectionId);
-  if (!inspection) return null;
+  const row = await apiFetch(
+    `/inspections/${encodeURIComponent(inspectionId)}/checklist/${itemIndex}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ status, notes }),
+    },
+  );
 
-  inspection.checklist[itemIndex] = {
-    ...inspection.checklist[itemIndex],
-    status,
-    notes,
-  };
-
-  inspection.status = "in_progress";
-  return inspection;
+  return withVesselsById(row);
 }
 
 export async function completeInspection(inspectionId) {
-  const inspection = inspections.find((item) => item.id === inspectionId);
-  if (!inspection) return null;
-
-  const allReviewed = inspection.checklist.every(
-    (item) => item.status !== "pending",
+  const row = await apiFetch(
+    `/inspections/${encodeURIComponent(inspectionId)}/complete`,
+    { method: "POST" },
   );
 
-  if (!allReviewed) return null;
-
-  inspection.status = "completed";
-  inspection.completedAt = new Date().toISOString();
-
-  const hasFailure = inspection.checklist.some(
-    (item) => item.status === "failed",
-  );
-
-  if (!hasFailure) {
-    const validUntil = new Date();
-    validUntil.setMonth(validUntil.getMonth() + 6);
-
-    inspection.certificate = {
-      id: `cert-${String(Date.now()).slice(-6)}`,
-      issuedAt: inspection.completedAt,
-      validUntil: validUntil.toISOString().split("T")[0],
-      inspector: inspection.inspector,
-      type:
-        inspection.type === "safety"
-          ? "Certificado de Segurança"
-          : "Certificado de Inspeção",
-    };
-  }
-
-  return inspection;
+  return withVesselsById(row);
 }
 
 export async function cancelInspection(inspectionId) {
-  const inspection = inspections.find((item) => item.id === inspectionId);
-  if (!inspection) return null;
+  const row = await apiFetch(
+    `/inspections/${encodeURIComponent(inspectionId)}/cancel`,
+    { method: "POST" },
+  );
 
-  inspection.status = "cancelled";
-  return inspection;
+  return withVesselsById(row);
 }
 
 export function getInspectionTypes() {

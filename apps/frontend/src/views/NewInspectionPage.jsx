@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useNewInspectionViewModel } from "../viewmodels/useInspectionViewModel";
+import { defaultChecklist } from "../services/inspectionService";
 import { BackLink } from "../components/PageHeader";
 import Icon from "../components/Icon";
 
@@ -16,24 +17,32 @@ export default function NewInspectionPage() {
   const [scheduledTime, setScheduledTime] = useState("");
   const [inspector, setInspector] = useState("");
   const [notes, setNotes] = useState("");
+  const [validationError, setValidationError] = useState("");
 
   async function onSubmit(e) {
     e.preventDefault();
+    setValidationError("");
 
     const vessel = vessels.find((v) => v.id === vesselId);
-    if (!vessel) return;
+    if (!vessel) {
+      setValidationError("Selecione uma embarcação.");
+      return;
+    }
 
     const scheduledAt = new Date(`${scheduledDate}T${scheduledTime}`);
 
+    if (Number.isNaN(scheduledAt.getTime())) {
+      setValidationError("Informe uma data e um horário válidos.");
+      return;
+    }
+
     const result = await handleSubmit({
       vesselId: vessel.id,
-      vesselName: vessel.name,
-      vesselType: `${vessel.type} ${vessel.length}`,
-      providerId: "prov-ricardo",
       type,
       scheduledAt: scheduledAt.toISOString(),
       inspector,
       notes,
+      checklist: defaultChecklist,
     });
 
     if (result) {
@@ -50,11 +59,11 @@ export default function NewInspectionPage() {
         Selecione a embarcação, o tipo de inspeção e o horário desejado.
       </p>
 
-      {error && (
+      {(error || validationError) && (
         <div className="card" style={{ marginTop: 18, borderColor: "var(--color-danger)" }}>
           <div className="card--padding">
             <p className="page-header__subtitle" style={{ color: "var(--color-danger)" }}>
-              {error}
+              {error || validationError}
             </p>
           </div>
         </div>
