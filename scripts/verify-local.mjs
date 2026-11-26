@@ -54,6 +54,11 @@ for (const needle of forbiddenInBundle) {
 }
 
 check("bundle contém o carrossel", builtContent.includes("auth-carousel"));
+check("bundle contém o controle de senha", builtContent.includes("password-toggle"));
+check(
+  "login usa autoComplete atual na senha",
+  frontendSource.includes('autoComplete="current-password"'),
+);
 check(
   "bundle sem console.* no código-fonte",
   !/\bconsole\.(error|warn|log|debug)\s*\(/.test(frontendSource),

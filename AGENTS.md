@@ -32,7 +32,8 @@ Este projeto agora e uma base simples para estudo.
   conta legada `demo@safeanchor.test`/`demo123456`. **Nao ha credencial publica
   de diretoria** — a conta `DIRECTOR` e provisionada fora do repositorio e nao
   aparece na UI. As contas sao reais, criadas via API; persona e so navegacao —
-  autorizacao por role e isolamento por Party.
+  autorizacao por role e isolamento por Party. O campo de senha tem opcao de
+  mostrar/ocultar e usa `autoComplete` para preencimento de credenciais.
 - Area da diretoria em `/director`, `/director/responses`, `/director/users` e
   `/director/audit`: guard por `roleKey` no frontend e
   `authorizeRoles("DIRECTOR","ADMIN")` no backend. A diretoria filtra respostas

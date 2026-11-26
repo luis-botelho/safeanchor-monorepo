@@ -13,6 +13,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -70,6 +71,10 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   placeholder="voce@exemplo.com"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  required
                   onChange={(event) => setEmail(event.target.value)}
                 />
               </div>
@@ -78,17 +83,34 @@ export default function LoginPage() {
                 <label className="field__label" htmlFor="login-password">
                   Senha
                 </label>
-                <input
-                  id="login-password"
-                  className="input"
-                  type="password"
-                  value={password}
-                  placeholder="••••••••"
-                  onChange={(event) => setPassword(event.target.value)}
-                />
+                <div className="field__password">
+                  <input
+                    id="login-password"
+                    className="input"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    required
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword((current) => !current)}
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? "Ocultar" : "Mostrar"}
+                  </button>
+                </div>
               </div>
 
-              {error && <p className="field__error">{error}</p>}
+              {error && (
+                <p className="field__error" role="alert">
+                  {error}
+                </p>
+              )}
 
               <SubmitButton
                 busy={isLoading}
