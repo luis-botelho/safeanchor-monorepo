@@ -32,14 +32,13 @@ delas têm botão na tela de login.
 | Proprietário | `demo@safeanchor.app` | `demo123` | `OWNER` | `USER` | Jornada completa: frota → embarcação → manutenção → documentos → inspeção com certificado |
 | Prestador | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` | `USER` | Dashboard do prestador, perfil público, jobs, solicitações de serviço |
 | Marina | `gestao@marinacostaazul.com` | `demo123` | `MARINA` | `USER` | Dashboard da marina, frota, equipe, serviços, reservas e plano |
-| Admin da diretoria | `diretoria@safeanchor.app` | `demo123` | `OWNER` | `DIRECTOR` | Área `/director`: respostas da pesquisa, decisões, usuários e auditoria |
 | Proprietário (legado) | `demo@safeanchor.test` | `demo123456` | `OWNER` | `USER` | Conta usada nos smoke tests; mesma base de dados da conta proprietário |
 
 > **Atenção para não prometer demais:** `persona` é metadado de navegação. O
-> backend autoriza por `role` (as contas de negócio são `USER` e a da diretoria é
-> `DIRECTOR`) e isola dados por `Party`. Trocar a persona no login muda os menus,
-> **não** concede permissões diferentes. Cada conta de negócio vê somente a
-> própria frota; a diretoria vê as respostas capturadas com consentimento. A conta da diretoria e o botão correspondente estão publicados em produção.
+> backend autoriza por `role` (as contas públicas são `USER`) e isola dados por
+> `Party`. Trocar a persona no login muda os menus, **não** concede permissões
+> diferentes. Cada conta de negócio vê somente a própria frota; a diretoria vê as
+> respostas capturadas com consentimento, mas sua credencial não é pública.
 
 ## 3. Roteiro principal (25–30 minutos)
 
@@ -236,5 +235,6 @@ antes de seguir.
    todos os itens aprovados.
 5. Layout “estranho” → limpe o `localStorage` (`safeanchor.cookieConsent`,
    `safeanchor.researchConsent` e o rascunho da pesquisa) e recarregue.
-6. Área da diretoria indisponível → confirme o login com
-   `diretoria@safeanchor.app`/`demo123` e rode `npm.cmd run verify:demo`.
+6. Área da diretoria indisponível → use a conta `DIRECTOR` privada do
+   mantenedor; as contas públicas são `USER` e recebem `403`. O verificador
+   `npm.cmd run verify:demo` cobre apenas as contas públicas.

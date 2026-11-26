@@ -205,8 +205,8 @@ embarcações e entidades ligadas. ADMIN vê tudo. A autorização de escrita us
 com `authorizeRoles("DIRECTOR","ADMIN")` e, no frontend, `DirectorRoute` exige
 `roleKey` equivalente. A `persona` (`OWNER`, `SERVICE_PROVIDER`, `MARINA`)
 aparece no perfil/token, mas no backend ela não decide permissão — no frontend
-ela só escolhe o menu/painel. A conta `diretoria@safeanchor.app` / `demo123` tem
-persona `OWNER` e role `DIRECTOR`.
+ela só escolhe o menu/painel. Não existe conta pública de `DIRECTOR`: a
+diretoria é provisionada fora do repositório.
 
 Endpoints principais (os protegidos vêm depois de `requireAuth` em `app.js`):
 
@@ -260,10 +260,9 @@ causa do `404.html`; as públicas têm HTML prerenderizado e as privadas são
 1. **Entrar** — a tela inicial tem dois cards: "Responder a pesquisa" e "Ver a
    demonstração". O texto "Não precisa criar conta" vale para a pesquisa; a área
    autenticada exige credenciais reais. Em `/login`, use os botões **"Acessos de
-   demonstração"** (proprietário, prestador, marina e "Admin da
-   diretoria" `diretoria@safeanchor.app` / `demo123`) ou a conta legada
-   `demo@safeanchor.test` / `demo123456`. O login com role `DIRECTOR` abre
-   `/director`; os demais abrem `/dashboard`.
+   demonstração"** (proprietário, prestador e marina) ou a conta legada
+   `demo@safeanchor.test` / `demo123456`. Não há botão de diretoria; ela exige
+   conta `DIRECTOR` privada. Os demais perfis abrem `/dashboard`.
 2. **Pesquisa (opcional)** — `/pesquisa` começa com **"Aceitar captura"** ou
    **"Recusar captura"** (versão `2026-11-26`, registrada em
    `safeanchor.researchConsent` com decisão e data). Com aceite, o rascunho em

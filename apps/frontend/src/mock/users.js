@@ -54,24 +54,6 @@ export const demoAccounts = [
       marinaId: "marin-costa-azul",
     },
   },
-  {
-    email: "diretoria@safeanchor.app",
-    password: "demo123",
-    label: "Demo — Admin da diretoria",
-    profile: {
-      id: "usr-diretoria",
-      name: "Diretoria",
-      fullName: "Admin da Diretoria",
-      email: "diretoria@safeanchor.app",
-      role: "Admin da diretoria",
-      roleKey: "DIRECTOR",
-      company: "SafeAnchor",
-      location: "Florianópolis, SC",
-      since: "2026",
-      initials: "AD",
-      persona: "OWNER",
-    },
-  },
 ];
 
 export const personaAccounts = [
@@ -98,15 +80,6 @@ export const personaAccounts = [
     email: "gestao@marinacostaazul.com",
     password: "demo123",
     icon: "anchor",
-  },
-  {
-    persona: "OWNER",
-    roleKey: "DIRECTOR",
-    label: "Admin da diretoria",
-    description: "Pesquisa, decisões e auditoria",
-    email: "diretoria@safeanchor.app",
-    password: "demo123",
-    icon: "dashboard",
   },
 ];
 

@@ -98,20 +98,21 @@ operacional.
 | Saude da API | https://safeanchor-monorepo.vercel.app/health |
 
 O login tem botoes **"Acessos de demonstracao"** que preenchem email e senha
-das contas reais criadas via `/auth/register`:
+das contas publicas de demonstracao, todas com `role: USER` na API:
 
 | Conta | Senha | Persona |
 |---|---|---|
 | `demo@safeanchor.app` | `demo123` | `OWNER` |
 | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` |
 | `gestao@marinacostaazul.com` | `demo123` | `MARINA` |
-| `diretoria@safeanchor.app` ("Admin da diretoria") | `demo123` | `OWNER` |
 | `demo@safeanchor.test` (legado, sem botao) | `demo123456` | `OWNER` |
 
-As contas de negocio sao `USER`; a da diretoria e `DIRECTOR` na API. A persona
-so define a navegacao; a autorizacao e por `role` e o isolamento por `Party`. O botao
-"Admin da diretoria" abre `/director`. O roteiro autorizado para apresentacao
-esta em [`docs/demo-apresentacao.md`](./docs/demo-apresentacao.md).
+**Nao ha credencial publica de diretoria.** O acesso a `/director` e
+provisionado pelo mantenedor fora do repositorio; veja
+[`docs/security-hardening.md`](./docs/security-hardening.md). A persona so define
+a navegacao; a autorizacao e por `role` e o isolamento por `Party`. O roteiro
+autorizado para apresentacao esta em
+[`docs/demo-apresentacao.md`](./docs/demo-apresentacao.md).
 
 **Publicado na rodada final:** area da diretoria em `/director`,
 `/director/responses`, `/director/users` e `/director/audit`, protegida por

@@ -225,22 +225,22 @@ WhatsApp e sempre link `wa.me`, nunca envio automatico.
 ## Acessos de demonstracao
 
 A tela `/login` mostra o bloco **"Acessos de demonstracao"**: um clique em
-Proprietario, Prestador, Marina ou **Admin da diretoria** preenche e-mail e
-senha. **Nao** ha picker de persona — as contas existem de verdade na API de
-producao e foram criadas via `/auth/register`.
+Proprietario, Prestador ou Marina preenche e-mail e senha. **Nao** ha picker de
+persona — as contas existem de verdade na API de producao e foram criadas via
+`/auth/register`.
 
 | Botao | Conta | Senha | Persona | Role na API |
 |---|---|---|---|---|
 | Proprietario | `demo@safeanchor.app` | `demo123` | `OWNER` | `USER` |
 | Prestador | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` | `USER` |
 | Marina | `gestao@marinacostaazul.com` | `demo123` | `MARINA` | `USER` |
-| Admin da diretoria | `diretoria@safeanchor.app` | `demo123` | `OWNER` | `DIRECTOR` |
 | (sem botao, legado) | `demo@safeanchor.test` | `demo123456` | `OWNER` | `USER` |
 
-Depois do preenchimento, o botao **Entrar** chama `/auth/login` (JWT de 1h, sem
-refresh). A persona vem do usuario autenticado e define apenas a navegacao: a
-autorizacao e por `role` (as contas de negocio sao `USER` e a da diretoria e
-`DIRECTOR`) e o isolamento por `Party`. Trocar a persona no login nao concede
+Nao ha botao de diretoria: `/director` exige conta `DIRECTOR` provisionada fora
+do repositorio. Depois do preenchimento, o botao **Entrar** chama `/auth/login`
+(JWT de curta duracao mantido apenas em memoria). A persona vem do usuario
+autenticado e define apenas a navegacao: a autorizacao e por `role` (as contas
+publicas sao `USER`) e o isolamento por `Party`. Trocar a persona no login nao concede
 permissoes extras. O login com role `DIRECTOR` direciona para `/director`.
 
 A area da diretoria (publicada) tem `/director`,

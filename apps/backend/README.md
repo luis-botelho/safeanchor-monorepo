@@ -225,10 +225,11 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 > **Aplicadas em produção:** as migrations
 > `20261127000000_add_director_role` (`UserRole.DIRECTOR`) e
 > `20261127000100_add_research_consent_and_director` (tabelas
-> `ResearchResponse`/`DirectorAction` e promoção da conta da diretoria) foram
-> executadas por bootstrap temporário, removido junto com a variável
-> `BOOTSTRAP_DIRECTOR_SCHEMA`. A conta pública `diretoria@safeanchor.app` /
-> `demo123` tem role `DIRECTOR` e as rotas `/director/*` funcionam em produção.
+> `ResearchResponse`/`DirectorAction`) foram executadas por bootstrap temporário,
+> removido junto com a variável `BOOTSTRAP_DIRECTOR_SCHEMA`. A promoção de
+> diretoria foi retirada da migration: a conta antiga precisa ser rotacionada e
+> invalidação de sessões pelo mantenedor. Veja
+> `../../docs/security-hardening.md`.
 
 ## Contas de demonstracao
 
@@ -241,13 +242,12 @@ demonstracao"** que preenchem e-mail e senha das quatro principais.
 | `demo@safeanchor.app` | `demo123` | `OWNER` | `USER` |
 | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` | `USER` |
 | `gestao@marinacostaazul.com` | `demo123` | `MARINA` | `USER` |
-| `diretoria@safeanchor.app` ("Admin da diretoria") | `demo123` | `OWNER` | `DIRECTOR` |
 | `demo@safeanchor.test` (legado, sem botao) | `demo123456` | `OWNER` | `USER` |
 
-As contas de negocio sao `USER`; a da diretoria e `DIRECTOR`. `persona` e
-metadado de navegacao; a autorizacao e por `role` (`authorizeRoles`) e o
-isolamento por `Party` (`accessScopeService`). O botao "Admin da diretoria" leva
-a `/director` no frontend.
+Todas as contas publicas sao `USER`. `persona` e metadado de navegacao; a
+autorizacao e por `role` (`authorizeRoles`) e o isolamento por `Party`
+(`accessScopeService`). Nao ha conta publica de `DIRECTOR`: as rotas
+`/director/*` exigem credencial provisionada fora do repositorio.
 
 Dados demo em producao (via API, nao via seed): `demo@safeanchor.app` e
 `demo@safeanchor.test` tem 3 vessels, 5 maintenances, 5 documents,
@@ -516,15 +516,15 @@ produção:
 
 ```text
 20261127000000_add_director_role                  # enum UserRole.DIRECTOR
-20261127000100_add_research_consent_and_director  # ResearchResponse, DirectorAction e role da conta demo
+20261127000100_add_research_consent_and_director  # ResearchResponse e DirectorAction
 ```
 
 Elas foram aplicadas em producao com `DIRECT_URL` operacional por bootstrap
 temporario removido no mesmo ciclo; a Vercel nao devolve segredos via CLI
-(`../../docs/handoff-freeze.md`). A migration so promoveu a conta
-`diretoria@safeanchor.app` porque ela ja existia na API — crie a conta por
-`/auth/register` antes de aplicar em outro ambiente. Nunca use
-`prisma migrate reset` ou `prisma db push` no projeto remoto.
+(`../../docs/handoff-freeze.md`). A migration nao promove contas: crie a conta
+da diretoria por `/auth/register` e altere o papel em ambiente controlado, sem
+versionar credenciais. Nunca use `prisma migrate reset` ou `prisma db push` no
+projeto remoto.
 
 ---
 

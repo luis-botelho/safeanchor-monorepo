@@ -27,12 +27,12 @@ Este projeto agora e uma base simples para estudo.
   em `https://safeanchor-monorepo.vercel.app` (`/health`). Apresente sempre a
   producao; o Preview expira em `2026-11-29T14:19:24Z`.
 - O login tem botoes "Acessos de demonstracao" para `demo@safeanchor.app`/`demo123`
-  (`OWNER`), `carlos@tecno.boat`/`demo123` (`SERVICE_PROVIDER`),
-  `gestao@marinacostaazul.com`/`demo123` (`MARINA`) e
-  `diretoria@safeanchor.app`/`demo123` ("Admin da diretoria": persona `OWNER`,
-  role real `DIRECTOR`); conta legada `demo@safeanchor.test`/`demo123456`. As
-  contas sao reais, criadas via API; persona e so navegacao — autorizacao por
-  role e isolamento por Party. O botao da diretoria abre `/director`.
+  (`OWNER`), `carlos@tecno.boat`/`demo123` (`SERVICE_PROVIDER`) e
+  `gestao@marinacostaazul.com`/`demo123` (`MARINA`), todos com role `USER`;
+  conta legada `demo@safeanchor.test`/`demo123456`. **Nao ha credencial publica
+  de diretoria** — a conta `DIRECTOR` e provisionada fora do repositorio e nao
+  aparece na UI. As contas sao reais, criadas via API; persona e so navegacao —
+  autorizacao por role e isolamento por Party.
 - Area da diretoria em `/director`, `/director/responses`, `/director/users` e
   `/director/audit`: guard por `roleKey` no frontend e
   `authorizeRoles("DIRECTOR","ADMIN")` no backend. A diretoria filtra respostas
