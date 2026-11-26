@@ -191,6 +191,8 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 > responde em `https://safeanchor-monorepo.vercel.app`, mas `/health` ainda
 > retorna `{"status":"degraded","database":"down"}` por configuração de banco.
 > Corrigir `DATABASE_URL`/migrations em produção é pré-requisito da Feature 038.
+> O `postinstall` executa `prisma generate`, que exige `DIRECT_URL` também nos
+> deployments de Preview — sem essa variável o build falha antes de iniciar.
 
 <details>
 <summary><strong>Testando rapidamente com curl</strong></summary>
