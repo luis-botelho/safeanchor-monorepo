@@ -123,7 +123,13 @@ export async function persistLocally(payload) {
   }
 }
 
-export function sendResearchSummary(summary, { consent, response } = {}) {
+export function getResearchNonce() {
+  return apiFetch("/research/nonce");
+}
+
+export async function sendResearchSummary(summary, { consent, response } = {}) {
+  const { nonce } = await getResearchNonce();
+
   return apiFetch("/research", {
     method: "POST",
     body: JSON.stringify({
@@ -132,6 +138,7 @@ export function sendResearchSummary(summary, { consent, response } = {}) {
         accepted: consent?.decision === "accepted",
         version: consent?.version,
         answeredAt: consent?.answeredAt,
+        nonce,
       },
       response,
     }),

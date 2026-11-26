@@ -133,9 +133,13 @@ export default function PrivacyPage() {
           </p>
           <ConsentControls />
           <p>
-            Se você <strong>autorizar</strong>, enviamos ao servidor as respostas,
-            o perfil informado e, caso você deixe, nome, cidade e e-mail ou
-            WhatsApp. A diretoria analisa esses dados para priorizar mudanças no
+            Se você <strong>autorizar</strong>, o servidor emite um nonce
+            assinado, com validade curta, e valida esse nonce no envio. Só assim
+            as respostas, o perfil
+            informado e, caso você deixe, nome, cidade e e-mail ou WhatsApp são
+            gravados. O registro do consentimento inclui IP, user-agent, data e
+            hora gerados no servidor, versão da política e identificador do
+            nonce; a diretoria analisa os dados para priorizar mudanças no
             produto. Cada decisão sobre uma resposta ou sobre o papel de um
             usuário gera um registro mínimo de auditoria, sem senhas ou tokens.
           </p>

@@ -1,8 +1,23 @@
+import { issueResearchNonce } from "../lib/researchConsent.js";
 import { submitResearchResponse } from "../services/researchService.js";
+
+export function researchNonce(request, response) {
+  return response
+    .set("Cache-Control", "no-store")
+    .status(200)
+    .json(issueResearchNonce());
+}
 
 export async function submitResearch(request, response) {
   try {
-    const result = await submitResearchResponse(request.body);
+    const result = await submitResearchResponse(
+      request.body,
+      request.app?.locals?.prisma,
+      {
+        ip: request.ip,
+        userAgent: request.headers["user-agent"],
+      },
+    );
 
     return response.status(202).json({
       message: result.message,
