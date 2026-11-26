@@ -238,7 +238,10 @@ export default function PrivacyPage() {
           <p>
             Esta demonstração não usa cookies de rastreamento, analytics ou
             publicidade. Usamos o armazenamento local do navegador para funções
-            essenciais e para lembrar sua escolha de consentimento:
+            essenciais e para lembrar sua escolha de consentimento.
+            O token de acesso e o perfil da sessão ficam somente na memória da
+            aba: não são gravados no navegador e desaparecem ao recarregar a
+            página. Para continuar usando a área privada, entre novamente.
           </p>
           <div className="legal__table-wrap">
             <table className="legal__table">
@@ -250,16 +253,6 @@ export default function PrivacyPage() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td><code>token</code></td>
-                  <td>Manter o JWT que autentica as chamadas à API.</td>
-                  <td>Até expirar (1 hora) ou sair da conta.</td>
-                </tr>
-                <tr>
-                  <td><code>safeanchor:session</code></td>
-                  <td>Guardar o perfil exibido na interface.</td>
-                  <td>Até sair da conta ou limpar o navegador.</td>
-                </tr>
                 <tr>
                   <td><code>safeanchor.research.draft</code></td>
                   <td>Restaurar o rascunho da pesquisa.</td>

@@ -65,3 +65,10 @@ export async function registerUser({ name, email, password, persona }) {
 export async function getCurrentUser() {
   return toProfile(await apiFetch("/auth/me"));
 }
+
+export async function logoutUser() {
+  return apiFetch("/auth/logout", {
+    method: "POST",
+    skipUnauthorizedEvent: true,
+  });
+}
