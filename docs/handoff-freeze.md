@@ -1,15 +1,15 @@
 # Handoff — estado final da demo (2026-11-26)
 
 > **Demo funcional nos dois lugares.** O backend está no Vercel e o frontend no
-> GitHub Pages. O desenvolvimento continua na branch **`develop`**; o código de
-> produção saiu de **`main`** após os merges dos PRs #175 e #176. A reformulação
-> visual descrita abaixo está em `develop`, aguardando promoção por PR.
+> GitHub Pages. O desenvolvimento continua na branch **`develop`**; a produção
+> sai de **`main`** após merges autorizados. Os PRs #175, #176 e #177 já foram
+> mergeados — a reformulação visual Maritime Precision está publicada.
 
 ## Onde está publicado
 
 | Camada | URL | Estado |
 |---|---|---|
-| Frontend (SPA React/Vite) | https://luis-botelho.github.io/safeanchor-monorepo/ | `200`, bundle apontando para a API de produção |
+| Frontend (SPA React/Vite) | https://luis-botelho.github.io/safeanchor-monorepo/ | `200`, bundle `index-kl5FpaBn.js` / CSS `index-CT24OO81.css`, API de produção e WhatsApp `5524992772357` |
 | Backend (API Express) | https://safeanchor-monorepo.vercel.app | `/health` `200` com `database: "up"` |
 | Preview da API | https://safeanchor-monorepo-git-develop-luisbotelhos-projects.vercel.app | `200`, banco temporário Neon |
 
@@ -18,10 +18,12 @@ Login da demo: `demo@safeanchor.test` / `demo123456` (conta `USER`, `persona: OW
 ## Branch, PR e deployments
 
 - Branch de trabalho: **`develop`**, sincronizada com `origin/develop`.
-- `main`: merge commit `aacaab655d5a88db5361039809811030c64f4c8b`.
-- PR #175 (`develop` → `main`): **MERGED** em `2026-11-26T17:14:26Z`.
-- CI em `main`: run `45866027746` (success).
-- GitHub Pages em `main`: run `45866028405` (success).
+- `main`: merge commit `4c7cf175f3dde868ecdcaac55b42e980095c6589` (PR #177).
+- PR #175 (`develop` → `main`): **MERGED** em `2026-11-26T17:14:26Z`; CI `45866027746`, Pages `45866028405`.
+- PR #176 (`develop` → `main`): **MERGED** em `2026-11-26T17:46:46Z`; CI `45870584827`.
+- PR #177 (`develop` → `main`): **MERGED** em `2026-11-26T18:32:23Z` com
+  autorização explícita do usuário; CI `45876739970` (success) e Pages
+  `45876739922` (success).
 - Deploy de produção limpo (sem endpoint temporário):
   `dpl_GqVhLf3QT8EsYqWrCGX1QFFDEt4b` — READY e com alias em
   `safeanchor-monorepo.vercel.app`.
@@ -43,8 +45,10 @@ Login da demo: `demo@safeanchor.test` / `demo123456` (conta `USER`, `persona: OW
    demonstração foram semeados pela própria API (não por `prisma db seed`).
 6. O PR #176 (`develop` → `main`) levou o botão de WhatsApp, a política de
    privacidade/LGPD e o aviso de armazenamento local para produção.
+7. O PR #177 levou a reformulação visual para `main`/produção após autorização
+   explícita; a validação pós-merge fechou 29/29 checks.
 
-## Reformulação visual — Maritime Precision (em `develop`)
+## Reformulação visual — Maritime Precision (em produção via PR #177)
 
 A pasta `stitch_safeanchor_maritime_ux_architecture/`, adicionada pelo usuário,
 foi versionada e traduzida para tokens BEM em
@@ -72,9 +76,27 @@ fonte de decisão, não código para copiar. O contrato completo está em
   opt-in. Com movimento desligado, o estado final continua visível.
 - Commits em `develop`: `2b3f1a1`, `ba8533c`, `7440477`, `cef53e6`, `5854bd1`,
   `fd3036d`, `f3c3388`, `214e69a`, `7d33a3b`, `e830dc9`, `aa62062`.
-- **PR #177** (`develop` → `main`) aberto em 26/11/2026: `MERGEABLE`, checks
-  verdes (backend `generate/validate/test`, frontend `build`, Vercel Preview).
-  Aguardando **autorização explícita** para merge — não fazer merge direto.
+- **PR #177** (`develop` → `main`) mesclado em `2026-11-26T18:32:23Z` após
+  autorização explícita. Checks verdes no commit final `3ce7c9e`: backend
+  `generate/validate/test`, frontend `build` e Vercel Preview.
+
+### Validação pós-merge (26/11/2026)
+
+Script temporário `verify-production.mjs` (fora do repositório): **29/29 checks OK**.
+
+- Pages `200` com o bundle novo (`index-kl5FpaBn.js` / `index-CT24OO81.css`).
+- Bundle com API de produção, `5524992772357`, `/privacidade`, LGPD,
+  `safeanchor.cookieConsent` e `wa.me`. O número antigo não aparece como literal
+  independente — a substring só existe dentro do número correto com `55`.
+- CSS com `skeleton-pulse`, `inline-loader__spin`, `btn__label-busy`,
+  `alert--error` e os tokens Maritime Precision.
+- Deep links `/privacidade`, `/pesquisa` e `/login`: o Pages responde `404` com o
+  HTML da SPA (`404.html`), que o Router renderiza no navegador — comportamento
+  esperado do fallback de SPA.
+- Vercel `/health`: `status: "ok"`, `database: "up"`.
+- Login demo `200` + JWT; `GET /vessels` (3), `/maintenances` (5), `/documents`
+  (5) e `/inspections` (3) todos `200`, com CORS para
+  `https://luis-botelho.github.io`.
 
 ## Dados de demonstração em produção
 
@@ -159,7 +181,9 @@ Executada com `Origin: https://luis-botelho.github.io` para exercitar o CORS rea
 4. Se o login voltar a falhar com `P2022`, rode `npx prisma migrate status` com
    `DIRECT_URL` e aplique as migrations pendentes antes de mexer no frontend.
 5. Depois de qualquer alteração em `main`, confirme Pages + Vercel e rode o
-   smoke test de `/health`, login e quatro listagens.
+   smoke test de `/health`, login e quatro listagens. O roteiro completo está em
+   `verify-production.mjs` (temporário, fora do repo): cobre bundle, rotas SPA,
+   login, listagens e CORS em 29 checks.
 6. Leia também [`diagnostico.md`](./diagnostico.md) para entender as tecnologias
    e o fluxo de uso antes de mexer na arquitetura.
 7. Antes de mexer em loading, animação ou cor, leia
