@@ -74,6 +74,13 @@ const accounts = [
   },
 ];
 
+const legacyAccount = {
+  email: "demo@safeanchor.test",
+  password: "demo123456",
+  persona: "OWNER",
+  label: "Proprietário legado",
+};
+
 async function verifyFrontend() {
   const response = await fetch(pagesUrl);
   const html = await response.text();
@@ -190,6 +197,25 @@ async function verifyBackend() {
       dashboard.status === 200 && Number(dashboard.body.total) >= account.expected.maintenances,
       `HTTP ${dashboard.status} · total=${dashboard.body.total}`,
     );
+  }
+
+  const legacySession = await login(legacyAccount);
+  check(
+    `Login ${legacyAccount.label}`,
+    legacySession.status === 200 && Boolean(legacySession.token),
+    `HTTP ${legacySession.status}`,
+  );
+  check(
+    `Persona ${legacyAccount.label}`,
+    legacySession.body.user?.persona === legacyAccount.persona,
+    legacySession.body.user?.persona || "ausente",
+  );
+  if (legacySession.token) {
+    const legacyVessels = await request("GET", "/vessels", {
+      token: legacySession.token,
+      withOrigin: true,
+    });
+    hasEnough("vessels (Proprietário legado)", legacyVessels.body, 3);
   }
 
   if (ownerVesselIds.length > 0) {
