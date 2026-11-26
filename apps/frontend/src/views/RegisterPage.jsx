@@ -4,6 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Icon from "../components/Icon";
 
+const personas = [
+  { value: "OWNER", label: "Proprietário" },
+  { value: "SERVICE_PROVIDER", label: "Prestador de serviços" },
+  { value: "MARINA", label: "Marina" },
+];
+
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -11,7 +17,9 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [persona, setPersona] = useState("OWNER");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -22,8 +30,15 @@ export default function RegisterPage() {
       return;
     }
 
-    await register(name, email, password);
-    navigate("/dashboard");
+    try {
+      setIsLoading(true);
+      await register(name, email, password, persona);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Não foi possível criar a conta. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -39,8 +54,8 @@ export default function RegisterPage() {
           </p>
         </div>
         <p className="auth__brand-quote">
-          "Tudo é simulado nesta demonstração: não há envio de dados nem cadastro real.
-          Apenas navegue e explore."
+          "Seus dados ficam salvos no servidor: frota, manutenção, documentos e inspeções
+          em um só lugar."
         </p>
       </aside>
 
@@ -51,11 +66,6 @@ export default function RegisterPage() {
             <p className="auth__card-subtitle">
               Comece agora, gratuitamente.
             </p>
-
-            <div className="demo-banner">
-              <strong>Modo demonstrativo</strong>
-              Nenhum dado real é criado ou enviado.
-            </div>
 
             <form onSubmit={handleSubmit} className="stack" style={{ marginTop: 6 }}>
               <div className="field">
@@ -100,10 +110,32 @@ export default function RegisterPage() {
                 />
               </div>
 
+              <div className="field">
+                <label className="field__label" htmlFor="register-persona">
+                  Como você usa o SafeAnchor?
+                </label>
+                <select
+                  id="register-persona"
+                  className="select"
+                  value={persona}
+                  onChange={(event) => setPersona(event.target.value)}
+                >
+                  {personas.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {error && <p className="field__error">{error}</p>}
 
-              <button type="submit" className="btn btn--primary btn--block">
-                Criar conta
+              <button
+                type="submit"
+                className="btn btn--primary btn--block"
+                disabled={isLoading}
+              >
+                {isLoading ? "Criando conta..." : "Criar conta"}
               </button>
             </form>
 
