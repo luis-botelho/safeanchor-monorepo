@@ -105,7 +105,7 @@ Features definidas no rebaseline 2026 (Features **031–038**):
 | **034** | Documents Core | 🔶 API + cadastro/listagem na UI (sem upload/Storage) |
 | **035** | Expiration & Compliance | ✅ status por validade e indicadores no dashboard |
 | **036** | Safety Completion & Mobile Polish | 🔶 inspeções via API; checklist desktop, sem mobile/offline |
-| **037** | MVP UX Polish | 🔶 skeletons contextuais, estados vazios/erro e spinner nos fluxos core (reformulação visual em `develop`, aguardando PR) |
+| **037** | MVP UX Polish | ✅ skeletons contextuais, estados vazios/erro e spinner nos fluxos core (PR #177 mergeado) |
 | **038** | CI/CD & Production Deploy | ✅ PR #175 mergeado; Pages e Vercel no ar; `/health` 200, migrations aplicadas, seed demo e deploy limpo |
 
 A **Definition of Ready** completa esta em
@@ -715,13 +715,14 @@ para ser validado por investidores, parceiros e PTM.
 
 > **Next Action**
 
-**Demo publicada e validada:** os PRs #175 e #176 (`develop` → `main`) foram
-mergeados; o frontend roda no GitHub Pages e a API na Vercel, com `/health`
-`200`, migrations aplicadas, usuario demo e dados de demonstracao carregados. Em
-`develop` esta a reformulação visual (tema Maritime Precision, skeletons,
-estados de erro e spinner de submit), pronta para promoção por PR — **nao fazer
+**Demo publicada e validada:** os PRs #175, #176 e #177 (`develop` → `main`)
+foram mergeados; o frontend roda no GitHub Pages e a API na Vercel, com `/health`
+`200`, migrations aplicadas, usuario demo e dados de demonstracao carregados. A
+reformulação visual (tema Maritime Precision, skeletons, estados de erro e
+spinner de submit) esta em produção desde 26/11/2026 — validação pos-merge
+29/29 checks. Para novas mudancas, trabalhe em `develop` e abra PR: **nao fazer
 merge direto em `main`**. Antes de mexer, leia `docs/handoff-freeze.md` (estado
-operacional), `docs/diagnostico.md` (stack e fluxo de uso) e
+operacional e validação), `docs/diagnostico.md` (stack e fluxo de uso) e
 `docs/visual-system.md` (tema e contrato de carregamento).
 
 ---

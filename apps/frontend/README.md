@@ -359,7 +359,7 @@ O frontend e deployado automaticamente via **GitHub Actions** no branch `main`:
 - [x] Dashboard com prontidao calculada a partir da API
 - [x] Deploy no GitHub Pages
 - [x] CI com build (sem lint configurado)
-- [x] Tema Maritime Precision e skeletons com acessibilidade (em `develop`)
+- [x] Tema Maritime Precision e skeletons com acessibilidade (em produção, PR #177)
 - [ ] Conectar marinas ao backend
 - [ ] Conectar marketplace ao backend
 - [ ] Upload de arquivos de documentos

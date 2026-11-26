@@ -98,8 +98,9 @@ foram conferidas na documentação oficial em 2026-11-26.
 
 ### 3.1.1 Sistema visual e estados de carregamento
 
-A reformulação visual segue o tema **Maritime Precision**, vindo da pasta de
-referência `stitch_safeanchor_maritime_ux_architecture/`. Ele foi traduzido para
+A reformulação visual em produção (PR #177, 26/11/2026) segue o tema
+**Maritime Precision**, vindo da pasta de referência
+`stitch_safeanchor_maritime_ux_architecture/`. Ele foi traduzido para
 tokens semânticos em `src/styles/global.css` (Light Mist, Deep Ocean Navy,
 Abyss Teal e Sea Teal; bordas hairline e raio 4 px), mantendo BEM e sem Tailwind.
 O contrato e as fontes consultadas estão em
@@ -374,8 +375,9 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 
 ## 9. Recomendações priorizadas
 
-1. **Congelar a demo de hoje** e evitar mudanças em `main` até a apresentação;
-   novos trabalhos seguem em `develop` via PR.
+1. **Manter a demo congelada** após o merge do PR #177 (reformulação visual
+   publicada e validada com 29/29 checks); novos trabalhos seguem em `develop`
+   via PR, sem merge direto em `main`.
 2. **Corrigir as rotas órfãs e os links quebrados** do `AppShell`, pelo menos para
    `/maintenances`, `/preventive-maintenances`, `/checklist-templates` e
    `/checklist-executions` — hoje parecem features faltando quando estão prontas.
