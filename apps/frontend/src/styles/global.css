@@ -4257,3 +4257,170 @@ textarea {
     animation: fade-in var(--motion-base) var(--ease) both;
   }
 }
+
+/* ============================================================
+   Loading primitives — skeleton estável, pulse finito, sem shimmer
+   ============================================================ */
+
+:root {
+  --skeleton-base: #e6ece9;
+}
+
+.skeleton-region {
+  width: 100%;
+}
+
+.skeleton {
+  display: block;
+  max-width: 100%;
+  background: var(--skeleton-base);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton--pill {
+  border-radius: 999px;
+}
+
+.skeleton-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-section {
+  margin-bottom: 16px;
+}
+
+.skeleton-kpi {
+  align-items: flex-start;
+}
+
+.skeleton-kpi__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-rows {
+  display: flex;
+  flex-direction: column;
+  margin-top: 14px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--row-border);
+}
+
+.skeleton-row:last-child {
+  border-bottom: 0;
+}
+
+.skeleton-row__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.skeleton-table {
+  margin-top: 14px;
+}
+
+.skeleton-table__head,
+.skeleton-table__row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--row-border);
+}
+
+.skeleton-table__row:last-child {
+  border-bottom: 0;
+}
+
+.skeleton-vessel {
+  overflow: hidden;
+}
+
+.skeleton-cover {
+  width: 100%;
+  border-radius: 0;
+}
+
+.skeleton-vessel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+
+.skeleton-vessel__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.skeleton-detail__hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.skeleton-detail__head {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Opt-in: sem prefers-reduced-motion o bloco fica estático, mas legível */
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: skeleton-pulse 2s ease-in-out 2;
+  }
+}
+
+/* Spinner de ação: curto e com estado final visível */
+.inline-loader {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.inline-loader__spin {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.42);
+  border-top-color: currentColor;
+  border-radius: 50%;
+}
+
+@keyframes inline-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .inline-loader__spin {
+    animation: inline-spin 800ms linear 6;
+  }
+}
