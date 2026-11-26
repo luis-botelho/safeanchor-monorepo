@@ -11,21 +11,29 @@ import {
 
 export async function listInspections(request, response) {
   const scope = await getAccessScope(request.user);
-  const inspections = await getInspections(scope);
+  const inspections = await getInspections(scope, request.app.locals.prisma);
 
   return response.json(inspections);
 }
 
 export async function listInspectionsByVessel(request, response) {
   const scope = await getAccessScope(request.user);
-  const inspections = await getInspectionsByVessel(scope, request.params.vesselId);
+  const inspections = await getInspectionsByVessel(
+    scope,
+    request.params.vesselId,
+    request.app.locals.prisma,
+  );
 
   return response.json(inspections);
 }
 
 export async function getInspection(request, response) {
   const scope = await getAccessScope(request.user);
-  const inspection = await getInspectionById(scope, request.params.id);
+  const inspection = await getInspectionById(
+    scope,
+    request.params.id,
+    request.app.locals.prisma,
+  );
 
   if (!inspection) {
     return response.status(404).json({ message: "Inspection not found" });
@@ -49,7 +57,11 @@ export async function createNewInspection(request, response) {
   }
 
   const scope = await getAccessScope(request.user);
-  const inspection = await createInspection(scope, body);
+  const inspection = await createInspection(
+    scope,
+    body,
+    request.app.locals.prisma,
+  );
 
   if (!inspection) {
     return response.status(404).json({ message: "Vessel not found" });
@@ -72,6 +84,7 @@ export async function updateInspectionChecklist(request, response) {
     itemIndex,
     request.body.status,
     request.body.notes,
+    request.app.locals.prisma,
   );
 
   if (!inspection) {
@@ -83,7 +96,11 @@ export async function updateInspectionChecklist(request, response) {
 
 export async function finishInspection(request, response) {
   const scope = await getAccessScope(request.user);
-  const inspection = await completeInspection(scope, request.params.id);
+  const inspection = await completeInspection(
+    scope,
+    request.params.id,
+    request.app.locals.prisma,
+  );
 
   if (!inspection) {
     return response.status(404).json({
@@ -96,7 +113,11 @@ export async function finishInspection(request, response) {
 
 export async function cancelNewInspection(request, response) {
   const scope = await getAccessScope(request.user);
-  const inspection = await cancelInspection(scope, request.params.id);
+  const inspection = await cancelInspection(
+    scope,
+    request.params.id,
+    request.app.locals.prisma,
+  );
 
   if (!inspection) {
     return response.status(404).json({ message: "Inspection not found" });

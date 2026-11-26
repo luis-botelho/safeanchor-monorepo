@@ -23,6 +23,8 @@ const genReqId = (request) => request.headers["x-request-id"] || randomUUID();
 export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   const app = express();
 
+  app.locals.prisma = db;
+
   app.use(
     pinoHttp({
       logger,

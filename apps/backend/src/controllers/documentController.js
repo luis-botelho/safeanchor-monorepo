@@ -7,14 +7,18 @@ import {
 
 export async function listDocuments(request, response) {
   const scope = await getAccessScope(request.user);
-  const documents = await getDocuments(scope);
+  const documents = await getDocuments(scope, request.app.locals.prisma);
 
   return response.json(documents);
 }
 
 export async function listDocumentsByVessel(request, response) {
   const scope = await getAccessScope(request.user);
-  const documents = await getDocumentsByVessel(scope, request.params.vesselId);
+  const documents = await getDocumentsByVessel(
+    scope,
+    request.params.vesselId,
+    request.app.locals.prisma,
+  );
 
   return response.json(documents);
 }
@@ -36,7 +40,11 @@ export async function createNewDocument(request, response) {
   }
 
   const scope = await getAccessScope(request.user);
-  const document = await createDocument(scope, body);
+  const document = await createDocument(
+    scope,
+    body,
+    request.app.locals.prisma,
+  );
 
   if (!document) {
     return response.status(404).json({ message: "Vessel not found" });
