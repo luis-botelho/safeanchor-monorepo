@@ -1,3 +1,5 @@
+import SubmitButton from "./SubmitButton";
+
 export default function ChecklistExecutionForm({
   title,
   viewModel,
@@ -45,9 +47,12 @@ export default function ChecklistExecutionForm({
         onChange={(event) => viewModel.setExecutedAt(event.target.value)}
       />
 
-      <button type="submit">
-        {viewModel.isLoading ? "Salvando..." : button}
-      </button>
+      <SubmitButton
+        className="btn btn--primary"
+        busy={viewModel.isLoading}
+        idleLabel={button}
+        busyLabel="Salvando..."
+      />
 
       {viewModel.error && <p>{viewModel.error}</p>}
       {viewModel.successMessage && <p>{viewModel.successMessage}</p>}

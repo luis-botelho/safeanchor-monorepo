@@ -1,3 +1,5 @@
+import SubmitButton from "./SubmitButton";
+
 export default function ChecklistTemplateForm({
   title,
   viewModel,
@@ -39,9 +41,12 @@ export default function ChecklistTemplateForm({
         rows={8}
       />
 
-      <button type="submit">
-        {viewModel.isLoading ? "Salvando..." : button}
-      </button>
+      <SubmitButton
+        className="btn btn--primary"
+        busy={viewModel.isLoading}
+        idleLabel={button}
+        busyLabel="Salvando..."
+      />
 
       {viewModel.error && <p>{viewModel.error}</p>}
 

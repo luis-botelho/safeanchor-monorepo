@@ -1,3 +1,5 @@
+import SubmitButton from "./SubmitButton";
+
 export default function PreventiveMaintenanceForm({
   title,
   viewModel,
@@ -71,9 +73,12 @@ export default function PreventiveMaintenanceForm({
         onChange={(e) => viewModel.setStartDate(e.target.value)}
       />
 
-      <button type="submit">
-        {button}
-      </button>
+      <SubmitButton
+        className="btn btn--primary"
+        busy={viewModel.isLoading}
+        idleLabel={button}
+        busyLabel="Salvando..."
+      />
 
       {viewModel.error && <p>{viewModel.error}</p>}
       {viewModel.successMessage && <p>{viewModel.successMessage}</p>}

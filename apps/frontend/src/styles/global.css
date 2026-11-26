@@ -631,6 +631,28 @@ textarea {
   width: 100%;
 }
 
+/* Rótulo de largura estável: idle e busy ocupam a mesma célula */
+.btn__label {
+  display: inline-grid;
+}
+
+.btn__label-idle,
+.btn__label-busy {
+  grid-area: 1 / 1;
+}
+
+.btn__label-busy {
+  opacity: 0;
+}
+
+.btn[aria-busy="true"] .btn__label-idle {
+  opacity: 0;
+}
+
+.btn[aria-busy="true"] .btn__label-busy {
+  opacity: 1;
+}
+
 /* Forms */
 
 .field {

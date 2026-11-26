@@ -1,4 +1,5 @@
 import { documentCategories } from "../mock/documents";
+import SubmitButton from "./SubmitButton";
 
 export default function DocumentForm({ title, viewModel, onSuccess, button }) {
   return (
@@ -85,9 +86,11 @@ export default function DocumentForm({ title, viewModel, onSuccess, button }) {
         onChange={(event) => viewModel.setProvider(event.target.value)}
       />
 
-      <button className="btn btn--primary" type="submit" disabled={viewModel.isLoading}>
-        {viewModel.isLoading ? "Salvando..." : button}
-      </button>
+      <SubmitButton
+        busy={viewModel.isLoading}
+        idleLabel={button}
+        busyLabel="Salvando..."
+      />
 
       {viewModel.error && <p className="field__error">{viewModel.error}</p>}
       {viewModel.successMessage && (

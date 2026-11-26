@@ -5,6 +5,7 @@ import { useNewInspectionViewModel } from "../viewmodels/useInspectionViewModel"
 import { defaultChecklist } from "../services/inspectionService";
 import { BackLink } from "../components/PageHeader";
 import Icon from "../components/Icon";
+import SubmitButton from "../components/SubmitButton";
 
 export default function NewInspectionPage() {
   const navigate = useNavigate();
@@ -159,14 +160,14 @@ export default function NewInspectionPage() {
         </div>
 
         <div style={{ marginTop: 18, display: "flex", gap: 10 }}>
-          <button
-            className="btn btn--primary"
-            type="submit"
-            disabled={isSubmitting || !vesselId || !scheduledDate || !scheduledTime || !inspector}
+          <SubmitButton
+            busy={isSubmitting}
+            idleLabel="Agendar inspeção"
+            busyLabel="Agendando..."
+            disabled={!vesselId || !scheduledDate || !scheduledTime || !inspector}
           >
             <Icon name="check" size={16} />
-            {isSubmitting ? "Agendando..." : "Agendar inspeção"}
-          </button>
+          </SubmitButton>
           <button
             type="button"
             className="btn btn--ghost"
