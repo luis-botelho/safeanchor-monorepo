@@ -20,16 +20,21 @@ const optionalFields = [
   "imageSeed",
 ];
 
+function normalizeStatus(status) {
+  return statusAliases[status] || status || "";
+}
+
 export function getVesselStatus(status) {
   return (
     vesselStatusMeta[status] ||
-    vesselStatusMeta[statusAliases[status]] || { label: status || "—", tone: "neutral" }
+    vesselStatusMeta[normalizeStatus(status)] || { label: status || "—", tone: "neutral" }
   );
 }
 
 function toVessel(row) {
   return {
     ...row,
+    status: normalizeStatus(row.status),
     category: row.category || row.type || "—",
     length: row.length || "—",
     year: row.year || "—",

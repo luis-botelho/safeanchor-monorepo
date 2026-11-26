@@ -12,10 +12,27 @@ import StatCard from "../components/StatCard";
 export default function DashboardPage() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getDashboard().then(setData);
+    let active = true;
+
+    getDashboard()
+      .then((result) => {
+        if (active) setData(result);
+      })
+      .catch((error) => {
+        if (active) setError(error.message || "Não foi possível carregar o dashboard.");
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
+
+  if (error) {
+    return <p className="field__error">{error}</p>;
+  }
 
   if (!data) {
     return <p>Carregando dashboard...</p>;
