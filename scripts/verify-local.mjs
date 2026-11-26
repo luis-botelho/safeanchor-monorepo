@@ -112,6 +112,12 @@ check(
     (effectMajor === 3 && (effectMinor > 22 || (effectMinor === 22 && effectPatch > 0))),
 );
 
+const ciWorkflow = readIfExists(join(root, ".github", "workflows", "ci.yml"));
+check(
+  "CI audita dependências do backend",
+  ciWorkflow.includes("npm audit --audit-level=high"),
+);
+
 if (failures.length > 0) {
   console.error("verify:local falhou:");
   for (const failure of failures) console.error(`  - ${failure}`);
