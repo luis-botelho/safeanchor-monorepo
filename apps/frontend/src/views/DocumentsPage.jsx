@@ -7,6 +7,8 @@ import StatusBadge from "../components/StatusBadge";
 import Icon from "../components/Icon";
 import StatCard from "../components/StatCard";
 import { getFleetVessels } from "../services/vesselService";
+import ErrorState from "../components/ErrorState";
+import { ListSkeleton } from "../components/PageSkeletons";
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState([]);
@@ -37,11 +39,11 @@ export default function DocumentsPage() {
   }, []);
 
   if (isLoading) {
-    return <p>Carregando documentos...</p>;
+    return <ListSkeleton label="Carregando documentos" rows={5} />;
   }
 
   if (error) {
-    return <p className="field__error">{error}</p>;
+    return <ErrorState title="Não foi possível carregar os documentos" message={error} />;
   }
 
   const summary = getDocumentsSummary(documents);

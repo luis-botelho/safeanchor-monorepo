@@ -9,6 +9,8 @@ import {
 import PageHeader from "../components/PageHeader";
 import StatusBadge from "../components/StatusBadge";
 import Icon from "../components/Icon";
+import ErrorState from "../components/ErrorState";
+import { ListSkeleton } from "../components/PageSkeletons";
 
 export default function MaintenancePage() {
   const [upcoming, setUpcoming] = useState([]);
@@ -41,11 +43,11 @@ export default function MaintenancePage() {
   }, []);
 
   if (isLoading) {
-    return <p>Carregando manutenções...</p>;
+    return <ListSkeleton label="Carregando manutenções" rows={5} />;
   }
 
   if (error) {
-    return <p className="field__error">{error}</p>;
+    return <ErrorState title="Não foi possível carregar as manutenções" message={error} />;
   }
 
   return (

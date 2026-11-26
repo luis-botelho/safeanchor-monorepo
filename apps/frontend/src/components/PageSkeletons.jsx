@@ -19,9 +19,9 @@ function HeaderSkeleton() {
   );
 }
 
-export function DashboardSkeleton() {
+export function DashboardSkeleton({ label = "Carregando dashboard operacional" }) {
   return (
-    <SkeletonRegion label="Carregando dashboard operacional">
+    <SkeletonRegion label={label}>
       <HeaderSkeleton />
 
       <div className="grid grid--4 skeleton-section">

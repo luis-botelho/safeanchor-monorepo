@@ -10,6 +10,7 @@ import Avatar from "../components/Avatar";
 import Rating from "../components/Rating";
 import StatCard from "../components/StatCard";
 import Icon from "../components/Icon";
+import { DashboardSkeleton } from "../components/PageSkeletons";
 
 const requestStatusMeta = {
   "Aguardando orçamento": "info",
@@ -31,7 +32,7 @@ export default function ProviderDashboardPage() {
   }, [providerId]);
 
   if (!provider) {
-    return <p>Carregando visão do prestador...</p>;
+    return <DashboardSkeleton label="Carregando visão do prestador..." />;
   }
 
   const pending = requests.filter((r) => r.status === "Aguardando orçamento");

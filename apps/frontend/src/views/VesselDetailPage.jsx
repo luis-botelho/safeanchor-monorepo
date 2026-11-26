@@ -11,6 +11,8 @@ import ReadinessGauge from "../components/ReadinessGauge";
 import StatusBadge from "../components/StatusBadge";
 import PageHeader, { BackLink } from "../components/PageHeader";
 import Icon from "../components/Icon";
+import ErrorState from "../components/ErrorState";
+import { DetailSkeleton } from "../components/PageSkeletons";
 
 export default function VesselDetailPage() {
   const { id } = useParams();
@@ -70,11 +72,11 @@ export default function VesselDetailPage() {
   }, [id]);
 
   if (isLoading) {
-    return <p>Carregando embarcação...</p>;
+    return <DetailSkeleton label="Carregando embarcação" />;
   }
 
   if (error) {
-    return <p className="field__error">{error}</p>;
+    return <ErrorState title="Embarcação indisponível" message={error} />;
   }
 
   const status = getVesselStatus(vessel.status);
