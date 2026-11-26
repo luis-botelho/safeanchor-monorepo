@@ -5,6 +5,7 @@ const roleLabels = {
   USER: "Proprietário",
   MANAGER: "Gestor de frota",
   ADMIN: "Administrador",
+  DIRECTOR: "Admin da diretoria",
 };
 
 // A API não tem modelos de Marina/Prestador, então estes IDs de catálogo
@@ -33,6 +34,7 @@ export function toProfile(user) {
     fullName: name,
     email: user.email,
     role: demoProfile.role || roleLabels[user.role] || "Proprietário",
+    roleKey: demoProfile.roleKey || user.role || "USER",
     persona: user.persona || demoProfile.persona || "OWNER",
     initials: demoProfile.initials || initials,
     providerId: user.providerId || demoProfile.providerId,

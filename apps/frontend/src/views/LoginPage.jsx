@@ -26,8 +26,8 @@ export default function LoginPage() {
 
     try {
       setIsLoading(true);
-      await login(email, password);
-      navigate("/dashboard");
+      const profile = await login(email, password);
+      navigate(profile.roleKey === "DIRECTOR" ? "/director" : "/dashboard");
     } catch (err) {
       setError(err.message || "Não foi possível entrar. Tente novamente.");
     } finally {
@@ -110,7 +110,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     className="demo-access__item"
-                    key={account.persona}
+                    key={account.email}
                     onClick={() => {
                       setEmail(account.email);
                       setPassword(account.password);

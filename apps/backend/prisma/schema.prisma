@@ -133,6 +133,7 @@ enum UserRole {
   USER
   MANAGER
   ADMIN
+  DIRECTOR
 }
 
 enum Persona {
@@ -181,4 +182,38 @@ model Membership {
 
   @@unique([userId, organizationId])
   @@index([organizationId])
+}
+
+// Respostas da pesquisa capturadas somente com consentimento explícito.
+model ResearchResponse {
+  id             String   @id @default(cuid())
+  consentVersion String
+  acceptedAt     String
+  name           String?
+  contact        String?
+  city           String?
+  profile        String?
+  answers        Json
+  summary        String
+  status         String   @default("NEW")
+  decision       String?
+  createdAt      String
+
+  @@index([status])
+  @@index([profile])
+  @@index([city])
+}
+
+// Registro mínimo das decisões tomadas pela diretoria.
+model DirectorAction {
+  id         String   @id @default(cuid())
+  actorId    String
+  targetType String
+  targetId   String
+  action     String
+  details    Json
+  createdAt  String
+
+  @@index([actorId])
+  @@index([targetType, targetId])
 }

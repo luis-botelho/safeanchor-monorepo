@@ -5,6 +5,7 @@ import pinoHttp from "pino-http";
 
 import logger from "./lib/logger.js";
 import prisma from "./lib/prisma.js";
+import { applyBootstrapMigrations } from "./services/bootstrapService.js";
 import { createHealthHandler } from "./controllers/healthController.js";
 import { modulesRouter } from "./routes/modulesRoutes.js";
 import vesselRoutes from "./routes/vesselRoutes.js";
@@ -16,6 +17,7 @@ import authRoutes from "./routes/authRoutes.js";
 import researchRoutes from "./routes/researchRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import inspectionRoutes from "./routes/inspectionRoutes.js";
+import directorRoutes from "./routes/directorRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
 
 const genReqId = (request) => request.headers["x-request-id"] || randomUUID();
@@ -94,6 +96,7 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   app.use("/checklist-executions", checklistExecutionRoutes);
   app.use("/documents", documentRoutes);
   app.use("/inspections", inspectionRoutes);
+  app.use("/director", directorRoutes);
 
   app.use((request, response) => {
     return response.status(404).json({
@@ -118,5 +121,14 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
 
   return app;
 };
+
+try {
+  const result = await applyBootstrapMigrations();
+  if (result.applied) {
+    logger.info("Bootstrap da diretoria concluído.");
+  }
+} catch (error) {
+  logger.error({ err: error }, "Falha no bootstrap da diretoria.");
+}
 
 export default createApp();

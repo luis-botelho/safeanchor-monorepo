@@ -6,6 +6,27 @@ import Avatar from "./Avatar";
 import Icon from "./Icon";
 
 function navFor(user) {
+  if (["DIRECTOR", "ADMIN"].includes(user?.roleKey)) {
+    return [
+      {
+        title: "Diretoria",
+        items: [
+          { to: "/director", label: "Visão geral", icon: "dashboard" },
+          { to: "/director/responses", label: "Respostas da pesquisa", icon: "doc" },
+          { to: "/director/users", label: "Usuários e papéis", icon: "users" },
+          { to: "/director/audit", label: "Auditoria", icon: "check" },
+        ],
+      },
+      {
+        title: "Produto",
+        items: [
+          { to: "/pesquisa", label: "Ver pesquisa pública", icon: "send" },
+          { to: "/profile", label: "Minha conta", icon: "user" },
+        ],
+      },
+    ];
+  }
+
   if (user?.persona === "SERVICE_PROVIDER") {
     return [
       {

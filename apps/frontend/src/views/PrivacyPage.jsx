@@ -1,6 +1,15 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Icon from "../components/Icon";
+import {
+  CONSENT_CHANGED_EVENT,
+  RESEARCH_CONSENT_VERSION,
+  clearResearchConsent,
+  markPrivacyNoticeSeen,
+  readResearchConsent,
+  saveResearchConsent,
+} from "../services/researchConsent";
 import {
   buildWhatsappUrl,
   researchPhone,
@@ -13,6 +22,70 @@ const privacyRequestUrl = buildWhatsappUrl(
 function displayPhone(phone) {
   if (phone.length !== 13) return phone || "(24) 99277-2357";
   return `+${phone[0]} (${phone.slice(1, 3)}) ${phone.slice(3, 7)}-${phone.slice(7)}`;
+}
+
+function ConsentControls() {
+  const [consent, setConsent] = useState(() => readResearchConsent());
+
+  useEffect(() => {
+    const refresh = () => setConsent(readResearchConsent());
+    window.addEventListener(CONSENT_CHANGED_EVENT, refresh);
+    return () => window.removeEventListener(CONSENT_CHANGED_EVENT, refresh);
+  }, []);
+
+  function decide(decision) {
+    saveResearchConsent(decision);
+    markPrivacyNoticeSeen();
+    setConsent(readResearchConsent());
+  }
+
+  function withdraw() {
+    clearResearchConsent();
+    setConsent(null);
+  }
+
+  return (
+    <div className="legal__consent">
+      <p>
+        <strong>Sua escolha atual:</strong>{" "}
+        {consent?.decision === "accepted"
+          ? "captura autorizada"
+          : consent?.decision === "declined"
+            ? "captura recusada"
+            : "ainda não respondida"}
+        {consent?.answeredAt
+          ? ` (em ${new Date(consent.answeredAt).toLocaleString("pt-BR")}, versão ${consent.version})`
+          : ""}
+        .
+      </p>
+      <div className="legal__consent-actions">
+        <button
+          type="button"
+          className="btn btn--primary btn--sm"
+          onClick={() => decide("accepted")}
+        >
+          Autorizar captura
+        </button>
+        <button
+          type="button"
+          className="btn btn--ghost btn--sm"
+          onClick={() => decide("declined")}
+        >
+          Recusar captura
+        </button>
+        {consent && (
+          <button type="button" className="btn btn--ghost btn--sm" onClick={withdraw}>
+            Revogar escolha
+          </button>
+        )}
+      </div>
+      <p className="legal__consent-note">
+        A revogação vale para respostas futuras. Para apagar respostas já
+        capturadas, fale com o controlador pelo WhatsApp no fim desta página.
+        Versão atual do consentimento: {RESEARCH_CONSENT_VERSION}.
+      </p>
+    </div>
+  );
 }
 
 export default function PrivacyPage() {
@@ -51,11 +124,35 @@ export default function PrivacyPage() {
         </section>
 
         <section className="legal__section">
-          <h2 className="legal__section-title">2. Quais dados coletamos</h2>
+          <h2 className="legal__section-title">2. Captura da pesquisa e seu consentimento</h2>
+          <p>
+            Antes de responder à pesquisa, você escolhe explicitamente entre
+            <strong> autorizar</strong> ou <strong>recusar</strong> a captura. A
+            escolha fica registrada no seu navegador com data e versão da
+            política; nenhum cookie de rastreamento ou publicidade é criado.
+          </p>
+          <ConsentControls />
+          <p>
+            Se você <strong>autorizar</strong>, enviamos ao servidor as respostas,
+            o perfil informado e, caso você deixe, nome, cidade e e-mail ou
+            WhatsApp. A diretoria analisa esses dados para priorizar mudanças no
+            produto. Cada decisão sobre uma resposta ou sobre o papel de um
+            usuário gera um registro mínimo de auditoria, sem senhas ou tokens.
+          </p>
+          <p>
+            Se você <strong>recusar</strong>, pode responder todas as perguntas
+            normalmente. Nada é enviado ao servidor nem gravado no banco: o
+            resumo aparece apenas na sua tela e você pode copiá-lo ou enviá-lo
+            manualmente por e-mail/WhatsApp.
+          </p>
+        </section>
+
+        <section className="legal__section">
+          <h2 className="legal__section-title">3. Quais dados coletamos</h2>
           <ul className="legal__list">
             <li>
-              <strong>Pesquisa de produto:</strong> perfil, respostas às perguntas
-              e, se você quiser, nome, cidade e um meio de contato.
+              <strong>Pesquisa de produto:</strong> perfil, respostas e, se você
+              quiser, nome, cidade e um meio de contato — somente após aceite.
             </li>
             <li>
               <strong>Conta de acesso:</strong> nome, e-mail, hash da senha
@@ -67,21 +164,28 @@ export default function PrivacyPage() {
               checklist.
             </li>
             <li>
-              <strong>Dados técnicos de uso:</strong> identificador da requisição,
-              horário e logs de erro. Tokens, senhas e cookies de autenticação
-              são removidos dos logs.
+              <strong>Dados técnicos de uso:</strong> identificador da
+              requisição, horário e logs de erro. Tokens, senhas e cookies de
+              autenticação são removidos dos logs.
             </li>
           </ul>
         </section>
 
         <section className="legal__section">
-          <h2 className="legal__section-title">3. Por que usamos os dados</h2>
+          <h2 className="legal__section-title">4. Por que usamos os dados</h2>
           <ul className="legal__list">
-            <li>entender o que construir primeiro a partir da pesquisa;</li>
+            <li>
+              entender o que construir primeiro a partir da pesquisa capturada
+              com consentimento;
+            </li>
             <li>autenticar você e manter sua sessão enquanto o token for válido;</li>
             <li>
               permitir o cadastro e o acompanhamento da frota, manutenções,
               documentos e inspeções;
+            </li>
+            <li>
+              permitir que o administrador da diretoria ajuste papéis, personas
+              e prioridades, com registro de auditoria;
             </li>
             <li>proteger a API contra acessos indevidos e depurar falhas.</li>
           </ul>
@@ -94,7 +198,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="legal__section">
-          <h2 className="legal__section-title">4. Com quem compartilhamos</h2>
+          <h2 className="legal__section-title">5. Com quem compartilhamos</h2>
           <p>
             Os dados trafegam apenas pelos serviços necessários para executar a
             demonstração:
@@ -102,7 +206,7 @@ export default function PrivacyPage() {
           <ul className="legal__list">
             <li>
               <strong>Supabase</strong> — banco PostgreSQL onde ficam conta,
-              frota e registros operacionais;
+              frota, respostas consentidas e registros operacionais;
             </li>
             <li>
               <strong>Vercel</strong> — hospedagem da API e variáveis de ambiente;
@@ -116,23 +220,25 @@ export default function PrivacyPage() {
             <li>
               <strong>WhatsApp</strong> — somente se você clicar no botão de
               contato; a conversa é aberta no seu aplicativo e não é enviada
-              automaticamente.
+              automaticamente;
+            </li>
+            <li>
+              <strong>Admin da diretoria</strong> — único perfil interno com
+              acesso às respostas capturadas e às ferramentas de alteração.
             </li>
           </ul>
           <p>
-            Não vendemos dados e não usamos dados pessoais para publicidade
-            direcionada.
+            Não vendemos dados, não usamos dados pessoais para publicidade
+            direcionada e não instalamos rastreadores de terceiros.
           </p>
         </section>
 
         <section className="legal__section">
-          <h2 className="legal__section-title">
-            5. Cookies e armazenamento local
-          </h2>
+          <h2 className="legal__section-title">6. Cookies e armazenamento local</h2>
           <p>
-            Esta demonstração não usa cookies de rastreamento, analítica ou
+            Esta demonstração não usa cookies de rastreamento, analytics ou
             publicidade. Usamos o armazenamento local do navegador para funções
-            essenciais:
+            essenciais e para lembrar sua escolha de consentimento:
           </p>
           <div className="legal__table-wrap">
             <table className="legal__table">
@@ -161,12 +267,17 @@ export default function PrivacyPage() {
                 </tr>
                 <tr>
                   <td><code>safeanchor.researchResponses</code></td>
-                  <td>Guardar uma cópia local do resumo enviado.</td>
+                  <td>Guardar cópia local do resumo quando você autoriza a captura.</td>
                   <td>Até você limpar os dados do site.</td>
                 </tr>
                 <tr>
+                  <td><code>safeanchor.researchConsent</code></td>
+                  <td>Registrar aceite ou recusa, com data e versão da política.</td>
+                  <td>Até você revogar ou limpar os dados do site.</td>
+                </tr>
+                <tr>
                   <td><code>safeanchor.cookieConsent</code></td>
-                  <td>Lembrar que você leu este aviso.</td>
+                  <td>Lembrar que você leu o aviso de privacidade.</td>
                   <td>Até você limpar os dados do site.</td>
                 </tr>
               </tbody>
@@ -179,18 +290,19 @@ export default function PrivacyPage() {
         </section>
 
         <section className="legal__section">
-          <h2 className="legal__section-title">6. Segurança e retenção</h2>
+          <h2 className="legal__section-title">7. Segurança e retenção</h2>
           <p>
             Usamos HTTPS, senhas com hash, token JWT com validade de uma hora,
-            isolamento de dados por proprietário/organização e remoção de
-            segredos nos logs. Os dados são mantidos enquanto necessários à
-            demonstração ou até você solicitar a exclusão. Registros de segurança
-            podem ser retidos por período limitado.
+            isolamento de dados por proprietário/organização, acesso restrito por
+            papel e remoção de segredos nos logs. Respostas capturadas e
+            auditorias são mantidas enquanto necessárias para a demonstração ou
+            até você solicitar a exclusão. Registros de segurança podem ser
+            retidos por período limitado.
           </p>
         </section>
 
         <section className="legal__section">
-          <h2 className="legal__section-title">7. Seus direitos</h2>
+          <h2 className="legal__section-title">8. Seus direitos</h2>
           <p>
             Nos termos do art. 18 da LGPD, você pode pedir: confirmação da
             existência dos dados, acesso, correção, anonimização, bloqueio ou
@@ -201,11 +313,12 @@ export default function PrivacyPage() {
         </section>
 
         <section className="legal__section">
-          <h2 className="legal__section-title">8. Mudanças nesta política</h2>
+          <h2 className="legal__section-title">9. Mudanças nesta política</h2>
           <p>
             Esta página pode ser atualizada quando o produto mudar. A data da
             última revisão sempre aparece no início. Em mudanças relevantes, o
-            aviso será atualizado no site.
+            aviso será atualizado no site e uma nova versão do consentimento
+            será solicitada.
           </p>
         </section>
 

@@ -45,9 +45,6 @@ jobs:
           VITE_RESEARCH_INBOX: ${{ vars.VITE_RESEARCH_INBOX }}
         run: npm run build
 
-      - name: SPA fallback for client-side routes
-        run: cp apps/frontend/dist/index.html apps/frontend/dist/404.html
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
