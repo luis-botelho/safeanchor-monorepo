@@ -153,7 +153,7 @@ async function verifyBackend() {
     `${countOf(templates)} templates`,
   );
 
-  let ownerVesselIds = [];
+  let ownerVesselId = null;
   for (const account of accounts) {
     const session = await login(account);
     check(`Login ${account.label}`, session.status === 200 && Boolean(session.token), `HTTP ${session.status}`);
@@ -181,7 +181,9 @@ async function verifyBackend() {
         list.cors || "ausente",
       );
       hasEnough(`${path} (${account.label})`, list.body, account.expected[key]);
-      if (path === "vessels") ownerVesselIds = (list.body || []).map((vessel) => vessel.id);
+      if (path === "vessels" && account === accounts[0]) {
+        ownerVesselId = Array.isArray(list.body) ? list.body[0]?.id || null : null;
+      }
       if (path === "inspections") {
         check(
           `Certificado ${account.label}`,
@@ -218,9 +220,9 @@ async function verifyBackend() {
     hasEnough("vessels (Proprietário legado)", legacyVessels.body, 3);
   }
 
-  if (ownerVesselIds.length > 0) {
+  if (ownerVesselId) {
     const provider = await login(accounts[1]);
-    const outsider = await request("GET", `/vessels/${ownerVesselIds[0]}`, { token: provider.token });
+    const outsider = await request("GET", `/vessels/${ownerVesselId}`, { token: provider.token });
     check(
       "Isolamento por Party",
       outsider.status === 404,
