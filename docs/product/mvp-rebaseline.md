@@ -82,6 +82,23 @@ O produto é organizado em torno dessa jornada. Cada feature do rebaseline contr
 - Smoke test.
 - Documentação de deploy.
 
+## Status de implementação (branch `develop`)
+
+| Feature | Situação | Observação |
+| --- | --- | --- |
+| 031 | ✅ | Roles + ownership aplicados a vessels, manutenções, documentos e inspeções. |
+| 032 | 🔶 | Shell e dashboard consomem a API; feed de atividades ainda mock. |
+| 033 | 🔶 | Perfil com dados reais; prontidão calculada no cliente (a API não expõe `readiness`). |
+| 034 | 🔶 | Modelo `Document`, API e cadastro/listagem na UI prontos; faltam upload e Supabase Storage. |
+| 035 | ✅ | Status por validade (válido/próximo/vencido) e indicadores no dashboard. |
+| 036 | 🔶 | Inspeções via API com checklist e certificado; falta mobile/offline e revalidação de QR Code. |
+| 037 | 🔶 | Loading/empty/error nos fluxos core; demais catálogos seguem mock. |
+| 038 | 🔶 | Pages no ar e API na Vercel, mas `/health` responde `database: down`. |
+
+Bloqueio atual da Feature 038: sem credenciais/acesso ao Supabase para corrigir
+`DATABASE_URL` e aplicar migrations em produção. As mudanças de `develop` serão
+promovidas a `main` somente por pull request.
+
 ## Definição de Pronto (DoD)
 
 - O usuário consegue percorrer a jornada completa (Login → Prontidão) sem erros.

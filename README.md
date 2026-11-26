@@ -11,7 +11,7 @@
 ![Express](https://img.shields.io/badge/Express-5-000000?style=flat)
 ![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?style=flat&logo=prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?style=flat&logo=postgresql&logoColor=white)
-![Status](https://img.shields.io/badge/status-MVP%20de%20apresentacao-F39C12?style=flat)
+![Status](https://img.shields.io/badge/status-MVP%20funcional-2ECC71?style=flat)
 
 </div>
 
@@ -99,14 +99,14 @@ Features definidas no rebaseline 2026 (Features **031–038**):
 
 | Feature | Nome | Situacao |
 |---|---|---|
-| **031** | Ownership & Access Scope | ✅ backend implementado |
-| **032** | Product Shell & Main Dashboard | ⬜ planejada |
-| **033** | Vessel Operational Profile | ⬜ planejada |
-| **034** | Documents Core | ⬜ planejada |
-| **035** | Expiration & Compliance | ⬜ planejada |
-| **036** | Safety Completion & Mobile Polish | ⬜ planejada |
-| **037** | MVP UX Polish | ⬜ planejada |
-| **038** | CI/CD & Production Deploy | 🔶 parcial (frontend publicado; backend nao) |
+| **031** | Ownership & Access Scope | ✅ backend + escopo aplicado nas rotas core |
+| **032** | Product Shell & Main Dashboard | 🔶 shell e dashboard com dados da API; feed de atividades ainda mock |
+| **033** | Vessel Operational Profile | 🔶 perfil com dados reais; prontidão calculada no cliente |
+| **034** | Documents Core | 🔶 API + cadastro/listagem na UI (sem upload/Storage) |
+| **035** | Expiration & Compliance | ✅ status por validade e indicadores no dashboard |
+| **036** | Safety Completion & Mobile Polish | 🔶 inspeções via API; checklist desktop, sem mobile/offline |
+| **037** | MVP UX Polish | 🔶 loading/empty/error nos fluxos core |
+| **038** | CI/CD & Production Deploy | 🔶 Pages no ar; Vercel com `/health` 503 (`database: down`) |
 
 A **Definition of Ready** completa esta em
 [`docs/product/mvp-rebaseline.md`](./docs/product/mvp-rebaseline.md): a jornada
@@ -160,12 +160,14 @@ nesta fase; **preservar** Prisma + PostgreSQL.
 3. **Fase 3** — Marina como operadora central
 4. **Fase 4** — dados agregados, analytics e insights
 
-### Roles no backend (estado atual)
+### Roles e personas (estado atual)
 
-O schema do banco define roles **`USER`**, **`MANAGER`** e **`ADMIN`**
-(`enum UserRole` em `apps/backend/prisma/schema.prisma`). Escritas em vessels,
-maintenances, checklists e preventivas exigem `MANAGER` ou `ADMIN`. A
-navegacao por persona no frontend e feita com contas demo (mock).
+O schema define roles **`USER`**, **`MANAGER`** e **`ADMIN`** (`enum UserRole`)
+e personas **`OWNER`**, **`SERVICE_PROVIDER`** e **`MARINA`** (`enum Persona`).
+Escritas em vessels, maintenances, checklists, preventivas, documentos e
+inspecoes aceitam `USER`, `MANAGER` e `ADMIN`, sempre limitadas ao escopo do
+usuario (`accessScopeService`). A persona e retornada em register/login/me,
+viaja no JWT e define a navegacao no frontend. Nao ha mais contas demo mock.
 
 ---
 
@@ -190,12 +192,13 @@ Mapa das areas de produto e seu estado atual no repositorio.
 
 | Area | Descricao | Estado |
 |---|---|---|
-| **Autenticacao** | Cadastro, login, JWT, roles | Backend: ✅ API real. Frontend: 🔶 login por contas demo (mock) |
-| **Fleet Management** | CRUD de embarcacoes + prontidao | Backend: ✅ endpoints. Frontend: 🔶 mock |
-| **Maintenance** | Agenda, historico, dashboard, preventiva | Backend: ✅ endpoints. Frontend: 🔶 mock (dashboard via API) |
+| **Autenticacao** | Cadastro, login, JWT, persona e roles | ✅ API real + frontend conectado (register e login automatico) |
+| **Fleet Management** | CRUD de embarcacoes + prontidao | ✅ API + CRUD na UI; prontidao calculada no cliente |
+| **Maintenance** | Agenda, historico, dashboard, preventiva | ✅ API + UI conectadas |
 | **Safety Checklists** | Templates + execucoes | ✅ Backend + frontend conectados via API |
-| **Inspections** | Agendamento e certificados | 🔶 Frontend mock apenas; backend pendente |
-| **Documents & Compliance** | Documentos e vencimentos (Features 034/035) | ⬜ Nao iniciado |
+| **Inspections** | Agendamento, checklist e certificados | ✅ API + telas de criacao/detalhe conectadas |
+| **Documents & Compliance** | Documentos e vencimentos (Features 034/035) | 🔶 API + cadastro/listagem na UI; sem upload/Storage |
+| **Dashboard** | Prontidao consolidada da frota | 🔶 dados reais; feed de atividades ainda mock |
 | **Marina operations** | Ocupacao, equipe, servicos, reservas, planos | 🔶 Frontend mock apenas |
 | **Marine Academy (treinamento)** | Trilhas e certificados | ⬜ Pos-MVP (Features 021–025) |
 | **Marketplace / Community / Events** | Conexao entre personas e networking | 🔶 Frontend mock apenas |
@@ -250,8 +253,9 @@ PostgreSQL (Supabase)
 |---|---|---|
 | `GET` | `/` | Status da API |
 | `GET` | `/health` | Health check (verifica conexao com o banco) |
-| `POST` | `/auth/register` | Cadastro de usuario |
-| `POST` | `/auth/login` | Login (retorna JWT) |
+| `POST` | `/auth/register` | Cadastro de usuario (aceita `persona`) |
+| `POST` | `/auth/login` | Login (retorna JWT com `persona`) |
+| `POST` | `/research` | Envio de resposta da pesquisa via Resend |
 
 **Autenticados:**
 
@@ -259,18 +263,27 @@ PostgreSQL (Supabase)
 |---|---|---|
 | `GET` | `/auth/me` | Dados do usuario autenticado |
 | `GET` | `/modules` | Modulos disponiveis |
-| `GET` `/POST` | `/vessels` | Lista / cria embarcacoes |
+| `GET` / `POST` | `/vessels` | Lista / cria embarcacoes |
 | `GET` | `/vessels/:id` | Detalhe de embarcacao |
 | `PUT` / `DELETE` | `/vessels/:id` | Atualiza / remove embarcacao |
 | `GET` | `/vessels/:id/maintenances` | Manutencoes da embarcacao |
 | `GET` | `/vessels/:id/inspections` | Checklists executados na embarcacao |
-| `GET` `/POST` | `/maintenances` | Lista / cria manutencoes |
+| `GET` / `POST` | `/maintenances` | Lista / cria manutencoes |
 | `GET` | `/maintenances/dashboard` | Dashboard de manutencao |
-| `GET` `/POST` | `/preventive-maintenances` | Agenda preventiva |
-| `GET` `/POST` | `/checklist-templates` | Templates de checklist |
-| `GET` `/POST` | `/checklist-executions` | Execucoes de checklist |
+| `GET` / `POST` | `/preventive-maintenances` | Agenda preventiva |
+| `GET` / `POST` | `/checklist-templates` | Templates de checklist |
+| `GET` / `POST` | `/checklist-executions` | Execucoes de checklist |
+| `GET` / `POST` | `/documents` | Lista / cria documentos |
+| `GET` | `/documents/vessel/:vesselId` | Documentos de uma embarcacao |
+| `GET` / `POST` | `/inspections` | Lista / cria inspecoes |
+| `GET` | `/inspections/vessel/:vesselId` | Inspecoes de uma embarcacao |
+| `GET` | `/inspections/:id` | Detalhe da inspecao |
+| `PATCH` | `/inspections/:id/checklist/:itemIndex` | Atualiza item do checklist |
+| `POST` | `/inspections/:id/complete` | Conclui inspecao e gera certificado |
+| `POST` | `/inspections/:id/cancel` | Cancela inspecao |
 
-Escritas em recursos de dominio exigem `MANAGER` ou `ADMIN`.
+Escritas em recursos de dominio aceitam `USER`, `MANAGER` e `ADMIN`, desde que
+o recurso pertença ao escopo (owner ou organizacao) do usuario autenticado.
 
 > Documentacao completa nos sub-READMEs: [`apps/backend/README.md`](./apps/backend/README.md) e [`apps/frontend/README.md`](./apps/frontend/README.md).
 
@@ -321,7 +334,7 @@ safeanchor-monorepo/
 │       ├── public/
 │       ├── src/
 │       │   ├── components/                # componentes compartilhados
-│       │   ├── context/                   # AuthContext (login por contas demo)
+│       │   ├── context/                   # AuthContext (login/cadastro via API)
 │       │   ├── mock/                      # dados simulados por modulo
 │       │   ├── router/                    # AppRouter + AppShell
 │       │   ├── services/                  # camada de dados (mock e/ou API)
@@ -352,36 +365,41 @@ safeanchor-monorepo/
 
 ## Current Implementation Status
 
-> Estado verificado no snapshot atual do repositorio (branch `main`).
-> Nao confie em "funcional" sem olhar a tabela — no frontend, muitos modulos
-> exibem dados mock.
+> Estado verificado na branch `develop` (a frente de `main`). Nao confie em
+> "funcional" sem olhar a tabela — catalogos como marinas, jobs e community
+> ainda exibem dados mock.
 
 ### Completed
 
 **Backend (API real, PostgreSQL via Prisma):**
 
-- [x] Autenticacao (register/login/me) com **bcrypt (custo 12)** + **JWT** (1h)
+- [x] Autenticacao (register/login/me) com **bcrypt (custo 12)** + **JWT** (1h) e `persona` no payload
 - [x] Autorizacao por roles **USER / MANAGER / ADMIN** (`authorizeRoles`)
-- [x] **Ownership & Access Scope** (Feature 031) — `accessScopeService` filtra por party do usuario + organizacoes
+- [x] **Ownership & Access Scope** (Feature 031) — `accessScopeService` filtra por party do usuario + organizacoes em todas as rotas core
 - [x] CRUD de embarcacoes (listar, criar, detalhe, atualizar, remover)
-- [x] Manutencoes + dashboard
-- [x] Manutencao preventiva
+- [x] Manutencoes + dashboard e manutencao preventiva
 - [x] Templates e execucoes de checklist
-- [x] Endpoint `/modules`
+- [x] Modelos Prisma `Document` e `Inspection` com escopo por embarcacao
+- [x] Documents API (listar, por vessel, criar) com validade e indicadores
+- [x] Inspections API (criar, listar, detalhe, checklist, concluir com certificado, cancelar)
+- [x] Endpoint `/modules` e `/research` (Resend)
 - [x] Health check com conexao ao banco
 - [x] Logging estruturado com pino + redacao de campos sensiveis
 - [x] Prisma + PostgreSQL + migrations versionadas (baseline `0_init` registrada)
 - [x] Seed de desenvolvimento protegido por `ALLOW_DATABASE_SEED`
-- [x] Testes com `node --test` (authMiddleware, authorization, ownership-scope, observability, server) + smoke test protegido por flag
+- [x] Testes com `node --test`: 15 passando e 3 integracoes puladas sem banco, incluindo controllers/rotas de documentos e inspecoes
 
 **Frontend (React 19 + Vite, MVVM):**
 
 - [x] Arquitetura MVVM (views → viewmodels → services)
-- [x] AppShell com navegacao por persona
-- [x] Autenticacao via contas demo (mock)
+- [x] AppShell com navegacao por persona vinda do usuario autenticado
+- [x] Autenticacao real via `/auth/register`, `/auth/login` e `/auth/me` (JWT no localStorage, logout em 401)
+- [x] Cadastro faz register e login automatico (register nao devolve token)
+- [x] Services conectados a API: vessels, maintenance, preventive-maintenances, checklists, modules, documents, inspections e dashboard
+- [x] Telas reais de cadastro de vessel, manutencao, documento e inspecao; detalhe de inspecao com checklist
+- [x] Dashboard calcula prontidao a partir de dados reais da API (manutencoes, documentos, inspecoes e status da embarcacao)
+- [x] Estados de loading/empty/error nos fluxos core
 - [x] Deploy no GitHub Pages via Actions + fallback SPA `404.html`
-- [x] Conectados ao backend via API: `modules`, `preventive-maintenances`, `checklist-templates`, `checklist-executions`, `maintenances/dashboard`
-- [x] Modulos em **mock**: vessels, maintenance, inspections, marinas (operações/equipe/servicos/reservas/planos/catalogo), marketplace, comunidade, eventos, academy, jobs & crew, trips/boat rental, documentos, IA
 
 **Fundacao (documentacao):**
 
@@ -389,38 +407,32 @@ safeanchor-monorepo/
 
 ### In Progress
 
-Nenhum trabalho aberto na branch `main` (working tree limpo). Os proximos itens
-do rebaseline estao definidos e nao iniciados:
+Itens do rebaseline ainda incompletos em `develop`:
 
-- [ ] **032** — Product Shell & Main Dashboard
-- [ ] **033** — Vessel Operational Profile
-- [ ] **034** — Documents Core
-- [ ] **035** — Expiration & Compliance
-- [ ] **036** — Safety Completion & Mobile Polish
-- [ ] **037** — MVP UX Polish
-- [ ] **038** — Production Deploy (backend)
+- [ ] **034** — upload de arquivos e Supabase Storage (metadados, validade e listagem ja funcionam)
+- [ ] **036** — checklist mobile/offline e revalidacao de QR Code
+- [ ] **038** — producao: `/health` da Vercel responde `503` com `database: down`
 
 ### Next
 
-1. Feature **032** — Product Shell & Main Dashboard
-2. Feature **033** — Vessel Operational Profile
-3. Feature **034** — Documents Core (modelo `Document` no Prisma + Supabase Storage)
+1. Corrigir `DATABASE_URL`/migrations em producao e validar `/health` + smoke test (Feature 038).
+2. Revisar o PR `develop` → `main` e promover as mudancas apos aprovacao.
+3. Upload de documentos (Supabase Storage) e polish mobile do checklist.
 
 ### Blocked
 
-- **Backend em producao** — nenhuma plataforma definida (deploy.md diz "ainda nao").
-- **Documents / Expiration** — dependem de modelo `Document` no Prisma + Supabase Storage.
-- **Seguranca no upload / mobile offline** — dependem das Features 034/036.
+- **Banco de producao na Vercel** — `/health` retorna `{"status":"degraded","database":"down"}`; sem credenciais/acesso ao Supabase para corrigir.
+- **Upload de documentos** — depende de Supabase Storage e politicas de acesso.
 
 ### Known Limitations (verificadas)
 
-- Dados de demonstracao do frontend sao simulado (mock) — nao persistem entre sessoes
-- O **login do frontend usa contas demo** (`AuthContext`); o backend tem API real, mas a UI ainda nao consome `/auth/login`
-- Embarcacoes e manutencoes sao **mock no frontend**; apenas preventivas, checklists, dashboard e modules consomem a API real
-- Inspections existem somente como mock no frontend (backend pendente)
-- Nao ha testes automatizados no frontend
-- Nao ha lint configurado (sem ESLint no repositorio)
-- Deploy do backend em producao ainda nao configurado
+- Catalogos (marinas, prestadores, jobs, community, eventos, trips, academy e IA) ainda usam dados mock.
+- O feed de atividades do dashboard ainda e mock.
+- Documentos nao tem upload/download de arquivos — a API guarda metadados/URLs.
+- A prontidao e calculada no cliente; a API nao expoe endpoint de `readiness`.
+- Nao ha testes automatizados no frontend e nao ha script de lint.
+- Backend em producao segue degradado por configuracao de banco.
+- Restam 3 vulnerabilidades high transitivas do Prisma 7 (`effect`); corrigi-las exigiria downgrade breaking.
 
 ---
 
@@ -428,20 +440,20 @@ do rebaseline estao definidos e nao iniciados:
 
 Mapa em blocos sequenciais. O objetivo aqui e mostrar o mapa, nao detalha-lo.
 
-1. **Product / UX** — Rebaseline 2026 validado; jornada Login → Prontidao definida. Proximo: Features 032/033/037.
-2. **Frontend** — MVVM pronto; maioria dos modulos em mock. Proximo: conectar frota/manutencao/inspecoes a API; testes automatizados.
-3. **Backend / API** — Nucleo REST pronto (auth, vessels, maintenances, checklists, modules). Pendente: inspecoes, documentos, notificacoes, OpenAPI/Swagger, refresh token.
-4. **Database** — Prisma + PostgreSQL + migrations e RLS sem policies prontos. Pendente: modelo `Document`, políticas de propriedade quando necessario.
-5. **Authentication** — JWT + bcrypt prontos no backend. Pendente no MVP: refresh token; tela de login consumindo a API real.
-6. **Authorization** — Roles + ownership prontos. Pendente: permissoes por modulo e por organizacao.
-7. **Core Maritime Domain** — Frota, manutencao, preventiva e checklists prontos. Pendente: inspecoes (backend) e documentos.
-8. **Storage** — Nao iniciado; necessario para Documents (Supabase Storage).
+1. **Product / UX** — Rebaseline 2026 validado; jornada Login → Prontidao com telas conectadas. Proximo: upload de documentos e mobile polish.
+2. **Frontend** — MVVM pronto; modulos core conectados a API. Proximo: catalogos (marinas/jobs/community) e testes automatizados.
+3. **Backend / API** — Nucleo REST pronto (auth, vessels, maintenances, checklists, documents, inspections, modules, research). Pendente: notificacoes, OpenAPI/Swagger, refresh token.
+4. **Database** — Prisma + PostgreSQL + migrations e RLS sem policies prontos, com modelos `Document` e `Inspection`. Pendente: politicas de Storage e correcao do banco de producao.
+5. **Authentication** — JWT + bcrypt no backend e login/cadastro reais no frontend. Pendente: refresh token.
+6. **Authorization** — Roles + ownership + persona prontos. Pendente: permissoes por modulo e por organizacao.
+7. **Core Maritime Domain** — Frota, manutencao, preventiva, checklists, documentos e inspecoes prontos. Proximo: compliance avancado.
+8. **Storage** — Nao iniciado; necessario para upload/download de documentos (Supabase Storage).
 9. **Mobile** — Nao iniciado; mobile polish de checklists (Feature 036) e PWA sao itens futuros.
-10. **Testing** — Backend coberto; faltam testes de controllers no backend e testes no frontend.
-11. **Security** — Base presente (hashing, JWT, ownership, RLS, redacao de logs). Pendente: rate limiting, upload security, dependency/security scanning.
+10. **Testing** — Backend com 15 testes (incluindo rotas de documentos/inspecoes). Faltam testes no frontend.
+11. **Security** — Base presente (hashing, JWT, ownership, RLS, redacao de logs, `npm audit` manual). Pendente: rate limiting, upload security e scanner no CI.
 12. **Observability** — Logging estruturado + health check prontos. Pendente: metricas, tracing e alertas.
-13. **Infrastructure** — Dev local funciona. Pendente: hospedagem de producao do backend.
-14. **CI/CD** — CI e deploy do frontend prontos. Pendente: deploy do backend e smoke test em producao (Feature 038).
+13. **Infrastructure** — Dev local funciona e backend esta na Vercel, mas com banco degradado.
+14. **CI/CD** — CI e deploy do frontend prontos. Pendente: banco de producao saudavel e smoke test (Feature 038).
 15. **Production Readiness** — Pendente (Feature 038 + Definition of Ready).
 16. **Pilot / Validation** — Pendente; validacao com PTM, parceiros e investidores.
 
@@ -609,11 +621,12 @@ Flags de operacao (avaliacao do proprio contexto):
 
 | Variable | Obrigatoria | Descricao |
 |---|---|---|
-| `VITE_API_URL` | sim (prod) | URL publica da API; em dev usa `/api` |
-| `VITE_BASE_URL` | sim (GH Pages) | Base do build; no CI e `./safeanchor-monorepo/` |
+| `VITE_API_URL` | sim | URL da API (`http://localhost:3001` no exemplo; URL publica da Vercel em producao) |
+| `VITE_BASE_URL` | sim (GH Pages) | Base do build; no CI e `/safeanchor-monorepo/` |
+| `VITE_RESEARCH_WHATSAPP` | nao | Numero para o botao de compartilhar da pesquisa |
+| `VITE_RESEARCH_INBOX` | nao | Destino sugerido no link manual de e-mail |
 
-> Na raiz nao ha `.env`; o `apps/frontend/.env.example` ainda nao existe no
-> repositorio.
+> Na raiz nao ha `.env`; o `apps/frontend/.env.example` esta versionado.
 
 ---
 
@@ -623,19 +636,19 @@ Principios de seguranca do MVP — marcados pelos que **ja existem** no reposito
 
 | Tema | Situacao |
 |---|---|
-| Authentication | ✅ JWT + bcrypt (custo 12), expiracao 1h |
-| Authorization | ✅ Roles `USER`/`MANAGER`/`ADMIN` no backend |
-| Ownership / Access Scope | ✅ `accessScopeService` isola dados por party/organizacao |
+| Authentication | ✅ JWT + bcrypt (custo 12), expiracao 1h; frontend consome a API real |
+| Authorization | ✅ Roles `USER`/`MANAGER`/`ADMIN` e persona no backend |
+| Ownership / Access Scope | ✅ `accessScopeService` isola vessels, documents e inspections por party/organizacao |
 | Password hashing | ✅ bcrypt; hash nunca exposto |
-| JWT security | ✅ payload minimo, `JWT_SECRET` via env |
-| Input validation | ✅ validacoes nos controllers |
+| JWT security | ✅ payload com `userId`, `partyId`, `role` e `persona`; `JWT_SECRET` via env |
+| Input validation | ✅ validacoes nos controllers, incluindo documentos e inspecoes |
 | Rate limiting | ⬜ nao implementado |
 | Secure secrets | ✅ `.env*` ignorado; apenas `.env.example` versionado |
 | Database security | ✅ RLS ativo sem policies; privilegios de `anon`/`authenticated` revogados; acesso so via backend |
-| Upload security | ⬜ depende da Feature 034 (Documents) |
+| Upload security | ⬜ depende de Supabase Storage (ainda nao implementado) |
 | Logging | ✅ pino estruturado com redacao de headers/body sensiveis |
 | Backups | 🔶 via Supabase (gerenciado; fora do codigo) |
-| Dependency / security scanning | ⬜ nao configurado |
+| Dependency / security scanning | 🔶 `npm audit` executado manualmente: frontend 0, backend 3 high transitivas do Prisma 7 (`effect`); sem scanner no CI |
 
 ---
 
@@ -676,11 +689,11 @@ para ser validado por investidores, parceiros e PTM.
 
 > **Next Action**
 
-**Feature 032 — Product Shell & Main Dashboard (rebaseline):** implementar o
-shell autenticado padronizado e o dashboard principal consolidando a prontidao
-da frota, manutencoes pendentes/proximas, inspecoes recentes e documentos
-proximos do vencimento — com os dados reais vindos da API do backend (iniciando
-pela conexao dos services de embarcacoes e manutencoes que hoje estao em mock).
+**Revisar e publicar o PR `develop` → `main`:** o ciclo de Features 031–037
+(autenticacao, frota, manutencao, documentos, inspecoes e dashboard) esta
+implementado e validado em `develop`. O proximo passo e o review do PR, sem
+merge direto. Em paralelo, a Feature 038 segue bloqueada pela configuracao do
+banco de producao na Vercel (`/health` com `database: down`).
 
 ---
 

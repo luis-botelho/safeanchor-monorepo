@@ -81,19 +81,22 @@ apps/backend/
 │   └── schema.prisma                  # schema do banco: modelos + enums
 ├── src/
 │   ├── controllers/
-│   │   ├── authController.js          # cadastro e login
+│   │   ├── authController.js          # cadastro, login e /auth/me
 │   │   ├── vesselController.js        # embarcacoes
 │   │   ├── maintenanceController.js   # manutencoes
 │   │   ├── preventiveMaintenanceController.js
 │   │   ├── checklistTemplateController.js
 │   │   ├── checklistExecutionController.js
+│   │   ├── documentController.js      # documentos e vencimentos
+│   │   ├── inspectionController.js    # inspecoes, checklist e certificado
+│   │   ├── researchController.js      # pesquisa via Resend
 │   │   └── healthController.js        # health check
 │   ├── lib/
 │   │   ├── prisma.js                  # cliente Prisma (singleton)
 │   │   └── logger.js                  # pino logger
 │   ├── middleware/
 │   │   ├── authMiddleware.js          # requireAuth (JWT)
-│   │   └── authorizeRoles.js         # controle por persona
+│   │   └── authorizeRoles.js         # controle por role (USER/MANAGER/ADMIN)
 │   ├── models/
 │   │   ├── vesselModel.js
 │   │   ├── maintenanceModel.js
@@ -102,11 +105,14 @@ apps/backend/
 │   │   └── checklistExecutionModel.js
 │   ├── routes/
 │   │   ├── authRoutes.js
+│   │   ├── researchRoutes.js
 │   │   ├── vesselRoutes.js
 │   │   ├── maintenanceRoutes.js
 │   │   ├── preventiveMaintenanceRoutes.js
 │   │   ├── checklistTemplateRoutes.js
-│   │   └── checklistExecutionRoutes.js
+│   │   ├── checklistExecutionRoutes.js
+│   │   ├── documentRoutes.js
+│   │   └── inspectionRoutes.js
 │   ├── services/
 │   │   ├── authService.js             # hashing, JWT, validacoes
 │   │   ├── accessScopeService.js      # controle de acesso por ownership
@@ -116,6 +122,9 @@ apps/backend/
 │   │   ├── preventiveMaintenanceService.js
 │   │   ├── checklistTemplateService.js
 │   │   ├── checklistExecutionService.js
+│   │   ├── documentService.js
+│   │   ├── inspectionService.js
+│   │   ├── researchService.js
 │   │   └── modulesService.js
 │   ├── app.js                         # criacao do Express, middlewares, rotas
 │   └── server.js                      # bootstrap e start do servidor
@@ -123,6 +132,8 @@ apps/backend/
 │   ├── authMiddleware.test.js
 │   ├── authorization.integration.test.js
 │   ├── database.smoke.test.js
+│   ├── documents.inspections.test.js
+│   ├── documents.inspections.routes.test.js
 │   ├── observability.test.js
 │   └── ownership-scope.integration.test.js
 ├── .env.example
@@ -176,6 +187,11 @@ verificado na conta Resend. A API e o frontend no GitHub Pages são projetos
 separados; configure a URL pública da API como variável `VITE_API_URL` no GitHub
 Actions (Settings → Secrets and variables → Actions → Variables).
 
+> **Estado atual da implantação:** o frontend está no ar no GitHub Pages e a API
+> responde em `https://safeanchor-monorepo.vercel.app`, mas `/health` ainda
+> retorna `{"status":"degraded","database":"down"}` por configuração de banco.
+> Corrigir `DATABASE_URL`/migrations em produção é pré-requisito da Feature 038.
+
 <details>
 <summary><strong>Testando rapidamente com curl</strong></summary>
 
@@ -186,7 +202,7 @@ curl http://localhost:3001/health
 # cadastro
 curl -X POST http://localhost:3001/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"name":"Maria","email":"maria@test.com","password":"123456"}'
+  -d '{"name":"Maria","email":"maria@test.com","password":"123456","persona":"OWNER"}'
 
 # login
 curl -X POST http://localhost:3001/auth/login \
@@ -218,11 +234,15 @@ curl http://localhost:3001/vessels \
 
 | Metodo | Rota | Descricao |
 |---|---|---|
+| `GET` | `/auth/me` | Dados do usuario autenticado (inclui `persona`) |
 | `GET` | `/modules` | Modulos disponiveis |
-| `GET` | `/vessels` | Lista embarcacoes do usuario |
+| `GET` | `/vessels` | Lista embarcacoes do escopo do usuario |
 | `POST` | `/vessels` | Cria embarcacao |
+| `GET` | `/vessels/:id` | Detalhe da embarcacao |
 | `PUT` | `/vessels/:id` | Atualiza embarcacao |
 | `DELETE` | `/vessels/:id` | Remove embarcacao |
+| `GET` | `/vessels/:id/maintenances` | Manutencoes da embarcacao |
+| `GET` | `/vessels/:id/inspections` | Execucoes de checklist da embarcacao |
 | `GET` | `/maintenances` | Lista manutencoes |
 | `POST` | `/maintenances` | Cria manutencao |
 | `GET` | `/maintenances/dashboard` | Dashboard de manutencao |
@@ -232,6 +252,21 @@ curl http://localhost:3001/vessels \
 | `POST` | `/checklist-templates` | Cria template |
 | `GET` | `/checklist-executions` | Lista execucoes de checklist |
 | `POST` | `/checklist-executions` | Registra execucao |
+| `GET` | `/documents` | Lista documentos do escopo |
+| `GET` | `/documents/vessel/:vesselId` | Documentos de uma embarcacao |
+| `POST` | `/documents` | Cria documento (metadados e validade) |
+| `GET` | `/inspections` | Lista inspecoes do escopo |
+| `GET` | `/inspections/vessel/:vesselId` | Inspecoes de uma embarcacao |
+| `GET` | `/inspections/:id` | Detalhe da inspecao |
+| `POST` | `/inspections` | Cria inspecao com checklist |
+| `PATCH` | `/inspections/:id/checklist/:itemIndex` | Atualiza item do checklist |
+| `POST` | `/inspections/:id/complete` | Conclui e gera certificado |
+| `POST` | `/inspections/:id/cancel` | Cancela inspecao |
+
+Escritas em `vessels`, `maintenances`, `preventive-maintenances`,
+`checklist-templates`, `checklist-executions`, `documents` e `inspections`
+exigem `USER`, `MANAGER` ou `ADMIN`, com escopo aplicado pelo
+`accessScopeService`.
 
 ---
 
@@ -239,25 +274,44 @@ curl http://localhost:3001/vessels \
 
 ### Autenticacao
 
-- Senhas sao armazenadas com **bcrypt** (custo 10).
-- O login retorna um **JWT** com `userId` e `role` (payload minimo).
-- Todos os endpoints abaixo de `/auth` requerem token valido no header.
+- Senhas sao armazenadas com **bcrypt** (custo 12).
+- `/auth/register` aceita `persona` (`OWNER`, `SERVICE_PROVIDER` ou `MARINA`), cria
+  o `Party`/`User` e retorna o usuario — sem token.
+- O login retorna um **JWT** (1h) com `userId`, `partyId`, `role` e `persona`.
+- `/auth/me` exige token e devolve o perfil; register e login sao publicos.
+- O frontend faz register e login em sequencia para obter a sessao.
 
 ### Ownership (controle de acesso)
 
 O `accessScopeService` garante que um usuario so acesse seus proprios dados:
-embarcacoes, manutencoes e execucoes de checklist pertencem ao usuario que as criou.
+embarcacoes, manutencoes, documentos, inspecoes e execucoes de checklist sao
+filtrados pelo `partyId` do usuario e pelas organizacoes das quais ele e membro.
+`ADMIN` enxerga o escopo completo.
 
-### Roles
+### Roles e personas
 
-A enum `UserRole` define as personas: `VESSEL_OWNER`, `SERVICE_PROVIDER`, `MARINA`.
-O middleware `authorizeRoles` restringe endpoints quando necessario.
+- `UserRole`: `USER`, `MANAGER` e `ADMIN` — usados pelo `authorizeRoles`.
+- `Persona`: `OWNER`, `SERVICE_PROVIDER` e `MARINA` — perfil de negocio, exposto
+  em register/login/me e no JWT; define a navegacao no frontend.
+- Escritas nos recursos core aceitam `USER`, `MANAGER` e `ADMIN`.
+
+### Documentos e inspecoes
+
+- Um documento exige `vesselId`, `name`, `category`, `number`, `validFrom` e
+  `expiresAt`; `provider` e opcional. A embarcacao precisa pertencer ao escopo.
+- Status de validade (`valido`, `proximo`, `vencido`) e calculado no frontend a
+  partir de `expiresAt`.
+- Uma inspecao exige `vesselId`, `type`, `scheduledAt` e `inspector`; o checklist
+  e salvo como JSON.
+- A conclusao exige todos os itens revisados (`status !== "pending"`) e gera
+  certificado com validade de 6 meses quando nao ha falhas. Com falhas, a API
+  conclui sem certificado e o frontend bloqueia a acao.
 
 ### Validacoes
 
 - Emails devem ser unicos (constraint do banco).
 - Campos obrigatorios sao validados antes de chegar ao Prisma.
-- O `createdAt` e controlado pelo servidor, nunca pelo cliente.
+- `createdAt` e controlado pelo servidor, nunca pelo cliente.
 
 ### Seed de desenvolvimento
 
@@ -305,12 +359,18 @@ na organizacao demo e vincula a embarcacao de demonstracao ao `Party` da organiz
 npm test
 ```
 
-Testes unitarios e de integracao usando o runner nativo do Node (`node --test`):
+Testes unitarios e de integracao usando o runner nativo do Node (`node --test`).
+No CI, `DATABASE_URL`/`DIRECT_URL` apontam para URLs locais ficticias: os testes
+que exigem banco real são pulados; os demais rodam com banco em memoria/fake.
 
 - `authMiddleware.test.js` — validacao do middleware de autenticacao
 - `authorization.integration.test.js` — controle de acesso por roles
 - `observability.test.js` — logging e observabilidade
 - `ownership-scope.integration.test.js` — escopo de acesso por ownership
+- `documents.inspections.test.js` — regras de documentos e inspecoes com fake db
+- `documents.inspections.routes.test.js` — controllers/rotas HTTP com banco injetado
+
+Resultado atual: 15 testes passando e 3 integracoes puladas sem banco.
 
 ### Smoke test contra o banco
 
@@ -346,22 +406,24 @@ Nunca use `prisma migrate reset` ou `prisma db push` no projeto remoto.
 
 ## Roadmap
 
-- [x] Autenticacao com JWT + bcrypt
+- [x] Autenticacao com JWT + bcrypt e `persona` em register/login/me
 - [x] CRUD de embarcacoes
 - [x] Manutencao (criar, listar, dashboard)
 - [x] Manutencao preventiva
-- [x] Templates de checklist
-- [x] Execucoes de checklist
+- [x] Templates e execucoes de checklist
+- [x] Endpoints de documentos (metadados e validade)
+- [x] Endpoints de inspecoes (checklist, certificado e cancelamento)
 - [x] Controle de acesso por ownership
-- [x] Roles (VESSEL_OWNER, SERVICE_PROVIDER, MARINA)
+- [x] Roles (`USER`, `MANAGER`, `ADMIN`) e personas (`OWNER`, `SERVICE_PROVIDER`, `MARINA`)
 - [x] Health check com conexao ao banco
 - [x] Seed de desenvolvimento
-- [x] Testes de integracao (ownership, authorization)
-- [ ] Endpoints de inspecoes (agendamento + certificados)
+- [x] Testes de integracao e de rotas HTTP com banco injetado
+- [ ] Upload/download de arquivos (Supabase Storage)
 - [ ] Notificacoes
 - [ ] Refresh token
 - [ ] Documentacao OpenAPI/Swagger
-- [ ] Testes automatizados dos controllers
+- [ ] Corrigir `database: down` em producao
+- [ ] Scanner de dependencias no CI (3 high transitivas restantes)
 
 ---
 
