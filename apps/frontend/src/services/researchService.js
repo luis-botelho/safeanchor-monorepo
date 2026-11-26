@@ -83,6 +83,18 @@ export function buildSummary({ questions, answers, contact, startedAt }) {
   return lines.join("\n");
 }
 
+// Links wa.me/mailto ficam no histórico e no Referer: nunca incluam contato
+// sem uma ação explícita do usuário.
+export function stripContactFromSummary(summary) {
+  return String(summary || "")
+    .split(/\n\s*\nContato\n/)[0]
+    .trim();
+}
+
+export function hasContactSection(summary) {
+  return /\n\s*\nContato\n/.test(String(summary || ""));
+}
+
 export function buildWhatsappUrl(summary) {
   return `https://wa.me/${researchPhone}?text=${encodeURIComponent(summary)}`;
 }
@@ -109,13 +121,18 @@ export async function copySummary(summary) {
 
 export async function persistLocally(payload) {
   try {
-    const previous = JSON.parse(
-      localStorage.getItem("safeanchor.researchResponses") || "[]"
-    );
-    previous.push(payload);
+    // Guarda apenas o último envio e sem contato: não faz sentido acumular
+    // respostas com dados pessoais no navegador por tempo indeterminado.
+    const saved = {
+      answers: payload?.answers || {},
+      startedAt: payload?.startedAt || null,
+      submittedAt: payload?.submittedAt || Date.now(),
+      expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+    };
+
     localStorage.setItem(
       "safeanchor.researchResponses",
-      JSON.stringify(previous)
+      JSON.stringify([saved])
     );
     return true;
   } catch {

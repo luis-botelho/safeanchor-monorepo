@@ -260,12 +260,15 @@ export default function PrivacyPage() {
                 <tr>
                   <td><code>safeanchor.research.draft</code></td>
                   <td>Restaurar o rascunho da pesquisa.</td>
-                  <td>Até finalizar ou reiniciar a pesquisa.</td>
+                  <td>Até 24 horas, ou até finalizar/reiniciar a pesquisa.</td>
                 </tr>
                 <tr>
                   <td><code>safeanchor.researchResponses</code></td>
-                  <td>Guardar cópia local do resumo quando você autoriza a captura.</td>
-                  <td>Até você limpar os dados do site.</td>
+                  <td>
+                    Guardar apenas a última resposta local quando você autoriza
+                    a captura. Nome e contato não são salvos nessa cópia.
+                  </td>
+                  <td>Até 24 horas.</td>
                 </tr>
                 <tr>
                   <td><code>safeanchor.researchConsent</code></td>
