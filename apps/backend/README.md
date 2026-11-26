@@ -79,7 +79,8 @@ flowchart LR
 ```text
 apps/backend/
 ├── prisma/
-│   └── schema.prisma                  # schema do banco: modelos + enums
+│   ├── schema.prisma                  # schema do banco: modelos + enums
+│   └── migrations/                    # inclui role DIRECTOR, ResearchResponse e DirectorAction
 ├── src/
 │   ├── controllers/
 │   │   ├── authController.js          # cadastro, login e /auth/me
@@ -90,14 +91,15 @@ apps/backend/
 │   │   ├── checklistExecutionController.js
 │   │   ├── documentController.js      # documentos e vencimentos
 │   │   ├── inspectionController.js    # inspecoes, checklist e certificado
-│   │   ├── researchController.js      # pesquisa via Resend
+│   │   ├── researchController.js      # pesquisa via Resend, com consentimento
+│   │   ├── directorController.js      # respostas, usuarios e auditoria da diretoria
 │   │   └── healthController.js        # health check
 │   ├── lib/
 │   │   ├── prisma.js                  # cliente Prisma (singleton)
 │   │   └── logger.js                  # pino logger
 │   ├── middleware/
 │   │   ├── authMiddleware.js          # requireAuth (JWT)
-│   │   └── authorizeRoles.js         # controle por role (USER/MANAGER/ADMIN)
+│   │   └── authorizeRoles.js         # controle por role (USER/MANAGER/ADMIN/DIRECTOR)
 │   ├── models/
 │   │   ├── vesselModel.js
 │   │   ├── maintenanceModel.js
@@ -107,6 +109,7 @@ apps/backend/
 │   ├── routes/
 │   │   ├── authRoutes.js
 │   │   ├── researchRoutes.js
+│   │   ├── directorRoutes.js          # /director/* (DIRECTOR ou ADMIN)
 │   │   ├── vesselRoutes.js
 │   │   ├── maintenanceRoutes.js
 │   │   ├── preventiveMaintenanceRoutes.js
@@ -125,7 +128,8 @@ apps/backend/
 │   │   ├── checklistExecutionService.js
 │   │   ├── documentService.js
 │   │   ├── inspectionService.js
-│   │   ├── researchService.js
+│   │   ├── researchService.js         # consentimento versionado + Resend
+│   │   ├── directorService.js         # decisoes, papeis e auditoria minima
 │   │   └── modulesService.js
 │   ├── app.js                         # criacao do Express, middlewares, rotas
 │   └── server.js                      # bootstrap e start do servidor
@@ -136,7 +140,8 @@ apps/backend/
 │   ├── documents.inspections.test.js
 │   ├── documents.inspections.routes.test.js
 │   ├── observability.test.js
-│   └── ownership-scope.integration.test.js
+│   ├── ownership-scope.integration.test.js
+│   └── research-consent.test.js       # consentimento e decisoes da diretoria
 ├── .env.example
 ├── package.json
 └── README.md
@@ -216,22 +221,33 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 > [`../../docs/handoff-freeze.md`](../../docs/handoff-freeze.md)). Não rode
 > migrations nem `prisma db seed` contra a produção sem essa providência
 > explícita.
+>
+> **Aplicadas em produção:** as migrations
+> `20261127000000_add_director_role` (`UserRole.DIRECTOR`) e
+> `20261127000100_add_research_consent_and_director` (tabelas
+> `ResearchResponse`/`DirectorAction` e promoção da conta da diretoria) foram
+> executadas por bootstrap temporário, removido junto com a variável
+> `BOOTSTRAP_DIRECTOR_SCHEMA`. A conta pública `diretoria@safeanchor.app` /
+> `demo123` tem role `DIRECTOR` e as rotas `/director/*` funcionam em produção.
 
 ## Contas de demonstracao
 
 As contas abaixo existem de verdade na API de producao e foram criadas por
 `/auth/register` (nao por seed). O login do frontend tem botoes **"Acessos de
-demonstracao"** que preenchem e-mail e senha das tres principais.
+demonstracao"** que preenchem e-mail e senha das quatro principais.
 
-| Conta | Senha | Persona |
-|---|---|---|
-| `demo@safeanchor.app` | `demo123` | `OWNER` |
-| `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` |
-| `gestao@marinacostaazul.com` | `demo123` | `MARINA` |
-| `demo@safeanchor.test` (legado, sem botao) | `demo123456` | `OWNER` |
+| Conta | Senha | Persona | Role na API |
+|---|---|---|---|
+| `demo@safeanchor.app` | `demo123` | `OWNER` | `USER` |
+| `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` | `USER` |
+| `gestao@marinacostaazul.com` | `demo123` | `MARINA` | `USER` |
+| `diretoria@safeanchor.app` ("Admin da diretoria") | `demo123` | `OWNER` | `DIRECTOR` |
+| `demo@safeanchor.test` (legado, sem botao) | `demo123456` | `OWNER` | `USER` |
 
-Todas sao `USER`: `persona` e metadado de navegacao; a autorizacao e por `role`
-(`authorizeRoles`) e o isolamento por `Party` (`accessScopeService`).
+As contas de negocio sao `USER`; a da diretoria e `DIRECTOR`. `persona` e
+metadado de navegacao; a autorizacao e por `role` (`authorizeRoles`) e o
+isolamento por `Party` (`accessScopeService`). O botao "Admin da diretoria" leva
+a `/director` no frontend.
 
 Dados demo em producao (via API, nao via seed): `demo@safeanchor.app` e
 `demo@safeanchor.test` tem 3 vessels, 5 maintenances, 5 documents,
@@ -280,7 +296,7 @@ curl http://localhost:3001/vessels \
 | `GET` | `/health` | Health check (verifica conexao com o banco) |
 | `POST` | `/auth/register` | Cadastro de novo usuario |
 | `POST` | `/auth/login` | Login — retorna JWT |
-| `POST` | `/research` | Envia uma resposta da pesquisa pelo Resend |
+| `POST` | `/research` | Envia uma resposta da pesquisa pelo Resend; so grava e envia com aceite explicito e versao `2026-11-26` |
 
 ### Autenticados (requer `Authorization: Bearer <token>`)
 
@@ -315,10 +331,22 @@ curl http://localhost:3001/vessels \
 | `POST` | `/inspections/:id/complete` | Conclui e gera certificado |
 | `POST` | `/inspections/:id/cancel` | Cancela inspecao |
 
+**Diretoria (publicado; JWT + `authorizeRoles("DIRECTOR","ADMIN")`):**
+
+| Metodo | Rota | Descricao |
+|---|---|---|
+| `GET` | `/director/responses` | Lista respostas capturadas; filtros `status`, `profile`, `city`, `from`, `to` e `limit` |
+| `GET` | `/director/insights` | Resumo por status/perfil/cidade, total, contato e ultimos 7 dias |
+| `GET` | `/director/users` | Usuarios com `id`, `name`, `email`, `role` e `persona` |
+| `GET` | `/director/actions` | Auditoria minima (ator, alvo, acao, antes/depois e data) |
+| `PATCH` | `/director/users/:id` | Altera nome/papel/persona; nao permite alterar o proprio papel nem remover o ultimo diretor |
+| `PATCH` | `/director/responses/:id` | Registra `status` (`NEW`/`REVIEWED`/`ACTIONED`) e `decision` |
+
 Escritas em `vessels`, `maintenances`, `preventive-maintenances`,
 `checklist-templates`, `checklist-executions`, `documents` e `inspections`
 exigem `USER`, `MANAGER` ou `ADMIN`, com escopo aplicado pelo
-`accessScopeService`.
+`accessScopeService`. As rotas `/director/*` exigem `DIRECTOR` ou `ADMIN`; o CORS
+continua liberando somente `https://luis-botelho.github.io`.
 
 ---
 
@@ -342,10 +370,33 @@ filtrados pelo `partyId` do usuario e pelas organizacoes das quais ele e membro.
 
 ### Roles e personas
 
-- `UserRole`: `USER`, `MANAGER` e `ADMIN` — usados pelo `authorizeRoles`.
+- `UserRole`: `USER`, `MANAGER`, `ADMIN` e `DIRECTOR` — usados
+  pelo `authorizeRoles`; a diretoria e `ADMIN` acessam `/director/*`.
 - `Persona`: `OWNER`, `SERVICE_PROVIDER` e `MARINA` — perfil de negocio, exposto
-  em register/login/me e no JWT; define a navegacao no frontend.
+  em register/login/me e no JWT; define a navegacao no frontend, nunca a
+  autorizacao. A conta demo da diretoria tem persona `OWNER` e role `DIRECTOR`.
 - Escritas nos recursos core aceitam `USER`, `MANAGER` e `ADMIN`.
+
+### Pesquisa com consentimento
+
+- A versao atual do aceite e `2026-11-26` (`RESEARCH_CONSENT_VERSION`, tambem no
+  frontend em `src/services/researchConsent.js`).
+- `POST /research` so persiste em `ResearchResponse` e envia pelo Resend quando
+  `consent.accepted === true`, com `version` e `answeredAt` validos. Respostas,
+  perfil e contato opcional ficam no banco para analise da diretoria.
+- Sem aceite, o servidor nao grava nem envia nada; o resumo permanece apenas no
+  navegador e pode ser compartilhado manualmente pelo usuario (WhatsApp/e-mail).
+- A escolha pode ser alterada/revogada em `/privacidade`. Nao ha cookies de
+  rastreamento, analytics ou publicidade.
+
+### Diretoria e auditoria
+
+- `GET /director/responses` filtra por `status`, `profile` e `city` (além de
+  periodo e limite); `GET /director/insights` resume os capturados.
+- `PATCH /director/users/:id` altera papel/persona; `PATCH
+  /director/responses/:id` registra decisao e status da analise.
+- Toda alteracao gera um `DirectorAction` com ator, alvo, acao e antes/depois.
+  A auditoria nunca registra senha ou token.
 
 ### Documentos e inspecoes
 
@@ -427,8 +478,10 @@ que exigem banco real são pulados; os demais rodam com banco em memoria/fake.
 - `ownership-scope.integration.test.js` — escopo de acesso por ownership
 - `documents.inspections.test.js` — regras de documentos e inspecoes com fake db
 - `documents.inspections.routes.test.js` — controllers/rotas HTTP com banco injetado
+- `research-consent.test.js` — recusa sem captura, aceite versionado, insights e
+  auditoria das decisoes da diretoria
 
-Resultado atual: 15 testes passando e 3 integracoes puladas sem banco.
+Resultado atual: 20 testes passando e 3 integracoes puladas sem banco (`npm test`).
 
 ### Smoke test contra o banco
 
@@ -458,7 +511,20 @@ Somente com diff vazio, marque como aplicada:
 npx prisma migrate resolve --applied 0_init
 ```
 
-Nunca use `prisma migrate reset` ou `prisma db push` no projeto remoto.
+Para a diretoria e o consentimento, estas duas migrations foram aplicadas em
+produção:
+
+```text
+20261127000000_add_director_role                  # enum UserRole.DIRECTOR
+20261127000100_add_research_consent_and_director  # ResearchResponse, DirectorAction e role da conta demo
+```
+
+Elas foram aplicadas em producao com `DIRECT_URL` operacional por bootstrap
+temporario removido no mesmo ciclo; a Vercel nao devolve segredos via CLI
+(`../../docs/handoff-freeze.md`). A migration so promoveu a conta
+`diretoria@safeanchor.app` porque ela ja existia na API — crie a conta por
+`/auth/register` antes de aplicar em outro ambiente. Nunca use
+`prisma migrate reset` ou `prisma db push` no projeto remoto.
 
 ---
 
@@ -472,10 +538,12 @@ Nunca use `prisma migrate reset` ou `prisma db push` no projeto remoto.
 - [x] Endpoints de documentos (metadados e validade)
 - [x] Endpoints de inspecoes (checklist, certificado e cancelamento)
 - [x] Controle de acesso por ownership
-- [x] Roles (`USER`, `MANAGER`, `ADMIN`) e personas (`OWNER`, `SERVICE_PROVIDER`, `MARINA`)
+- [x] Roles (`USER`, `MANAGER`, `ADMIN`) e personas (`OWNER`, `SERVICE_PROVIDER`, `MARINA`); role `DIRECTOR`
+- [x] Pesquisa com consentimento explicito versionado e captura no banco
+- [x] Rotas e servicos da diretoria com auditoria minima
 - [x] Health check com conexao ao banco
 - [x] Seed de desenvolvimento
-- [x] Testes de integracao e de rotas HTTP com banco injetado
+- [x] Testes de integracao e de rotas HTTP com banco injetado, incluindo consentimento/diretoria
 - [ ] Upload/download de arquivos (Supabase Storage)
 - [ ] Notificacoes
 - [ ] Refresh token

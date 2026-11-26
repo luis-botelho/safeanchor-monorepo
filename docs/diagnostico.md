@@ -56,8 +56,11 @@ Detalhes do build do frontend que importam para rotas diretas:
   (`apps/frontend/vite.config.js`).
 - `BrowserRouter` usa `basename = import.meta.env.BASE_URL` sem a barra final
   (`src/main.jsx`).
-- O workflow copia `dist/index.html` para `dist/404.html`, então links como
-  `/fleet/abc` abertos diretamente funcionam no Pages.
+- O build (`vite build` + `scripts/prerender.mjs`) gera HTML estático para `/`,
+  `/pesquisa` e `/privacidade`, além de `robots.txt`, `sitemap.xml` e
+  `404.html` com `noindex`; links como `/fleet/abc` abertos diretamente
+  funcionam no Pages pelo fallback da SPA. Metadados em `src/seo/pageMeta.js`
+  (detalhes em [`seo.md`](./seo.md)).
 - O deploy do Pages dispara somente quando mudam `apps/frontend/**` ou o próprio
   workflow; mudanças apenas em `docs/**` não publicam nada.
 - Não existe workflow versionado de deploy do backend: a Vercel publica via
@@ -83,7 +86,7 @@ foram conferidas na documentação oficial em 2026-11-26.
 | Tecnologia | Versão | O que é / por que usar | Uso no SafeAnchor | Referência |
 |---|---|---|---|---|
 | **React** | `^19.0.0` (19.2.7) | Biblioteca de UI baseada em componentes. A documentação oficial recomenda um framework, mas aceita explicitamente montar uma SPA "do zero" com um build tool quando se quer aprender ou há restrições — é o caso aqui. | `createRoot` e `StrictMode` em `src/main.jsx`; componentes em `views/` e `components/`. | [react.dev — Build a React App from Scratch](https://react.dev/learn/build-a-react-app-from-scratch) |
-| **Vite** | `^7.0.0` (7.3.8) | Build tool com dev server rápido e bundling estático, ideal para Pages. | `vite.config.js` com `@vitejs/plugin-react` 5.2.0 e `base` configurável. | [react.dev — Vite](https://react.dev/learn/build-a-react-app-from-scratch#vite) |
+| **Vite** | `^7.0.0` (7.3.8) | Build tool com dev server rápido e bundling estático, ideal para Pages. | `vite.config.js` com `@vitejs/plugin-react` 5.2.0 e `base` configurável; `scripts/prerender.mjs` roda depois do build. | [react.dev — Vite](https://react.dev/learn/build-a-react-app-from-scratch#vite) |
 | **React Router** | `^7.18.1` (7.18.7) | Navegação declarative da SPA, com rotas protegidas e `basename`. | `src/router/AppRouter.jsx` e `components/ProtectedRoute.jsx`. | [react.dev — Routing](https://react.dev/learn/build-a-react-app-from-scratch#routing) |
 | **MVVM** | padrão (sem lib) | Separa View (UI), ViewModel (estado/lógica) e Model (dados/API). Revisão de literatura aponta desacoplamento/testabilidade como benefícios e ViewModel sobrecarregado/boilerplate como riscos. | 19 hooks `use*ViewModel`; services em `src/services/`; views em `src/views/`. | [MVVM Revisited (arXiv, 2025)](https://arxiv.org/html/2504.18191v1) |
 | **BEM** | convenção CSS | Block / Element / Modifier: classes previsíveis, sem selects de tag/ID, reduzindo colisões do cascade. | Classes como `app-shell__link--active` no único arquivo CSS do projeto, `src/styles/global.css`. | [getbem.com — Introduction](https://getbem.com/introduction/) |
@@ -119,7 +122,7 @@ têm explicação e saída. Tudo respeita `prefers-reduced-motion`.
 |---|---|---|---|---|
 | **Node.js** | `>=22` | Runtime local e da função serverless. | `src/server.js`: escuta na porta 3001 fora da Vercel; na Vercel apenas exporta o app. | [expressjs.com — Migrating 5](https://expressjs.com/guide/migrating-5) |
 | **Express** | `^5.0.0` (5.2.1) | Framework HTTP minimalista. A v5 encaminha promises rejeitadas em handlers async para o error handler. | Rotas, middleware de auth/CORS e handler global em `src/app.js`. | [Introducing Express v5](https://expressjs.com/2024/10/15/v5-release) |
-| **jsonwebtoken** | `^9.0.3` (9.0.3) | Emissão/verificação de JWT. | `POST /auth/login` devolve token com `userId`, `partyId`, `role`, `persona` e validade de **1 hora**; `requireAuth` valida o `Bearer`. | [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) |
+| **jsonwebtoken** | `^9.0.3` (9.0.3) | Emissão/verificação de JWT. | `POST /auth/login` devolve token com `userId`, `partyId`, `role` (`USER`/`MANAGER`/`ADMIN`/`DIRECTOR`) e `persona`, validade de **1 hora**; `requireAuth` valida o `Bearer`. | [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) |
 | **bcrypt** | `^6.0.0` (6.0.0) | Hash de senha com salt. | Custo 12 no cadastro, 10 no seed local. | OWASP Password Storage Cheat Sheet |
 | **CORS** | `^2.8.6` (2.8.6) | Controle de origens permitidas. | `FRONTEND_ORIGIN` + localhost em dev; requisições sem `Origin` passam (health/curl); origem não autorizada → 403. | [MDN — CORS](https://developer.mozilla.org/docs/Web/HTTP/CORS) |
 | **dotenv** | `^17.4.2` | Carrega `.env` apenas fora da Vercel. | `prisma.config.ts` e `src/lib/prisma.js`. | [dotenv](https://github.com/motdotla/dotenv) |
@@ -132,7 +135,7 @@ têm explicação e saída. Tudo respeita `prefers-reduced-motion`.
 |---|---|---|---|---|
 | **Prisma ORM** | `^7.9.1` (client 7.9.1, CLI 7.10.1) | Schema declarativo, migrations e client gerado. A v7 exige driver adapters para todas as conexões. | `prisma/schema.prisma`, `prisma.config.ts` com `DIRECT_URL`, client em `src/lib/prisma.js`. | [Prisma 7 — PostgreSQL](https://www.prisma.io/docs/orm/overview/databases/postgresql) |
 | **@prisma/adapter-pg + pg** | `^7.9.1` / `^8.22.0` | Adapter que executa queries geradas pelo Prisma via driver `pg` sobre TCP. | `new PrismaPg({ connectionString: DATABASE_URL })`. | [Prisma 7 — Database drivers](https://www.prisma.io/docs/orm/core-concepts/supported-databases/database-drivers) |
-| **PostgreSQL / Supabase** | — | Banco relacional gerenciado; Supabase fornece pooler (Supavisor) e injeta variáveis na Vercel via Marketplace. | Tabelas `User`, `Party`, `Organization`, `Membership`, `Vessel`, `Maintenance`, `Document`, `Inspection`, checklists etc. | [Supabase — Connect to Postgres](https://supabase.com/docs/guides/database/connecting-to-postgres) e [Vercel Marketplace](https://supabase.com/docs/guides/integrations/vercel-marketplace) |
+| **PostgreSQL / Supabase** | — | Banco relacional gerenciado; Supabase fornece pooler (Supavisor) e injeta variáveis na Vercel via Marketplace. | Tabelas `User`, `Party`, `Organization`, `Membership`, `Vessel`, `Maintenance`, `Document`, `Inspection`, checklists, `ResearchResponse` e `DirectorAction` (aplicadas em produção por bootstrap temporário removido). | [Supabase — Connect to Postgres](https://supabase.com/docs/guides/database/connecting-to-postgres) e [Vercel Marketplace](https://supabase.com/docs/guides/integrations/vercel-marketplace) |
 | **Neon (preview)** | — | Postgres efêmero com branches, usado só no Preview. | Projeto temporário `wispy-forest-67479829`, expira em 29/11/2026. | [Prisma 7 — PostgreSQL (Neon)](https://www.prisma.io/docs/orm/overview/databases/postgresql) |
 
 > **Lição aprendida na demo:** a integração Supabase/Vercel cria `POSTGRES_*` e
@@ -168,6 +171,11 @@ Exemplos concretos:
 - `CreateDocumentPage.jsx` → `useCreateDocumentViewModel` → `documentService.createDocument` → `POST /documents`.
 - `InspectionDetailPage.jsx` → `useInspectionDetailViewModel` → `PATCH /inspections/:id/checklist/:itemIndex`, `POST /inspections/:id/complete` e `/cancel`.
 - `CreateMaintenancePage.jsx` → `useCreateMaintenanceViewModel` → `maintenanceService.createMaintenance` → `POST /maintenances`.
+- `ResearchPage.jsx` → `useResearchViewModel` → `researchConsent.js` (decisão
+  versionada) + `researchService.js` → `POST /research`; sem aceite não há
+  chamada HTTP.
+- `DirectorResponsesPage.jsx`/`DirectorUsersPage.jsx` → `useDirectorViewModel` →
+  `directorService.js` → `GET/PATCH /director/*` publicados.
 
 `src/services/api.js` guarda o token em `localStorage["token"]`, envia
 `Authorization: Bearer ...`, trata `204` e dispara `auth:unauthorized` em `401`.
@@ -193,9 +201,12 @@ src/lib/prisma.js       → PrismaClient com PrismaPg(DATABASE_URL)
 `partyIds = [partyId do usuário, partyIds das organizações]`; os filtros
 `buildVesselScopeFilter` e `buildVesselLinkedScopeFilter` reaplicam o escopo em
 embarcações e entidades ligadas. ADMIN vê tudo. A autorização de escrita usa
-**role** (`USER`, `MANAGER`, `ADMIN`); a `persona` (`OWNER`,
-`SERVICE_PROVIDER`, `MARINA`) aparece no perfil/token, mas no backend ela não
-decide permissão — no frontend ela só escolhe o menu/painel.
+**role** (`USER`, `MANAGER`, `ADMIN`); a área da diretoria usa `DIRECTOR`/`ADMIN`
+com `authorizeRoles("DIRECTOR","ADMIN")` e, no frontend, `DirectorRoute` exige
+`roleKey` equivalente. A `persona` (`OWNER`, `SERVICE_PROVIDER`, `MARINA`)
+aparece no perfil/token, mas no backend ela não decide permissão — no frontend
+ela só escolhe o menu/painel. A conta `diretoria@safeanchor.app` / `demo123` tem
+persona `OWNER` e role `DIRECTOR`.
 
 Endpoints principais (os protegidos vêm depois de `requireAuth` em `app.js`):
 
@@ -204,7 +215,7 @@ Endpoints principais (os protegidos vêm depois de `requireAuth` em `app.js`):
 | GET | `/`, `/health` | Identidade da API e checagem real de banco (`SELECT 1`) |
 | POST | `/auth/register`, `/auth/login` | Cadastro e login |
 | GET | `/auth/me` | Perfil do token |
-| POST | `/research` | Pesquisa (envia e-mail via Resend) |
+| POST | `/research` | Pesquisa: só grava `ResearchResponse` e envia pelo Resend com aceite versionado (`2026-11-26`) |
 | GET | `/modules` | Módulos fixos do produto |
 | GET/POST/PUT/DELETE | `/vessels`, `/vessels/:id` | CRUD da frota |
 | GET | `/vessels/:id/maintenances`, `/vessels/:id/inspections` | Histórico por embarcação |
@@ -214,6 +225,8 @@ Endpoints principais (os protegidos vêm depois de `requireAuth` em `app.js`):
 | GET/POST | `/documents`, `/documents/vessel/:vesselId` | Documentos |
 | GET/POST | `/inspections`, `/inspections/vessel/:vesselId` | Inspeções |
 | PATCH/POST | `/inspections/:id/checklist/:itemIndex`, `/complete`, `/cancel` | Checklist e ciclo de vida |
+| GET | `/director/responses`, `/insights`, `/users`, `/actions` | Leitura da diretoria: respostas, resumo, usuários e auditoria (publicado) |
+| PATCH | `/director/users/:id`, `/responses/:id` | Alteração de papel/persona e de decisão/status, com auditoria (publicado) |
 
 > A pasta `src/models/` do backend existe, mas nenhum arquivo a importa: no
 > fluxo real o modelo é o `schema.prisma`.
@@ -232,26 +245,40 @@ Protegidas: `/dashboard`, `/fleet`, `/fleet/:id`, `/fleet/new`, `/maintenance`,
 `/maintenance/new`, `/documents`, `/documents/new`, `/inspections`,
 `/inspections/new`, `/inspections/:id`, `/profile`, além das rotas de marinas,
 prestadores, solicitações, viagens, aluguel, eventos, community, marketplace,
-jobs e IA. Qualquer rota desconhecida redireciona para `/`.
+jobs e IA. Em `develop`, há também as rotas da diretoria: `/director`,
+`/director/responses`, `/director/users` e `/director/audit`. Qualquer rota
+desconhecida redireciona para `/`.
 
 `ProtectedRoute` só verifica se há usuário; sem token ele redireciona para
-`/login`. As rotas diretas funcionam no Pages por causa do `404.html`.
+`/login`. `DirectorRoute` acrescenta a checagem de `roleKey` (`DIRECTOR`/`ADMIN`)
+e devolve os demais para `/dashboard`. As rotas diretas funcionam no Pages por
+causa do `404.html`; as públicas têm HTML prerenderizado e as privadas são
+`noindex`.
 
 ### 5.2 Jornada principal, passo a passo
 
 1. **Entrar** — a tela inicial tem dois cards: "Responder a pesquisa" e "Ver a
    demonstração". O texto "Não precisa criar conta" vale para a pesquisa; a área
    autenticada exige credenciais reais. Em `/login`, use os botões **"Acessos de
-   demonstração"** (proprietário, prestador e marina) ou a conta legada
-   `demo@safeanchor.test` / `demo123456`.
-2. **Pesquisa (opcional)** — `/pesquisa` guarda um rascunho em `localStorage`
-   (`safeanchor.research.draft`), envia `POST /research` e mantém respostas em
-   `safeanchor.researchResponses`. No backend, o e-mail sai **automaticamente**
-   pelo Resend para `RESEARCH_INBOX` (envio validado em 26/11/2026, com
-   recebimento confirmado). Há alternativas manuais na própria página: link
-   `mailto:` e link `wa.me` com o resumo preenchido, ambos exibidos após a
-   confirmação. O botão flutuante `WhatsAppButton` usa o mesmo número e aparece
-   em todas as telas quando `VITE_RESEARCH_WHATSAPP` está definido no build.
+   demonstração"** (proprietário, prestador, marina e "Admin da
+   diretoria" `diretoria@safeanchor.app` / `demo123`) ou a conta legada
+   `demo@safeanchor.test` / `demo123456`. O login com role `DIRECTOR` abre
+   `/director`; os demais abrem `/dashboard`.
+2. **Pesquisa (opcional)** — `/pesquisa` começa com **"Aceitar captura"** ou
+   **"Recusar captura"** (versão `2026-11-26`, registrada em
+   `safeanchor.researchConsent` com decisão e data). Com aceite, o rascunho em
+   `safeanchor.research.draft` é enviado por `POST /research`, as respostas ficam
+   em `safeanchor.researchResponses` e no banco (`ResearchResponse`), e o e-mail
+   sai **automaticamente** pelo Resend para `RESEARCH_INBOX` (envio validado em
+   26/11/2026, com recebimento confirmado). Com recusa, nada vai ao servidor nem
+   ao banco: o resumo fica só no navegador. Em ambos os casos há alternativas
+   manuais na própria página: link `mailto:` e link `wa.me` com o resumo
+   preenchido — o WhatsApp é clique do usuário, nunca envio automático. A escolha
+   pode ser alterada/revogada em `/privacidade`, onde
+   `safeanchor.cookieConsent` registra apenas a leitura do aviso. Não há cookies
+   de rastreamento, analytics ou publicidade. O botão flutuante
+   `WhatsAppButton` usa o mesmo número quando `VITE_RESEARCH_WHATSAPP` está
+   definido no build.
 3. **Autenticar** — `LoginPage` → `AuthContext.login` → `POST /auth/login`. O
    token é salvo em `localStorage` e o perfil em `safeanchor:session`.
    `/register` envia `POST /auth/register` (nome, e-mail, senha mínima de 6
@@ -287,6 +314,12 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 9. **Prontidão** — heurística do cliente no dashboard. No detalhe da embarcação,
    `toVessel` devolve `readiness: null`, então o medidor não usa o mesmo cálculo:
    há inconsistência visual entre as duas telas.
+10. **Diretoria (publicado)** — `/director` resume as capturas;
+   `/director/responses` filtra por `status`, `profile` e `city` e registra
+   decisão/status; `/director/users` altera papel/persona; `/director/audit`
+   mostra ator, alvo, ação, antes/depois e data. Backend exige
+   `DIRECTOR`/`ADMIN` e frontend exige `roleKey` equivalente; a auditoria nunca
+   guarda senha ou token.
 
 ### 5.3 Áreas ainda em mock ou inalcançáveis pela UI
 
@@ -310,7 +343,7 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 |---|---|
 | Página no GitHub Pages | `200` |
 | Bundle contém a URL da API de produção | sim |
-| `POST /auth/login` (quatro contas demo) | `200` + JWT para cada uma |
+| `POST /auth/login` (contas demo publicadas) | `200` + JWT para cada uma |
 | `GET /vessels` | `200` · 3 itens no proprietário (2 no prestador e na marina) |
 | `GET /maintenances` | `200` · 5 itens no proprietário (2 no prestador e na marina) |
 | `GET /maintenances/dashboard` | `200` · `total=5` no proprietário, `total=2` no prestador e na marina |
@@ -325,6 +358,13 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 | Aviso de armazenamento local | `CookieNotice` com aceite em `safeanchor.cookieConsent` |
 | Skeletons contextuais | 8 telas principais + `LoadingFallback` nas secundárias; `aria-busy` e pulse finito |
 | Submit assíncrono | 10 formulários com spinner inline, `disabled` e rótulo de largura estável |
+| SEO (`docs/seo.md`) | prerender das três rotas públicas, `noindex` nas privadas, `robots.txt`, `sitemap.xml`, favicon e og-image (publicado) |
+| Consentimento da pesquisa | aceite/recusa versionados; `npm test` cobre recusa sem gravação e aceite com `ResearchResponse` (publicado) |
+| Área da diretoria | rotas `/director/*` com `roleKey` no frontend e `authorizeRoles("DIRECTOR","ADMIN")` no backend (publicado) |
+
+> As três últimas linhas estão publicadas e validadas em produção. A validação
+> final do verificador versionado fechou 157/157 checks; o detalhamento está no
+> handoff.
 
 > **Nota para a apresentação:** o dashboard e as listagens core mostram dados
 > reais; as áreas de catálogo e o feed de atividade são mock. A tela inicial
@@ -355,11 +395,13 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 
 | Item | Impacto | Situação |
 |---|---|---|
-| Migrations em produção dependem de segredo não lido pela CLI | Bloqueia evolução do schema | Mitigado agora; exige `DIRECT_URL` fornecida pelo usuário na próxima |
+| Migrations em produção dependem de segredo não lido pela CLI | Bloqueia evolução do schema | As duas migrations novas (`DIRECTOR` e consentimento) foram aplicadas por
+bootstrap temporário removido no mesmo ciclo |
 | Banco do Preview é temporário (expira 29/11) | Preview pode quebrar | Reivindicar ou substituir |
 | JWT de 1h sem refresh, em `localStorage` | Sessão cai e exige novo login; risco XSS | Aceitável no MVP; no roadmap |
-| Persona é só navegação; `ProtectedRoute` checa presença, não `role` | Menu por persona não autoriza | Endurecer checagem de `role` nas rotas |
+| Persona é só navegação; `ProtectedRoute` checa presença, não `role` | Menu por persona não autoriza | `DirectorRoute` já exige `roleKey` `DIRECTOR`/`ADMIN`; estender às demais rotas |
 | 16 views não roteadas (links órfãos antigos já removidos) | APIs prontas parecem inexistentes | Corrigir `AppRouter` para preventivas e checklists |
+| Captura da pesquisa depende de aceite explícito e versão `2026-11-26` | Respostas recusadas não entram na diretoria | Comportamento desejado; recusa mantém o resumo só no navegador |
 | WhatsApp é link manual (`wa.me`), não envio automático | Depende de clique do usuário; sem disparo server-side | Aceito na demo; automatizar exige API business/Twilio |
 | Upload de documentos ausente | Documentos são só metadados | Pendente (Supabase Storage) |
 | Prontidão calculada no cliente; detalhe devolve `readiness: null` | Métricas inconsistentes | Levar regra para o backend |
@@ -375,9 +417,10 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 
 ## 9. Recomendações priorizadas
 
-1. **Manter a demo congelada** após o merge do PR #179 (acessos de demonstração,
-   correção de perfil e verificação versionada; 110/110 checks); novos trabalhos
-   seguem em `develop` via PR, sem merge direto em `main`.
+1. **Manter a demo publicada congelada** após o merge do PR #179 (acessos de
+   demonstração, correção de perfil e verificação versionada — o total exato de
+   checks está no handoff); a diretoria, o consentimento e o SEO seguem em
+   `develop` via PR, sem merge direto em `main`.
 2. **Corrigir as rotas órfãs e os links quebrados** do `AppShell`, pelo menos para
    `/maintenances`, `/preventive-maintenances`, `/checklist-templates` e
    `/checklist-executions` — hoje parecem features faltando quando estão prontas.
@@ -391,6 +434,8 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 7. **Adicionar refresh token**, validação leve de request e autorização por
    persona onde fizer sentido, antes de expor a API a terceiros.
 8. **Reduzir mocks visíveis** na apresentação e corrigir o texto da tela inicial.
+9. **Manter a área da diretoria e o consentimento** em produção; após qualquer
+   mudança, valide com os 157 checks do verificador versionado.
 
 ---
 

@@ -6,7 +6,8 @@ primeira tarefa. Para apresentar a demo, use o roteiro autorizado em
 `node scripts/verify-demo.mjs` na raiz (Node 22). Para o estado operacional, veja
 [`../handoff-freeze.md`](../handoff-freeze.md). Para tecnologias e fluxo de uso,
 veja [`../diagnostico.md`](../diagnostico.md). Para o tema visual e as regras de
-loading e animação, veja [`../visual-system.md`](../visual-system.md).
+loading e animação, veja [`../visual-system.md`](../visual-system.md). Para SEO e
+assets públicos, veja [`../seo.md`](../seo.md).
 
 ## Visão geral
 
@@ -29,10 +30,11 @@ apps/
     src/
       views/         # páginas (o que o usuário vê)
       viewmodels/    # estado e ações da tela (hooks use...ViewModel)
-      services/      # chamadas HTTP para a API
-      components/    # pedaços de UI reutilizáveis
+      services/      # chamadas HTTP para a API (inclui researchConsent e directorService)
+      components/    # pedaços de UI reutilizáveis (inclui DirectorRoute)
       context/       # autenticação e estado global
-      router/        # rotas da SPA
+      router/        # rotas da SPA (inclui /director/*)
+      seo/           # pageMeta.js: metadados das rotas públicas
       mock/          # dados falsos para áreas ainda não conectadas
       styles/global.css          # tokens Maritime Precision + BEM
       views/PrivacyPage.jsx      # política LGPD (/privacidade)
@@ -66,9 +68,18 @@ apps/
 - Inspeções: listar, criar, marcar checklist, concluir com certificado e cancelar.
 - Isolamento de dados por usuário/organização (`accessScopeService.js`).
 - `/health` no backend e smoke tests de produção.
-- Formulário `/pesquisa`: rascunho local e envio por e-mail via Resend (validado).
+- Formulário `/pesquisa`: rascunho local e envio por e-mail via Resend (validado);
+  captura só com aceite explícito e versionado (`2026-11-26`).
 - Rota pública `/privacidade` (LGPD), aviso de armazenamento local e botão
-  flutuante de WhatsApp (link `wa.me`, não envio automático).
+  flutuante de WhatsApp (link `wa.me`, não envio automático). A decisão de
+  captura pode ser alterada/revogada ali; `safeanchor.researchConsent` guarda
+  decisão, versão e data, e `safeanchor.cookieConsent` registra o aviso lido.
+- Área da diretoria publicada: `/director`, `/responses`, `/users` e `/audit`,
+  com guard por `roleKey` no frontend e `DIRECTOR`/`ADMIN` no backend; respostas,
+  decisões, papéis/personas e auditoria mínima (sem senha ou token).
+- Prerender estático de `/`, `/pesquisa` e `/privacidade`, com `noindex` nas
+  rotas privadas, `robots.txt`, `sitemap.xml`, favicon e metadados em
+  `src/seo/pageMeta.js` .
 - Carregamento com skeletons contextuais nas telas principais, fallback nas
   secundárias e spinner inline em ações — todos com `aria-busy` e respeitando
   `prefers-reduced-motion`.
@@ -80,6 +91,9 @@ apps/
 - Upload de arquivos de documentos (Supabase Storage).
 - Refresh token e documentação OpenAPI.
 - Testes automatizados no frontend (não há script de lint).
+- Migrations de `DIRECTOR`, `ResearchResponse` e `DirectorAction` aplicadas em
+  produção por bootstrap temporário removido no mesmo ciclo; diretoria,
+  consentimento e SEO publicados em produção.
 
 ## Tarefas boas para começar
 
@@ -96,8 +110,14 @@ apps/
 3. **Trocar um mock por API:** escolha um catálogo pequeno em `src/mock/` e crie
    o service, o viewmodel e a rota correspondentes.
 4. **Escrever um teste:** use os testes existentes em `apps/backend/test/` como
-   modelo para cobrir uma regra de negócio simples.
-5. **Melhorar um skeleton:** troque o `LoadingFallback` de uma tela secundária
+   modelo — `research-consent.test.js` mostra como cobrir recusa, aceite e
+   auditoria com banco fake (`npm test` no backend).
+5. **Seguir a diretoria:** abra `views/DirectorResponsesPage.jsx` →
+   `viewmodels/useDirectorViewModel.js` → `services/directorService.js` →
+   `GET /director/responses` → `directorController.js` →
+   `directorService.js` → Prisma. Compare com `DirectorRoute.jsx` para ver
+   `roleKey` no frontend e `authorizeRoles("DIRECTOR","ADMIN")` no backend.
+6. **Melhorar um skeleton:** troque o `LoadingFallback` de uma tela secundária
    por uma variante em `PageSkeletons.jsx` que espelhe o layout real. Antes,
    leia o checklist de aceite em `docs/visual-system.md` e rode o build.
 
@@ -106,6 +126,10 @@ apps/
 - Nunca versione `.env` nem credenciais do Supabase.
 - `DATABASE_URL` é usada no runtime; `DIRECT_URL` é usada pelo Prisma CLI.
 - Trabalhe em `develop` e promova para `main` somente por pull request.
+- `persona` escolhe a navegação; `role` autoriza. Não tente liberar a diretoria
+  trocando apenas a persona no login — use a conta `diretoria@safeanchor.app`.
+- Sem aceite versionado na pesquisa, não envie respostas nem grave no banco; o
+  resumo recusado fica só no navegador.
 - Não use `transition: all`, shimmer agressivo ou animação infinita: o contrato
   de movimento está em `docs/visual-system.md`.
 - Para validar o build no Windows, use `npm.cmd run build` dentro de

@@ -105,14 +105,27 @@ das contas reais criadas via `/auth/register`:
 | `demo@safeanchor.app` | `demo123` | `OWNER` |
 | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` |
 | `gestao@marinacostaazul.com` | `demo123` | `MARINA` |
+| `diretoria@safeanchor.app` ("Admin da diretoria") | `demo123` | `OWNER` |
 | `demo@safeanchor.test` (legado, sem botao) | `demo123456` | `OWNER` |
 
-Todas sao `USER`: a persona so define a navegacao; a autorizacao e por `role`
-e o isolamento por `Party`. O roteiro autorizado para apresentacao esta em
-[`docs/demo-apresentacao.md`](./docs/demo-apresentacao.md).
+As contas de negocio sao `USER`; a da diretoria e `DIRECTOR` na API. A persona
+so define a navegacao; a autorizacao e por `role` e o isolamento por `Party`. O botao
+"Admin da diretoria" abre `/director`. O roteiro autorizado para apresentacao
+esta em [`docs/demo-apresentacao.md`](./docs/demo-apresentacao.md).
+
+**Publicado na rodada final:** area da diretoria em `/director`,
+`/director/responses`, `/director/users` e `/director/audit`, protegida por
+`roleKey` no frontend e por `authorizeRoles("DIRECTOR","ADMIN")` no backend; a
+diretoria analisa respostas da pesquisa, filtra por status/perfil/cidade,
+registra decisao/status, altera papel/persona e ve auditoria minima (ator, alvo,
+acao, antes/depois e data — nunca senha/token). A pesquisa agora comeca com
+"Aceitar captura" ou "Recusar captura": so com aceite ha gravacao no banco e
+envio por Resend; com recusa o resumo fica no navegador. Ver
+[`docs/seo.md`](./docs/seo.md) para o prerender das rotas publicas.
 
 **Limites da demo:** a API real cobre auth, vessels, maintenances, documents,
-inspections, preventive-maintenances, checklist templates/executions e research.
+inspections, preventive-maintenances, checklist templates/executions, research
+com consentimento e as rotas `/director/*`.
 Marinas, prestadores, jobs, eventos, viagens, locacoes, marketplace, comunidade,
 academy e IA sao catalogos mock/localStorage; o feed de atividades e a
 "prontidao" do dashboard tambem sao mock (a API nao expoe `readiness`). O CORS
@@ -194,14 +207,16 @@ nesta fase; **preservar** Prisma + PostgreSQL.
 
 ### Roles e personas (estado atual)
 
-O schema define roles **`USER`**, **`MANAGER`** e **`ADMIN`** (`enum UserRole`)
+O schema define roles **`USER`**, **`MANAGER`**, **`ADMIN`** e **`DIRECTOR`**
+(`enum UserRole`; `DIRECTOR` depende da migration `20261127000000_add_director_role`)
 e personas **`OWNER`**, **`SERVICE_PROVIDER`** e **`MARINA`** (`enum Persona`).
 Escritas em vessels, maintenances, checklists, preventivas, documentos e
 inspecoes aceitam `USER`, `MANAGER` e `ADMIN`, sempre limitadas ao escopo do
-usuario (`accessScopeService`). A persona e retornada em register/login/me,
-viaja no JWT e define a navegacao no frontend. As contas demo sao reais, foram
-criadas via `/auth/register` na API de producao e aparecem nos botoes "Acessos
-de demonstracao" do login.
+usuario (`accessScopeService`). As rotas da diretoria exigem `DIRECTOR` ou
+`ADMIN`. A persona e retornada em register/login/me, viaja no JWT e define a
+navegacao no frontend; a autorizacao real e pelo `role`. As contas demo sao
+reais, foram criadas via `/auth/register` na API de producao e aparecem nos
+botoes "Acessos de demonstracao" do login.
 
 ---
 
@@ -227,6 +242,7 @@ Mapa das areas de produto e seu estado atual no repositorio.
 | Area | Descricao | Estado |
 |---|---|---|
 | **Autenticacao** | Cadastro, login, JWT, persona e roles | ✅ API real + frontend conectado (register, login automatico e botoes de acessos demo) |
+| **Diretoria** | Respostas da pesquisa, decisoes, papeis e auditoria | ✅ rotas `/director/*` publicadas, com guard por role |
 | **Fleet Management** | CRUD de embarcacoes + prontidao | ✅ API + CRUD na UI; prontidao calculada no cliente |
 | **Maintenance** | Agenda, historico, dashboard, preventiva | ✅ API + UI conectadas |
 | **Safety Checklists** | Templates + execucoes | ✅ Backend + frontend conectados via API |
@@ -289,7 +305,7 @@ PostgreSQL (Supabase)
 | `GET` | `/health` | Health check (verifica conexao com o banco) |
 | `POST` | `/auth/register` | Cadastro de usuario (aceita `persona`) |
 | `POST` | `/auth/login` | Login (retorna JWT com `persona`) |
-| `POST` | `/research` | Envio de resposta da pesquisa via Resend |
+| `POST` | `/research` | Envio de resposta da pesquisa via Resend; so captura com aceite explicito e versao `2026-11-26` |
 
 **Autenticados:**
 
@@ -316,8 +332,21 @@ PostgreSQL (Supabase)
 | `POST` | `/inspections/:id/complete` | Conclui inspecao e gera certificado |
 | `POST` | `/inspections/:id/cancel` | Cancela inspecao |
 
+**Diretoria (publicado; JWT + `DIRECTOR`/`ADMIN`):**
+
+| Metodo | Rota | Descricao |
+|---|---|---|
+| `GET` | `/director/responses` | Respostas capturadas, com filtros por status/perfil/cidade |
+| `GET` | `/director/insights` | Resumo por status, perfil, cidade e contato |
+| `GET` | `/director/users` | Usuarios com papel e persona atuais |
+| `GET` | `/director/actions` | Auditoria minima das acoes da diretoria |
+| `PATCH` | `/director/users/:id` | Altera papel/persona (registra antes/depois) |
+| `PATCH` | `/director/responses/:id` | Registra decisao/status (registra antes/depois) |
+
 Escritas em recursos de dominio aceitam `USER`, `MANAGER` e `ADMIN`, desde que
-o recurso pertença ao escopo (owner ou organizacao) do usuario autenticado.
+o recurso pertença ao escopo (owner ou organizacao) do usuario autenticado. As
+rotas `/director/*` exigem `DIRECTOR` ou `ADMIN`; o CORS de producao continua
+liberando somente `https://luis-botelho.github.io`.
 
 > Documentacao completa nos sub-READMEs: [`apps/backend/README.md`](./apps/backend/README.md) e [`apps/frontend/README.md`](./apps/frontend/README.md).
 
@@ -365,7 +394,7 @@ safeanchor-monorepo/
 │   ├── backend/
 │   │   ├── prisma/
 │   │   │   ├── schema.prisma              # schema do banco
-│   │   │   ├── migrations/                # 0_init + evoluções de identidade/ownership
+│   │   │   ├── migrations/                # 0_init + identidade/ownership + role DIRECTOR e consentimento
 │   │   │   └── seed.js                    # seed de desenvolvimento (protegido por flag)
 │   │   ├── src/
 │   │   │   ├── controllers/               # validacao HTTP
@@ -373,7 +402,7 @@ safeanchor-monorepo/
 │   │   │   ├── middleware/                # auth (JWT), roles
 │   │   │   ├── models/                    # queries prisma
 │   │   │   ├── routes/                    # rotas REST
-│   │   │   ├── services/                  # regras de negocio (incl. accessScope)
+│   │   │   ├── services/                  # regras de negocio (incl. accessScope, research e director)
 │   │   │   ├── app.js                     # criacao do Express
 │   │   │   └── server.js                  # bootstrap
 │   │   ├── test/                          # testes (node --test)
@@ -388,12 +417,16 @@ safeanchor-monorepo/
 │       │   ├── context/                   # AuthContext (login/cadastro via API)
 │       │   ├── mock/                      # dados simulados por modulo
 │       │   ├── router/                    # AppRouter + AppShell
-│       │   ├── services/                  # camada de dados (mock e/ou API)
+│       │   ├── services/                  # camada de dados (mock, API, consentimento e diretoria)
+│       │   ├── seo/                       # pageMeta.js: unica fonte de metadados publicos
 │       │   ├── styles/                    # BEM CSS global
 │       │   ├── viewmodels/                # hooks de logica (MVVM)
-│       │   ├── views/                     # paginas (PageViews)
+│       │   ├── views/                     # paginas (PageViews, incl. /director/*)
 │       │   ├── App.jsx
 │       │   └── main.jsx
+│       ├── scripts/
+│       │   ├── prerender.mjs              # HTML estatico, robots.txt e sitemap.xml
+│       │   └── generate-brand-assets.mjs  # favicon, manifest e og-image
 │       ├── vite.config.js                 # base via VITE_BASE_URL
 │       ├── package.json
 │       └── README.md
@@ -425,7 +458,7 @@ safeanchor-monorepo/
 **Backend (API real, PostgreSQL via Prisma):**
 
 - [x] Autenticacao (register/login/me) com **bcrypt (custo 12)** + **JWT** (1h) e `persona` no payload
-- [x] Autorizacao por roles **USER / MANAGER / ADMIN** (`authorizeRoles`)
+- [x] Autorizacao por roles **USER / MANAGER / ADMIN** (`authorizeRoles`); `DIRECTOR` na area da diretoria
 - [x] **Ownership & Access Scope** (Feature 031) — `accessScopeService` filtra por party do usuario + organizacoes em todas as rotas core
 - [x] CRUD de embarcacoes (listar, criar, detalhe, atualizar, remover)
 - [x] Manutencoes + dashboard e manutencao preventiva
@@ -433,50 +466,60 @@ safeanchor-monorepo/
 - [x] Modelos Prisma `Document` e `Inspection` com escopo por embarcacao
 - [x] Documents API (listar, por vessel, criar) com validade e indicadores
 - [x] Inspections API (criar, listar, detalhe, checklist, concluir com certificado, cancelar)
-- [x] Endpoint `/modules` e `/research` (Resend)
+- [x] Endpoint `/modules` e `/research` (Resend); captura so com consentimento explicito e versao `2026-11-26`
+- [x] Area da diretoria: `/director/responses`, `/insights`, `/users`, `/actions` e `PATCH` em usuarios/respostas, com auditoria minima
 - [x] Health check com conexao ao banco
 - [x] Logging estruturado com pino + redacao de campos sensiveis
 - [x] Prisma + PostgreSQL + migrations versionadas (baseline `0_init` registrada)
 - [x] Seed de desenvolvimento protegido por `ALLOW_DATABASE_SEED`
-- [x] Testes com `node --test`: 15 passando e 3 integracoes puladas sem banco, incluindo controllers/rotas de documentos e inspecoes
+- [x] Testes com `node --test`: 21 passando e 3 integracoes puladas sem banco, incluindo controllers/rotas de documentos/inspecoes e `research-consent.test.js`
 
 **Frontend (React 19 + Vite, MVVM):**
 
 - [x] Arquitetura MVVM (views → viewmodels → services)
 - [x] AppShell com navegacao por persona vinda do usuario autenticado
 - [x] Autenticacao real via `/auth/register`, `/auth/login` e `/auth/me` (JWT no localStorage, logout em 401)
-- [x] Botoes "Acessos de demonstracao" no login (preenchem as tres contas principais; nao ha picker de persona)
+- [x] Botoes "Acessos de demonstracao" no login (quatro contas, incluindo "Admin da diretoria"; nao ha picker de persona)
+- [x] Rota `/director` e subrotas com guard por `roleKey`; login da diretoria abre `/director`
+- [x] Pesquisa com "Aceitar captura" / "Recusar captura" e escolha revisavel em `/privacidade`
 - [x] Cadastro faz register e login automatico (register nao devolve token)
 - [x] Services conectados a API: vessels, maintenance, preventive-maintenances, checklists, modules, documents, inspections e dashboard
 - [x] Telas reais de cadastro de vessel, manutencao, documento e inspecao; detalhe de inspecao com checklist
 - [x] Dashboard calcula prontidao a partir de dados reais da API (manutencoes, documentos, inspecoes e status da embarcacao)
 - [x] Estados de loading/empty/error nos fluxos core (skeletons contextuais, `aria-busy` e spinner inline)
 - [x] Tema Maritime Precision em tokens BEM, sem Tailwind e sem novas libs
+- [x] Prerender estatico de rotas publicas, `noindex` nas privadas e metadados centralizados em `src/seo/pageMeta.js`
 - [x] Deploy no GitHub Pages via Actions + fallback SPA `404.html`
 
 **Fundacao (documentacao):**
 
-- [x] Product vision, MVP, business rules, domain model, arquitetura, rebaseline, changelog, learning/retrospectives
+- [x] Product vision, MVP, business rules, domain model, arquitetura, rebaseline, changelog, learning/retrospectives, SEO (`docs/seo.md`)
 
 ### In Progress
 
-Itens do rebaseline ainda incompletos em `develop`:
+Itens do rebaseline ainda incompletos:
 
 - [ ] **034** — upload de arquivos e Supabase Storage (metadados, validade e listagem ja funcionam)
 - [ ] **036** — checklist mobile/offline e revalidacao de QR Code
 
 **038 concluida:** Pages e Vercel no ar; `/health` da Vercel responde `200` com
-`database: up`, PRs #175, #177, #178 e #179 mergeados em `main`.
+`database: up`, PRs #175 a #181 mergeados em `main`. A area da
+diretoria, o consentimento da pesquisa e o SEO estao publicados; a validacao
+final fechou 157/157 checks.
 
 ### Next
 
-1. Apresentar sempre a producao; o Preview usa Neon temporario que expira em `2026-11-29T14:19:24Z`.
-2. Upload de documentos (Supabase Storage) e polish mobile do checklist.
-3. Para novas migrations em producao, fornecer `DIRECT_URL` do Supabase — a Vercel nao devolve segredos via CLI. Nao rodar seed/migrations contra producao. Ver `docs/handoff-freeze.md`.
+1. Migrations `20261127000000_add_director_role` e
+   `20261127000100_add_research_consent_and_director` aplicadas em producao por
+   bootstrap temporario removido no mesmo ciclo; nao rodar seed contra producao.
+2. Area da diretoria e consentimento da pesquisa publicados em `main` e validados
+   com `npm.cmd run verify:demo` (157/157 checks).
+3. Apresentar sempre a producao; o Preview usa Neon temporario que expira em `2026-11-29T14:19:24Z`.
+4. Upload de documentos (Supabase Storage) e polish mobile do checklist. Ver `docs/handoff-freeze.md`.
 
 ### Blocked
 
-- **Novas migrations em producao** — a Vercel nao devolve segredos via CLI; exige `DIRECT_URL` do Supabase fornecida pelo usuario. O banco atual esta saudavel (`/health` 200, `database: "up"`) e as migrations ja aplicadas. Ver `docs/handoff-freeze.md`.
+- **Novas migrations em producao** — a Vercel nao devolve segredos via CLI; exige `DIRECT_URL` do Supabase fornecida pelo usuario. As migrations antigas e as duas novas estao aplicadas e o banco esta saudavel (`/health` 200, `database: "up"`). Ver `docs/handoff-freeze.md`.
 - **Upload de documentos** — depende de Supabase Storage e politicas de acesso.
 
 ### Known Limitations (verificadas)
@@ -486,7 +529,7 @@ Itens do rebaseline ainda incompletos em `develop`:
 - Documentos nao tem upload/download de arquivos — a API guarda metadados/URLs.
 - A prontidao e calculada no cliente; a API nao expoe endpoint de `readiness`.
 - O CORS de producao so aceita `https://luis-botelho.github.io`; um frontend local nao deve apontar para a API publica.
-- Deep links no Pages (`/login`, `/pesquisa`, `/privacidade`) respondem `404` com o HTML da SPA — esperado pelo fallback.
+- Deep links no Pages (`/login`, `/pesquisa`, `/privacidade`, `/director/*`) respondem `404` com o HTML da SPA — esperado pelo fallback.
 - O JWT dura 1h e nao ha refresh; se expirar, faca login novamente.
 - Nao ha testes automatizados no frontend e nao ha script de lint.
 - Restam 3 vulnerabilidades high transitivas do Prisma 7 (`effect`); corrigi-las exigiria downgrade breaking.
@@ -499,14 +542,15 @@ Mapa em blocos sequenciais. O objetivo aqui e mostrar o mapa, nao detalha-lo.
 
 1. **Product / UX** — Rebaseline 2026 validado; jornada Login → Prontidao com telas conectadas. Proximo: upload de documentos e mobile polish.
 2. **Frontend** — MVVM pronto; modulos core conectados a API. Proximo: catalogos (marinas/jobs/community) e testes automatizados.
-3. **Backend / API** — Nucleo REST pronto (auth, vessels, maintenances, checklists, documents, inspections, modules, research). Pendente: notificacoes, OpenAPI/Swagger, refresh token.
-4. **Database** — Prisma + PostgreSQL + migrations e RLS sem policies prontos, com modelos `Document` e `Inspection`. Pendente: politicas de Storage; novas migrations exigem `DIRECT_URL` fora da operacao rotineira.
-5. **Authentication** — JWT + bcrypt no backend e login/cadastro reais no frontend. Pendente: refresh token.
-6. **Authorization** — Roles + ownership + persona prontos. Pendente: permissoes por modulo e por organizacao.
+3. **Backend / API** — Nucleo REST pronto (auth, vessels, maintenances, checklists, documents, inspections, modules, research) e rotas `/director/*` publicadas. Pendente: notificacoes, OpenAPI/Swagger, refresh token.
+4. **Database** — Prisma + PostgreSQL + migrations e RLS sem policies prontos, com `Document`, `Inspection`, `ResearchResponse` e `DirectorAction`. Migrations novas aplicadas em producao por bootstrap temporario removido no mesmo
+ciclo; pendente: politicas de Storage.
+5. **Authentication** — JWT + bcrypt no backend e login/cadastro reais no frontend. Cinco botoes demo, incluindo "Admin da diretoria". Pendente: refresh token.
+6. **Authorization** — Roles + ownership + persona prontos; `DIRECTOR`/`ADMIN` protegem a diretoria no frontend e no backend. Pendente: permissoes por modulo e por organizacao.
 7. **Core Maritime Domain** — Frota, manutencao, preventiva, checklists, documentos e inspecoes prontos. Proximo: compliance avancado.
 8. **Storage** — Nao iniciado; necessario para upload/download de documentos (Supabase Storage).
 9. **Mobile** — Nao iniciado; mobile polish de checklists (Feature 036) e PWA sao itens futuros.
-10. **Testing** — Backend com 15 testes (incluindo rotas de documentos/inspecoes). Faltam testes no frontend.
+10. **Testing** — Backend com 20 testes passando (incluindo documentos/inspecoes e `research-consent.test.js`); 3 integracoes puladas sem banco. Faltam testes no frontend.
 11. **Security** — Base presente (hashing, JWT, ownership, RLS, redacao de logs, `npm audit` manual). Pendente: rate limiting, upload security e scanner no CI.
 12. **Observability** — Logging estruturado + health check prontos. Pendente: metricas, tracing e alertas.
 13. **Infrastructure** — Frontend no GitHub Pages e API na Vercel, com Supabase saudavel (`/health` 200).
@@ -708,10 +752,15 @@ Flags de operacao (avaliacao do proprio contexto):
 > **Privacidade e contato na demo:** a SPA publica a rota publica `/privacidade`
 > (politica LGPD), mostra um aviso de armazenamento local com aceite registrado
 > em `safeanchor.cookieConsent` e exibe um botao flutuante de WhatsApp quando
-> `VITE_RESEARCH_WHATSAPP` e configurado no build. O formulario `/pesquisa` envia
-> o resumo por e-mail via Resend e oferece links manuais para WhatsApp/e-mail;
-> o envio por e-mail foi validado em 26/11/2026 (resposta `202` e recebimento
-> confirmado).
+> `VITE_RESEARCH_WHATSAPP` e configurado no build. O formulario `/pesquisa`
+> comeca com "Aceitar captura" ou "Recusar captura": com aceite (versao
+> `2026-11-26`) respostas, perfil e contato opcional sao enviados a `/research`,
+> gravados em `ResearchResponse` e encaminhados por Resend; com recusa nada e
+> enviado ao servidor e o resumo fica so no navegador. A escolha pode ser
+> alterada/revogada em `/privacidade`. `safeanchor.researchConsent` guarda
+> decisao, versao e data. Nao ha cookies de rastreamento, analytics ou
+> publicidade; WhatsApp continua link manual `wa.me`. O envio por e-mail foi
+> validado em 26/11/2026 (resposta `202` e recebimento confirmado).
 
 ---
 
@@ -722,7 +771,7 @@ Principios de seguranca do MVP — marcados pelos que **ja existem** no reposito
 | Tema | Situacao |
 |---|---|
 | Authentication | ✅ JWT + bcrypt (custo 12), expiracao 1h; frontend consome a API real |
-| Authorization | ✅ Roles `USER`/`MANAGER`/`ADMIN` e persona no backend |
+| Authorization | ✅ Roles `USER`/`MANAGER`/`ADMIN` e persona no backend; `DIRECTOR`/`ADMIN` nas rotas da diretoria |
 | Ownership / Access Scope | ✅ `accessScopeService` isola vessels, documents e inspections por party/organizacao |
 | Password hashing | ✅ bcrypt; hash nunca exposto |
 | JWT security | ✅ payload com `userId`, `partyId`, `role` e `persona`; `JWT_SECRET` via env |
@@ -757,6 +806,9 @@ Decisoes ja tomadas. Datas aproximadas pelo historico do git.
 | 2026 | Sem Next.js / TypeScript / Tailwind nesta fase | Fase de aprendizado, stack simples e didatica |
 | 2026-11 | Tema Maritime Precision traduzido para tokens BEM | Referencia visual do usuario sem introduzir Tailwind ou libs de animacao |
 | 2026-11 | Skeleton so para layout conhecido; acoes usam spinner inline | Evita piscar, salto visual e movimento que infringe WCAG 2.2.2 |
+| 2026-11 | Consentimento explicito e versionado na pesquisa (`2026-11-26`) | Sem captura sem aceite; diretoria so analisa respostas autorizadas |
+| 2026-11 | Diretoria autorizada por `role`, nao por persona | Persona e navegacao; `DIRECTOR`/`ADMIN` protegem rotas e API |
+| 2026-11 | Prerender estatico em vez de SSR | GitHub Pages serve arquivos; SPA permanece MVVM e sem Next.js |
 
 ---
 
@@ -768,7 +820,8 @@ Apresentar o **MVP de apresentacao (Rebaseline 2026 — Operational Readiness)**
 a jornada **Login → Dashboard → Frota → Embarcacao →
 Manutencao/Checklists/Documentos → Prontidao Operacional** ja esta publicada com
 dados reais e ownership aplicado de ponta a ponta, pronta para validacao com
-investidores, parceiros e PTM.
+investidores, parceiros e PTM. A pesquisa tem consentimento explicito e a diretoria tem area propria para
+decidir e auditar; tudo publicado em `main`.
 
 ---
 
@@ -776,17 +829,17 @@ investidores, parceiros e PTM.
 
 > **Next Action**
 
-**Demo publicada e validada:** os PRs #175, #176, #177, #178 e #179 (`develop` →
-`main`) foram mergeados; a promoção final saiu de `develop` (`13442e1`), que
-levou os botoes de acessos de demonstracao no login. O frontend roda no GitHub
-Pages, a API na Vercel com `/health` `200`, migrations aplicadas e quatro contas
-demo criadas via `/auth/register`. O tema Maritime Precision (skeletons, estados
-de erro e spinner de submit) esta em produção desde 26/11/2026 — validação
-pos-merge 110/110 checks. Para novas mudancas, trabalhe em `develop` e abra PR:
+**Demo publicada e validada:** os PRs #175 a #181 (`develop` → `main`) foram
+mergeados; o ciclo final removeu o bootstrap temporário e sincronizou a
+documentação. O frontend roda no GitHub Pages, a API na Vercel com `/health`
+`200`, as migrations aplicadas e as cinco contas demo criadas via
+`/auth/register`. O tema Maritime Precision, a área da diretoria, o
+consentimento e o SEO estão em produção desde 26/11/2026 — validação final com
+**157/157 checks**. Para novas mudanças, trabalhe em `develop` e abra PR:
 **nao fazer merge direto em `main`**. Antes de apresentar,
 leia `docs/demo-apresentacao.md` (roteiro e verificacao via
 `node scripts/verify-demo.mjs`); antes de mexer, leia `docs/handoff-freeze.md`,
-`docs/diagnostico.md` e `docs/visual-system.md`.
+`docs/diagnostico.md`, `docs/visual-system.md` e `docs/seo.md`.
 
 ---
 

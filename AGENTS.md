@@ -27,15 +27,42 @@ Este projeto agora e uma base simples para estudo.
   em `https://safeanchor-monorepo.vercel.app` (`/health`). Apresente sempre a
   producao; o Preview expira em `2026-11-29T14:19:24Z`.
 - O login tem botoes "Acessos de demonstracao" para `demo@safeanchor.app`/`demo123`
-  (`OWNER`), `carlos@tecno.boat`/`demo123` (`SERVICE_PROVIDER`) e
-  `gestao@marinacostaazul.com`/`demo123` (`MARINA`); conta legada
-  `demo@safeanchor.test`/`demo123456`. As contas sao reais, criadas via API;
-  persona e so navegacao — autorizacao por role e isolamento por Party.
+  (`OWNER`), `carlos@tecno.boat`/`demo123` (`SERVICE_PROVIDER`),
+  `gestao@marinacostaazul.com`/`demo123` (`MARINA`) e
+  `diretoria@safeanchor.app`/`demo123` ("Admin da diretoria": persona `OWNER`,
+  role real `DIRECTOR`); conta legada `demo@safeanchor.test`/`demo123456`. As
+  contas sao reais, criadas via API; persona e so navegacao — autorizacao por
+  role e isolamento por Party. O botao da diretoria abre `/director`.
+- Area da diretoria em `/director`, `/director/responses`, `/director/users` e
+  `/director/audit`: guard por `roleKey` no frontend e
+  `authorizeRoles("DIRECTOR","ADMIN")` no backend. A diretoria filtra respostas
+  da pesquisa por status/perfil/cidade, registra decisao/status, altera
+  papel/persona e consulta auditoria minima (ator, alvo, acao, antes/depois e
+  data; nunca senha ou token).
 - API real: auth, vessels, maintenances, documents, inspections, preventiva,
-  checklists e research. Marinas, prestadores, jobs, eventos, viagens, locacoes,
-  marketplace, comunidade, academy e IA sao mock; feed e "prontidao" tambem.
+  checklists, research com consentimento explicito e os endpoints `/director/*`.
+  Marinas, prestadores, jobs, eventos, viagens, locacoes, marketplace,
+  comunidade, academy e IA sao mock; feed e "prontidao" tambem.
+- A pesquisa comeca por "Aceitar captura" ou "Recusar captura"
+  (`safeanchor.researchConsent`, versao `2026-11-26`). Com aceite, respostas,
+  perfil e contato opcional sao gravados em `ResearchResponse` e enviados por
+  Resend; com recusa, nada vai ao servidor, o resumo fica no navegador e pode
+  ser compartilhado manualmente por WhatsApp/e-mail. A escolha pode ser
+  alterada/revogada em `/privacidade`. `safeanchor.cookieConsent` registra so a
+  leitura do aviso: nao ha cookies de rastreamento, analytics ou publicidade.
+  WhatsApp continua sendo link manual `wa.me`, sem envio automatico.
+- SEO sem SSR: prerender estatico de `/`, `/pesquisa/` e `/privacidade/`,
+  `noindex` nas rotas privadas, `robots.txt`, `sitemap.xml`, JSON-LD, Open
+  Graph, canonical, favicon SVG/ICO/PNG, manifest e og-image. Fonte unica:
+  `apps/frontend/src/seo/pageMeta.js`. Ver `docs/seo.md`.
 - CORS so aceita `https://luis-botelho.github.io`; deep links no Pages respondem
   `404` com o HTML da SPA (esperado); JWT dura 1h sem refresh.
+- `npm test` no backend passa (21 testes, 3 integrações puladas),
+  incluindo `test/research-consent.test.js`. As migrations
+  `20261127000000_add_director_role` e
+  `20261127000100_add_research_consent_and_director` foram aplicadas em
+  produção por bootstrap temporário removido no mesmo ciclo.
+  `npm.cmd run verify:demo` fecha 157/157 checks.
 - Node 22 no backend e no CI. No Windows use `npm.cmd`, `Copy-Item` e
   `$env:VAR=...`.
 - Nunca versione `.env`, rode seed/migrations contra producao ou reintroduza

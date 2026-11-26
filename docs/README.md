@@ -2,24 +2,30 @@
 
 Este indice separa o que descreve a demo em producao (current), o registro da
 versao inicial (historico) e as propostas ainda nao adotadas (target). Estado
-operacional de referencia: 26/11/2026.
+operacional de referencia: 26/11/2026; area da diretoria, consentimento da
+pesquisa e SEO publicados em produção.
 
 ### Current — demo funcional (26/11/2026)
 
-- [Roteiro de apresentacao](./demo-apresentacao.md) — contas demo, ordem de
-  cliques, o que e real x mock e `node scripts/verify-demo.mjs`.
-- [Handoff operacional](./handoff-freeze.md) — PRs #175/#176/#177/#178/#179,
+- [Roteiro de apresentacao](./demo-apresentacao.md) — contas demo (inclui a
+  diretoria), ordem de cliques, consentimento da pesquisa, o que e real x mock
+  e `node scripts/verify-demo.mjs`.
+- [Handoff operacional](./handoff-freeze.md) — PRs #175 a #181,
   deploys, contas demo e validacao com `node scripts/verify-demo.mjs`.
-- [Deploy](./deployment.md) — GitHub Pages + Vercel, variaveis, CORS e Preview
-  com Neon temporario que expira em `2026-11-29T14:19:24Z`.
+- [Deploy](./deployment.md) — GitHub Pages + Vercel, variaveis, CORS, migrations
+  aplicadas e Preview com Neon temporario que expira em `2026-11-29T14:19:24Z`.
 - [Rebaseline 2026](./product/mvp-rebaseline.md) — Features 031-038; 037 e 038
-  concluidas, com #177/#178/#179 registrados.
+  concluidas, com #177 a #181 registrados, e trabalho adicional publicado.
 - [Fluxo do usuario](./user-flow.mmd) — login com "Acessos de demonstracao" e
   jornada real da API.
 - [Fluxo de dados](./data-flow.mmd) — services entre API real e catalogos mock.
 - [Sistema visual](./visual-system.md) — Maritime Precision em producao,
-  contratos de skeleton e movimento.
-- [Diagnostico](./diagnostico.md) — stack e fluxo de uso.
+  contratos de skeleton, movimento e novos blocos `.consent-gate*` e `.director-*`.
+- [SEO e identidade visual](./seo.md) — prerender de rotas publicas, metadados,
+  favicon, manifest e og-image; fonte unica em `src/seo/pageMeta.js`.
+- [Cenarios competitivos](./product/competitive-landscape.md) — referencias de
+  mercado usadas para priorizar a demo.
+- [Diagnostico](./diagnostico.md) — stack, area da diretoria e fluxo de uso.
 - [Banco de dados](./architecture/database.md) — RLS, seed local e contas demo
   criadas via API.
 - [Guia de estudo](./learning/README.md) — primeiras tarefas e comandos Windows.
