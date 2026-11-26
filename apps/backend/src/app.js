@@ -19,7 +19,9 @@ import inspectionRoutes from "./routes/inspectionRoutes.js";
 import directorRoutes from "./routes/directorRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
 
-const genReqId = (request) => request.headers["x-request-id"] || randomUUID();
+// IDs de correlação são sempre gerados no servidor: o header do cliente
+// não é confiável e não deve ser refletido em logs nem em respostas.
+const genReqId = () => randomUUID();
 
 export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   const app = express();

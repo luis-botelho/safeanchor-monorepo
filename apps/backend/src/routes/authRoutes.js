@@ -2,6 +2,7 @@ import express from "express";
 import {
   register,
   login,
+  logout,
   me,
 } from "../controllers/authController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
@@ -12,6 +13,7 @@ export function createAuthRouter(limiters = createAuthLimiters()) {
 
   router.post("/register", limiters.registerByIp, limiters.registerByEmail, register);
   router.post("/login", limiters.loginByIp, limiters.loginByEmail, login);
+  router.post("/logout", requireAuth, logout);
   router.get("/me", requireAuth, me);
 
   return router;

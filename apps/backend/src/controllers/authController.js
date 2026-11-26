@@ -3,6 +3,7 @@ import {
   loginUser,
   getUserById,
 } from "../services/authService.js";
+import { revokeToken } from "../services/tokenRevocation.js";
 
 export const register = async (request, response) => {
   const { name, email, password, persona } = request.body;
@@ -50,6 +51,12 @@ export const login = async (request, response) => {
   }
 
   return response.status(200).json(user);
+};
+
+export const logout = async (request, response) => {
+  revokeToken(request.user.jti, request.user.exp);
+
+  return response.status(204).end();
 };
 
 export const me = async (request, response) => {
