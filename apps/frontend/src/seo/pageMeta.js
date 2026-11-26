@@ -67,8 +67,8 @@ export const PAGES = {
     robots: "index,follow",
     heading: "Ajude a decidir o que o SafeAnchor constrói primeiro",
     paragraphs: [
-      "Queremos ouvir quem usa barco, marina e serviço náutico todo dia. A pesquisa é curta, pode ser respondida de forma anônima e suas respostas ajudam a priorizar o produto.",
-      "Ao final, você pode deixar seu contato de forma opcional. O envio pelo site é feito pelo backend; também há alternativas manuais por e-mail e WhatsApp.",
+      "Queremos ouvir quem usa barco, marina e serviço náutico todo dia. A pesquisa é curta e começa com uma escolha explícita: autorizar ou recusar a captura das respostas.",
+      "Se você aceitar, as respostas são enviadas ao servidor e analisadas pela diretoria. Se recusar, pode responder normalmente e nada é capturado — você ainda pode compartilhar o resumo por e-mail ou WhatsApp.",
     ],
     links: [
       { href: "/", label: "Voltar ao início" },

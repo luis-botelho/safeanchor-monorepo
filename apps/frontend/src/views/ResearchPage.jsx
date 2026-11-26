@@ -10,9 +10,86 @@ import {
   hasWhatsappTarget,
   researchPhone,
 } from "../services/researchService";
+import {
+  clearResearchConsent,
+  markPrivacyNoticeSeen,
+  readResearchConsent,
+  saveResearchConsent,
+} from "../services/researchConsent";
 import useResearchViewModel from "../viewmodels/useResearchViewModel";
 
 const EMPTY_CONTACT = { nome: "", contato: "", cidade: "", perfil: "" };
+
+function ConsentGate({ onDecide }) {
+  return (
+    <div className="survey">
+      <header className="survey__header">
+        <Link to="/" className="survey__brand">
+          <span className="survey__brand-mark">
+            <Icon name="anchor" size={18} />
+          </span>
+          <span className="survey__brand-name">SafeAnchor</span>
+        </Link>
+        <span className="survey__stage">Antes de começar</span>
+      </header>
+
+      <main className="survey__shell">
+        <div className="card consent-gate">
+          <div className="card--padding">
+            <span className="consent-gate__icon">
+              <Icon name="doc" size={26} />
+            </span>
+            <h1 className="survey__question">
+              Você autoriza a captura das respostas?
+            </h1>
+            <p className="survey__hint">
+              Escolha com tranquilidade. Essa decisão vale para esta pesquisa e
+              pode ser alterada na política de privacidade.
+            </p>
+
+            <div className="consent-gate__options">
+              <button
+                type="button"
+                className="consent-gate__option consent-gate__option--accept"
+                onClick={() => onDecide("accepted")}
+              >
+                <Icon name="check" size={18} />
+                <span>
+                  <strong>Aceitar captura</strong>
+                  <small>
+                    Envio as respostas ao SafeAnchor para análise da diretoria e
+                    priorização do produto, incluindo contato se eu deixar.
+                  </small>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className="consent-gate__option"
+                onClick={() => onDecide("declined")}
+              >
+                <Icon name="back" size={18} />
+                <span>
+                  <strong>Recusar captura</strong>
+                  <small>
+                    Posso responder normalmente, mas nada é enviado ao servidor.
+                    O resumo fica apenas neste navegador para compartilhar
+                    manualmente se eu quiser.
+                  </small>
+                </span>
+              </button>
+            </div>
+
+            <p className="consent-gate__note">
+              Não usamos cookies de rastreamento nem publicidade.{" "}
+              <Link to="/privacidade">Leia a política de privacidade</Link>.
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
 
 function OptionList({ question, answers, onSingle, onMulti }) {
   const selected = answers[question.id] || [];
@@ -168,8 +245,9 @@ function Finished({ model, onRestart }) {
 
       <h2 className="survey__done-title">Obrigado pela resposta</h2>
       <p className="survey__done-text">
-        Sua resposta foi enviada para a equipe SafeAnchor. Você também pode conferir
-        o resumo abaixo ou compartilhar uma cópia.
+        {model.captured
+          ? "Sua resposta foi registrada com sua autorização e ficou disponível para análise da diretoria. Você também pode conferir o resumo abaixo ou compartilhar uma cópia."
+          : "Você recusou a captura: nada foi enviado ao servidor. O resumo ficou apenas neste navegador e você pode compartilhar uma cópia manualmente."}
       </p>
 
       <div className="survey__send">
@@ -213,7 +291,12 @@ function Finished({ model, onRestart }) {
   );
 }
 
-function FinalStep({ model }) {
+function FinalStep({ model, consent }) {
+  const captureAllowed = consent?.decision === "accepted";
+  const consentHint = captureAllowed
+    ? "Com sua autorização, a resposta será enviada ao servidor, analisada pela diretoria e encaminhada por e-mail usando o Resend."
+    : "Você recusou a captura: nada será enviado ao servidor. O resumo fica só neste navegador e pode ser compartilhado manualmente.";
+
   if (!model.wantsContact) {
     return (
       <div className="survey__final">
@@ -250,8 +333,7 @@ function FinalStep({ model }) {
         </div>
 
         <p className="survey__hint-inline survey__hint-inline--center">
-          Usamos seus dados para retorno sobre a pesquisa e encaminhamos a resposta
-          por e-mail usando o Resend.
+          {consentHint}
         </p>
       </div>
     );
@@ -264,10 +346,7 @@ function FinalStep({ model }) {
       </span>
 
       <h1 className="survey__question">Deixe um contato para retorno</h1>
-      <p className="survey__hint">
-        Usamos esses dados para falar com você sobre a pesquisa e encaminhar sua
-        resposta por e-mail usando o Resend.
-      </p>
+      <p className="survey__hint">{consentHint}</p>
 
       <ContactForm
         onSubmit={model.submit}
@@ -291,6 +370,17 @@ function FinalStep({ model }) {
 
 export default function ResearchPage() {
   const model = useResearchViewModel();
+  const [consent, setConsent] = useState(() => readResearchConsent());
+
+  function decideConsent(decision) {
+    setConsent(saveResearchConsent(decision));
+    markPrivacyNoticeSeen();
+  }
+
+  function changeConsent() {
+    clearResearchConsent();
+    setConsent(null);
+  }
 
   const { current, index, total, isLast } = model;
 
@@ -303,12 +393,17 @@ export default function ResearchPage() {
     : "";
 
   useEffect(() => {
+    if (!consent) return;
     if (!current || current.type !== "single" || current.hasOther) return;
     if (!model.answered(current) || !model.canContinue) return;
 
     const timer = setTimeout(model.goNext, 300);
     return () => clearTimeout(timer);
-  }, [answerKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [answerKey, consent]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!consent) {
+    return <ConsentGate onDecide={decideConsent} />;
+  }
 
   if (model.finished) {
     return (
@@ -351,7 +446,7 @@ export default function ResearchPage() {
         <main className="survey__shell">
           <div className="card survey__card">
             <div className="card--padding">
-              <FinalStep model={model} />
+              <FinalStep model={model} consent={consent} />
             </div>
           </div>
         </main>
@@ -479,8 +574,17 @@ export default function ResearchPage() {
 
       <footer className="survey__footer">
         <p className="survey__footer-note">
-          Seu rascunho fica salvo neste navegador. Ao finalizar, a resposta é enviada
-          para a equipe SafeAnchor.{" "}
+          {consent.decision === "accepted"
+            ? "Captura autorizada: ao finalizar, a resposta é enviada ao SafeAnchor e analisada pela diretoria."
+            : "Captura recusada: ao finalizar, nada é enviado ao servidor; o resumo fica só neste navegador."}{" "}
+          <button
+            type="button"
+            className="survey__footer-hint survey__footer-hint--button"
+            onClick={changeConsent}
+          >
+            Alterar escolha
+          </button>
+          {" · "}
           <Link to="/privacidade">Política de Privacidade e LGPD</Link>
         </p>
       </footer>

@@ -123,9 +123,17 @@ export async function persistLocally(payload) {
   }
 }
 
-export function sendResearchSummary(summary) {
+export function sendResearchSummary(summary, { consent, response } = {}) {
   return apiFetch("/research", {
     method: "POST",
-    body: JSON.stringify({ summary }),
+    body: JSON.stringify({
+      summary,
+      consent: {
+        accepted: consent?.decision === "accepted",
+        version: consent?.version,
+        answeredAt: consent?.answeredAt,
+      },
+      response,
+    }),
   });
 }

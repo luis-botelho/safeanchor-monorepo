@@ -13,6 +13,10 @@ import {
   persistLocally,
   sendResearchSummary,
 } from "../services/researchService";
+import {
+  isResearchCaptureAllowed,
+  readResearchConsent,
+} from "../services/researchConsent";
 
 const STORAGE_KEY = "safeanchor.research.draft";
 
@@ -42,8 +46,10 @@ export default function useResearchViewModel() {
   const [step, setStep] = useState(initial.step);
   const [startedAt, setStartedAt] = useState(initial.startedAt);
   const [finished, setFinished] = useState(false);
+  const [consent, setConsent] = useState(() => readResearchConsent());
   const [summary, setSummary] = useState("");
   const [sent, setSent] = useState(false);
+  const [captured, setCaptured] = useState(false);
   const [copied, setCopied] = useState(false);
   const [wantsContact, setWantsContact] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -144,25 +150,49 @@ export default function useResearchViewModel() {
 
   const submit = useCallback(
     async (contact) => {
+      const contactData = wantsContact ? contact : null;
       const text = buildSummary({
         questions,
         answers,
-        contact: wantsContact ? contact : null,
+        contact: contactData,
         startedAt,
       });
+      const currentConsent = readResearchConsent();
+      const allowed = isResearchCaptureAllowed(currentConsent);
+      const responseData = {
+        name: contactData?.nome || null,
+        contact: contactData?.contato || null,
+        city: contactData?.cidade || null,
+        profile: contactData?.perfil || answers.perfil || null,
+        answers,
+      };
+
       setIsSubmitting(true);
       setSubmissionError("");
 
       try {
-        await sendResearchSummary(text);
-        await persistLocally({
-          answers,
-          contact: wantsContact ? contact : null,
-          startedAt,
-          submittedAt: Date.now(),
-        });
+        let wasCaptured = false;
+        if (allowed) {
+          const result = await sendResearchSummary(text, {
+            consent: currentConsent,
+            response: responseData,
+          });
+          wasCaptured = Boolean(result.captured);
+        }
+
+        if (allowed) {
+          await persistLocally({
+            answers,
+            contact: contactData,
+            startedAt,
+            submittedAt: Date.now(),
+          });
+        }
+
         setSummary(text);
         setSent(true);
+        setConsent(currentConsent);
+        setCaptured(wasCaptured);
         setCopied(false);
         return true;
       } catch (error) {
@@ -191,8 +221,10 @@ export default function useResearchViewModel() {
     setStep(0);
     setStartedAt(null);
     setFinished(false);
+    setConsent(readResearchConsent());
     setSummary("");
     setSent(false);
+    setCaptured(false);
     setCopied(false);
     setWantsContact(false);
     setSubmissionError("");
@@ -217,8 +249,10 @@ export default function useResearchViewModel() {
     otherValue: otherValue(current),
     canContinue,
     finished,
+    consent,
     summary,
     sent,
+    captured,
     copied,
     wantsContact,
     isSubmitting,

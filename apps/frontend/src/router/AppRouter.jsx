@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
+import DirectorRoute from "../components/DirectorRoute";
 import ProtectedRoute from "../components/ProtectedRoute";
 import SeoRoute from "../seo/SeoRoute";
 
@@ -48,6 +49,10 @@ import CreateMaintenancePage from "../views/CreateMaintenancePage";
 import InspectionsPage from "../views/InspectionsPage";
 import InspectionDetailPage from "../views/InspectionDetailPage";
 import NewInspectionPage from "../views/NewInspectionPage";
+import DirectorDashboardPage from "../views/DirectorDashboardPage";
+import DirectorResponsesPage from "../views/DirectorResponsesPage";
+import DirectorUsersPage from "../views/DirectorUsersPage";
+import DirectorAuditPage from "../views/DirectorAuditPage";
 
 export default function AppRouter() {
   return (
@@ -60,6 +65,14 @@ export default function AppRouter() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/privacidade" element={<PrivacyPage />} />
+
+      {/* Diretoria: autorização real por role, não por persona */}
+      <Route element={<DirectorRoute />}>
+        <Route path="/director" element={<DirectorDashboardPage />} />
+        <Route path="/director/responses" element={<DirectorResponsesPage />} />
+        <Route path="/director/users" element={<DirectorUsersPage />} />
+        <Route path="/director/audit" element={<DirectorAuditPage />} />
+      </Route>
 
       {/* Protegidas */}
       <Route element={<ProtectedRoute />}>
