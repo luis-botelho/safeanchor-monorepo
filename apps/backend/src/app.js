@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
 import pinoHttp from "pino-http";
 
 import logger from "./lib/logger.js";
@@ -25,6 +26,34 @@ const genReqId = () => randomUUID();
 
 export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   const app = express();
+
+  app.disable("x-powered-by");
+
+  // A API não serve HTML: a CSP é configurada no frontend. Aqui mantemos
+  // HSTS, nosniff, frame-ancestors e Referrer-Policy sem quebrar o CORS.
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: false,
+      referrerPolicy: { policy: "no-referrer" },
+      frameguard: { action: "deny" },
+      hsts: {
+        maxAge: 63072000,
+        includeSubDomains: true,
+        preload: true,
+      },
+    }),
+  );
+
+  app.use((request, response, next) => {
+    response.setHeader(
+      "Permissions-Policy",
+      "camera=(), microphone=(), geolocation=()",
+    );
+
+    return next();
+  });
 
   // A Vercel Termina o TLS e repassa o IP real em X-Forwarded-For.
   app.set("trust proxy", 1);
