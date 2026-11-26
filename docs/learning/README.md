@@ -1,33 +1,22 @@
-# Estado atual do projeto SafeAnchor
+# Guia de estudo — estado atual do SafeAnchor
 
-Este documento resume o que já existe no projeto para ajudar na organização do backlog e na continuidade do estudo.
+Este resumo ajuda quem está começando a entender o projeto e a escolher uma
+primeira tarefa. Para o estado operacional da demo, veja
+[`../handoff-freeze.md`](../handoff-freeze.md). Para tecnologias e fluxo de uso,
+veja [`../diagnostico.md`](../diagnostico.md).
 
 ## Visão geral
 
-O SafeAnchor é um projeto de estudo em formato monorepo com:
+O SafeAnchor é um projeto de estudo em monorepo:
 
-- Frontend em React + Vite
-- Backend em Express
-- Arquitetura simples no frontend com padrão MVVM
-- Objetivo de aprender fluxo completo entre interface, viewmodel, service e API
+- Frontend: React + Vite, SPA hospedada no GitHub Pages.
+- Backend: Express 5, hospedado na Vercel.
+- Persistência: PostgreSQL (Supabase) com Prisma 7.
+- Frontend em MVVM; backend em Route → Controller → Service → Prisma.
+- CSS em arquivos `.css` com convenção BEM.
 
-## O que já existe
-
-### Frontend
-
-- Tela inicial com navegação entre listagem e cadastro de embarcações
-- Página de embarcações com listagem de dados
-- Formulário para cadastrar uma nova embarcação
-- ViewModels para controlar estado das telas
-- Serviços para comunicação com a API
-- Fallback local para quando o backend não estiver disponível
-
-### Backend
-
-- Servidor Express rodando na porta 3001
-- Rota para listar módulos
-- Rotas para listar, criar e buscar embarcações
-- Separação em controllers, services e models
+Objetivo: aprender o fluxo completo entre interface, viewmodel, service, API e
+banco, sem frameworks extras como Next.js, TypeScript ou Tailwind nesta fase.
 
 ## Estrutura principal
 
@@ -35,43 +24,62 @@ O SafeAnchor é um projeto de estudo em formato monorepo com:
 apps/
   frontend/
     src/
-      views/         # páginas e componentes de tela
-      viewmodels/    # lógica da tela
-      services/      # comunicação com API
-      models/        # estrutura dos dados
+      views/         # páginas (o que o usuário vê)
+      viewmodels/    # estado e ações da tela (hooks use...ViewModel)
+      services/      # chamadas HTTP para a API
+      components/    # pedaços de UI reutilizáveis
+      context/       # autenticação e estado global
+      router/        # rotas da SPA
+      mock/          # dados falsos para áreas ainda não conectadas
+      styles/        # CSS com BEM
   backend/
     src/
-      routes/        # rotas da API
-      controllers/   # tratamento de requests
-      services/      # regras e dados do sistema
-      models/        # modelos de dados
+      routes/        # definição dos endpoints
+      controllers/   # validação do request e resposta
+      services/      # regras de negócio e acesso ao Prisma
+      middleware/    # autenticação, autorização e CORS
+    prisma/
+      schema.prisma  # modelos do banco
+      migrations/    # histórico de mudanças do schema
+      seed.js        # dados locais de desenvolvimento
 ```
 
-## Funcionalidades já implementadas
+## O que já funciona de verdade
 
-- Listagem de embarcações
-- Cadastro de embarcações
-- Validação básica de formulário
-- Resposta simples da API
-- Exibição de status de conexão com o backend
+- Cadastro e login com JWT; token enviado no header `Authorization: Bearer`.
+- Frota: listar e criar embarcações com dono (`ownerPartyId`); editar/excluir
+  existem na API mas ainda não têm tela roteada.
+- Manutenções: listar, criar, histórico por embarcação e dashboard de números.
+- Documentos: listar e cadastrar com validade e status (válido/próximo/vencido).
+- Inspeções: listar, criar, marcar checklist, concluir com certificado e cancelar.
+- Isolamento de dados por usuário/organização (`accessScopeService.js`).
+- `/health` no backend e smoke tests de produção.
 
-## Pontos que ainda podem entrar no backlog
+## O que ainda é mock ou está pendente
 
-- Persistência real em banco de dados
-- Edição de embarcações
-- Exclusão de embarcações
-- Melhorias na validação de dados
-- Busca e filtros na listagem
-- Melhorias na interface visual
-- CRUD completo de módulos
-- Autenticação de usuários
-- Testes automatizados
+- Catálogos: marinas, prestadores, jobs, community, eventos, trips, academy e IA.
+- Feed de atividades do dashboard e cálculo de prontidão no cliente.
+- Upload de arquivos de documentos (Supabase Storage).
+- Refresh token e documentação OpenAPI.
 
-## Sugestão de próximos passos
+## Tarefas boas para começar
 
-1. Completar o CRUD de embarcações
-2. Conectar o projeto a um banco real
-3. Melhorar a experiência visual do frontend
-4. Adicionar testes básicos no backend e no frontend
+1. **Seguir uma requisição completa:** abra `views/CreateVesselPage.jsx` →
+   `viewmodels/useCreateVesselViewModel.js` → `services/vesselService.js` →
+   rota `POST /vessels` → `vesselController.js` → `vesselService.js` → Prisma.
+   Para uma listagem, comece em `views/FleetPage.jsx` (chama
+   `getFleetVessels()` diretamente) → `GET /vessels`.
+2. **Rodar local:** configure `.env` apenas no backend (nunca versionado), rode
+   `npx prisma migrate dev` e `npm run dev` nos dois apps.
+3. **Trocar um mock por API:** escolha um catálogo pequeno em `src/mock/` e crie
+   o service, o viewmodel e a rota correspondentes.
+4. **Escrever um teste:** use os testes existentes em `apps/backend/test/` como
+   modelo para cobrir uma regra de negócio simples.
+5. **Melhorar o empty state:** ajuste um dos componentes `EmptyState` sem mudar
+   a API.
 
-Este resumo pode ser usado como base para criar tarefas mais claras no backlog.
+## Cuidados
+
+- Nunca versione `.env` nem credenciais do Supabase.
+- `DATABASE_URL` é usada no runtime; `DIRECT_URL` é usada pelo Prisma CLI.
+- Trabalhe em `develop` e promova para `main` somente por pull request.

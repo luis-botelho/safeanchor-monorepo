@@ -189,11 +189,11 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 
 > **Estado atual da implantação:** o frontend está no ar no GitHub Pages e a API
 > responde em `https://safeanchor-monorepo.vercel.app` com `/health` `200` e
-> `database: "up"` após a conexão do Supabase à Vercel. A implantação de produção
-> ainda executa o código de `main`; as rotas de documentos e inspeções só chegarão
-> a ela após o merge do PR #175. O `postinstall` executa `prisma generate`, que
-> exige `DIRECT_URL` também nos deployments de Preview — sem essa variável o
-> build falha antes de iniciar.
+> `database: "up"`. O PR #175 foi mergeado em `main`: documentos e inspeções já
+> estão em produção, com migrations aplicadas, seed demo carregado e deploy limpo
+> (sem o endpoint temporário de setup). O `postinstall` executa
+> `prisma generate`, que exige `DIRECT_URL` também nos deployments de Preview —
+> sem essa variável o build falha antes de iniciar.
 >
 > **Banco do Preview:** os deployments de Preview usam um Postgres temporário
 > configurado em `DATABASE_URL`/`DIRECT_URL` no ambiente de Preview da Vercel.
@@ -209,6 +209,15 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 > A proteção por login da Vercel (`ssoProtection`) foi desativada no projeto
 > para que o Preview seja acessível sem autenticação; reative em
 > Settings → Deployment Protection se preferir.
+>
+> **Produção validada:** `https://safeanchor-monorepo.vercel.app` responde
+> `200` em `/health`, login demo e nas quatro listagens, com CORS liberado para
+> `https://luis-botelho.github.io`. As migrations de `persona`, campos de perfil
+> da embarcação e tabelas de documentos/inspeções já estão aplicadas no
+> Supabase. O endpoint temporário `/__setup` e a variável `SETUP_TOKEN` foram
+> removidos. Para novas migrations, a Vercel não devolve segredos via CLI: é
+> necessário fornecer `DIRECT_URL` com acesso ao banco (ver
+> `docs/handoff-freeze.md`).
 
 <details>
 <summary><strong>Testando rapidamente com curl</strong></summary>
