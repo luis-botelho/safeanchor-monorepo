@@ -173,6 +173,8 @@ No Windows, em qualquer diretório com Node 22:
 
 ```powershell
 node scripts/verify-demo.mjs
+# ou, na raiz do repositório:
+npm.cmd run verify:demo
 ```
 
 O script checa Pages, bundle, rotas da SPA, `/health`, login das quatro contas,
