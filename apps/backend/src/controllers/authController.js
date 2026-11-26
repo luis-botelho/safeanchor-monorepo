@@ -4,13 +4,23 @@ import {
   getUserById,
 } from "../services/authService.js";
 import { revokeToken } from "../services/tokenRevocation.js";
+import {
+  isEmail,
+  isNonEmptyString,
+  isStrongPassword,
+} from "../lib/validation.js";
 
 export const register = async (request, response) => {
   const { name, email, password, persona } = request.body;
 
-  if (!name || !email || !password) {
+  if (
+    !isNonEmptyString(name, 120) ||
+    !isEmail(email) ||
+    !isStrongPassword(password)
+  ) {
     return response.status(400).json({
-      message: "Name, email and password are required",
+      message:
+        "Informe nome, e-mail válido e senha com pelo menos 12 caracteres.",
     });
   }
 
@@ -33,9 +43,9 @@ export const register = async (request, response) => {
 export const login = async (request, response) => {
   const { email, password } = request.body;
 
-  if (!email || !password) {
+  if (!isEmail(email) || typeof password !== "string" || !password) {
     return response.status(400).json({
-      message: "Email and password are required",
+      message: "Invalid email or password",
     });
   }
 

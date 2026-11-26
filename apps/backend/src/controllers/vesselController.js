@@ -1,3 +1,4 @@
+import { hasRequiredStrings } from "../lib/validation.js";
 import { getAccessScope } from "../services/accessScopeService.js";
 import {
   getAllVessels,
@@ -8,7 +9,7 @@ import {
 } from "../services/vesselService.js";
 
 function hasRequiredFields(body) {
-  return Boolean(body?.name?.trim() && body?.type?.trim() && body?.status?.trim());
+  return hasRequiredStrings(body, ["name", "type", "status"], 120);
 }
 
 export const getVessels = async (request, response) => {
