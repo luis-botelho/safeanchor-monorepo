@@ -53,7 +53,10 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
           return callback(null, true);
         }
 
-        return callback(new Error("Origin not allowed by CORS"));
+        const error = new Error("Origin not allowed by CORS");
+        error.status = 403;
+
+        return callback(error);
       },
     }),
   );
@@ -86,14 +89,23 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   app.use("/checklist-templates", checklistTemplateRoutes);
   app.use("/checklist-executions", checklistExecutionRoutes);
 
+  app.use((request, response) => {
+    return response.status(404).json({
+      message: "Not found",
+      requestId: request.id,
+    });
+  });
+
   app.use((error, request, response, next) => {
     logger.error(
       { err: error, requestId: request.id },
       "Unhandled error",
     );
 
-    return response.status(500).json({
-      message: "Internal server error",
+    const status = error.status >= 400 && error.status < 500 ? error.status : 500;
+
+    return response.status(status).json({
+      message: status === 500 ? "Internal server error" : error.message,
       requestId: request.id,
     });
   });

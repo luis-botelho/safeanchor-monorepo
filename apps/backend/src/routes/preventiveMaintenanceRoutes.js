@@ -10,7 +10,7 @@ const router = Router();
 router.get("/", getPreventiveMaintenancesController);
 router.post(
   "/",
-  authorizeRoles("MANAGER", "ADMIN"),
+  authorizeRoles("USER", "MANAGER", "ADMIN"),
   createPreventiveMaintenanceController,
 );
 

@@ -5,6 +5,6 @@ import { authorizeRoles } from "../middleware/authorizeRoles.js";
 const router = Router();
 
 router.get("/", listChecklistTemplates);
-router.post("/", authorizeRoles("MANAGER", "ADMIN"), createChecklistTemplate);
+router.post("/", authorizeRoles("USER", "MANAGER", "ADMIN"), createChecklistTemplate);
 
 export default router;

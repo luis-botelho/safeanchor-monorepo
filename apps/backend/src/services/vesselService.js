@@ -4,6 +4,33 @@ import {
   resolveOwnerPartyId,
 } from "./accessScopeService.js";
 
+const optionalFields = [
+  "category",
+  "length",
+  "year",
+  "engine",
+  "registration",
+  "location",
+  "mission",
+  "imageSeed",
+];
+
+function buildVesselData(vesselData) {
+  const data = {
+    name: vesselData.name,
+    type: vesselData.type,
+    status: vesselData.status,
+  };
+
+  for (const field of optionalFields) {
+    if (vesselData[field] !== undefined) {
+      data[field] = vesselData[field] || null;
+    }
+  }
+
+  return data;
+}
+
 export const getAllVessels = async (scope) => {
   return prisma.vessel.findMany({
     where: buildVesselScopeFilter(scope),
@@ -39,9 +66,7 @@ export const createVessel = async (scope, vesselData) => {
   return prisma.vessel.create({
     data: {
       ownerPartyId,
-      name: vesselData.name,
-      type: vesselData.type,
-      status: vesselData.status,
+      ...buildVesselData(vesselData),
     },
   });
 };
@@ -65,9 +90,7 @@ export const updateVessel = async (scope, id, vesselData) => {
 
     data: {
       ownerPartyId,
-      name: vesselData.name,
-      type: vesselData.type,
-      status: vesselData.status,
+      ...buildVesselData(vesselData),
     },
   });
 };

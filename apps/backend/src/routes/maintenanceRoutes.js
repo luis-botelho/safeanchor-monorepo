@@ -9,7 +9,7 @@ import { authorizeRoles } from "../middleware/authorizeRoles.js";
 const router = Router();
 
 router.get("/", getMaintenancesController);
-router.post("/", authorizeRoles("MANAGER", "ADMIN"), createMaintenanceController);
+router.post("/", authorizeRoles("USER", "MANAGER", "ADMIN"), createMaintenanceController);
 router.get("/dashboard", getMaintenanceDashboardController);
 
 

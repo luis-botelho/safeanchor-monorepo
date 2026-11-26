@@ -17,10 +17,10 @@ import { authorizeRoles } from "../middleware/authorizeRoles.js";
 const router = express.Router();
 
 router.get("/", getVessels);
-router.post("/", authorizeRoles("MANAGER", "ADMIN"), createNewVessel);
+router.post("/", authorizeRoles("USER", "MANAGER", "ADMIN"), createNewVessel);
 router.get("/:id", getVessel);
-router.put("/:id", authorizeRoles("MANAGER", "ADMIN"), updateVesselController)
-router.delete("/:id", authorizeRoles("MANAGER", "ADMIN"), deleteVesselController)
+router.put("/:id", authorizeRoles("USER", "MANAGER", "ADMIN"), updateVesselController)
+router.delete("/:id", authorizeRoles("USER", "MANAGER", "ADMIN"), deleteVesselController)
 router.get("/:id/maintenances", getMaintenancesByVesselIdController);
 router.get("/:id/inspections", getChecklistExecutionsByVesselIdController);
 

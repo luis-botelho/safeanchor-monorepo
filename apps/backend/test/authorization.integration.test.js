@@ -70,6 +70,7 @@ test(
     let userIds = [];
     let partyIds = [];
     let vesselId = null;
+    let managerVesselId = null;
 
     try {
       const registerResponse = await requestJson(
@@ -88,6 +89,7 @@ test(
 
       assert.equal(registerResponse.status, 201);
       assert.equal(registerResponse.body.role, "USER");
+      assert.equal(registerResponse.body.persona, "OWNER");
       assert.ok(registerResponse.body.id);
 
       const publicUserId = registerResponse.body.id;
@@ -156,12 +158,15 @@ test(
       assert.equal(userReadResponse.status, 200);
       assert.ok(Array.isArray(userReadResponse.body));
 
+      // Um usuário comum é dono da própria frota: pode criar em seu escopo.
       const userWriteResponse = await requestJson(baseUrl, "/vessels", {
         method: "POST",
         token: userToken,
         body: { name: marker, type: "Lancha", status: "Ativa" },
       });
-      assert.equal(userWriteResponse.status, 403);
+      assert.equal(userWriteResponse.status, 201);
+      assert.equal(userWriteResponse.body.ownerPartyId, registerResponse.body.partyId);
+      vesselId = userWriteResponse.body.id;
 
       const managerWriteResponse = await requestJson(baseUrl, "/vessels", {
         method: "POST",
@@ -170,10 +175,14 @@ test(
       });
       assert.equal(managerWriteResponse.status, 201);
       assert.ok(managerWriteResponse.body.id);
-      vesselId = managerWriteResponse.body.id;
+      managerVesselId = managerWriteResponse.body.id;
     } finally {
       if (vesselId) {
         await prisma.vessel.deleteMany({ where: { id: vesselId } });
+      }
+
+      if (managerVesselId) {
+        await prisma.vessel.deleteMany({ where: { id: managerVesselId } });
       }
 
       if (partyIds.length) {

@@ -13,6 +13,14 @@ model Vessel {
   name         String
   type         String
   status       String
+  category     String?
+  length       String?
+  year         String?
+  engine       String?
+  registration String?
+  location     String?
+  mission      String?
+  imageSeed    String?
 
   ownerParty             Party?                  @relation(fields: [ownerPartyId], references: [id])
   maintenances           Maintenance[]
@@ -85,6 +93,12 @@ enum UserRole {
   ADMIN
 }
 
+enum Persona {
+  OWNER
+  SERVICE_PROVIDER
+  MARINA
+}
+
 model Party {
   id           String        @id @default(cuid())
   type         PartyType
@@ -100,6 +114,7 @@ model User {
   email        String   @unique
   passwordHash String
   role         UserRole @default(USER)
+  persona      Persona  @default(OWNER)
 
   party       Party        @relation(fields: [partyId], references: [id], onDelete: Cascade)
   memberships Membership[]

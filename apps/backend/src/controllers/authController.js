@@ -5,7 +5,7 @@ import {
 } from "../services/authService.js";
 
 export const register = async (request, response) => {
-  const { name, email, password } = request.body;
+  const { name, email, password, persona } = request.body;
 
   if (!name || !email || !password) {
     return response.status(400).json({
@@ -17,6 +17,7 @@ export const register = async (request, response) => {
     name,
     email,
     password,
+    persona,
   });
 
   if (!user) {
