@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Icon from "./Icon";
 
@@ -30,30 +30,74 @@ const slides = [
 ];
 
 const SLIDE_INTERVAL = 5000;
+const SWIPE_THRESHOLD = 40;
 
 export default function AuthCarousel() {
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef(null);
   const slide = slides[active];
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return undefined;
     }
 
     const timer = window.setInterval(() => {
+      if (document.hidden) return;
       setActive((current) => (current + 1) % slides.length);
     }, SLIDE_INTERVAL);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [paused]);
 
   function select(index) {
     setActive((index + slides.length) % slides.length);
   }
 
+  function handleKeyDown(event) {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      select(active - 1);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      select(active + 1);
+    }
+  }
+
+  function handleTouchStart(event) {
+    touchStartX.current = event.changedTouches[0]?.clientX ?? null;
+  }
+
+  function handleTouchEnd(event) {
+    if (touchStartX.current === null) return;
+
+    const distance = (event.changedTouches[0]?.clientX ?? touchStartX.current) - touchStartX.current;
+
+    if (Math.abs(distance) >= SWIPE_THRESHOLD) {
+      select(active + (distance < 0 ? 1 : -1));
+    }
+
+    touchStartX.current = null;
+  }
+
   return (
-    <section className="auth-carousel" aria-label="Funcionalidades do SafeAnchor">
-      <div className="auth-carousel__item" key={active} aria-live="polite">
+    <section
+      className="auth-carousel"
+      aria-label="Funcionalidades do SafeAnchor"
+      aria-roledescription="carrossel"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
+      }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <div className="auth-carousel__item" key={active} aria-live="polite" aria-atomic="true">
         <span className="auth-carousel__icon">
           <Icon name={slide.icon} size={22} />
         </span>
@@ -81,7 +125,9 @@ export default function AuthCarousel() {
               onClick={() => select(index)}
               aria-label={`Mostrar funcionalidade ${index + 1}: ${item.title}`}
               aria-current={index === active ? "true" : undefined}
-            />
+            >
+              <span className="auth-carousel__dot-mark" />
+            </button>
           ))}
         </div>
 

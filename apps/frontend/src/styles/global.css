@@ -1711,14 +1711,15 @@ textarea {
 }
 
 .auth-carousel__arrow {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1;
   display: grid;
   place-items: center;
   background: rgba(var(--shell-rgb), 0.1);
+  flex: none;
 }
 
 .auth-carousel__arrow:hover,
@@ -1733,19 +1734,30 @@ textarea {
 }
 
 .auth-carousel__dot {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+}
+
+.auth-carousel__dot-mark {
+  display: block;
   width: 9px;
   height: 9px;
-  padding: 0;
   border-radius: 999px;
   background: rgba(var(--shell-rgb), 0.3);
   transition: width 180ms ease, background 180ms ease;
 }
 
-.auth-carousel__dot--active {
+.auth-carousel__dot--active .auth-carousel__dot-mark {
   width: 24px;
   background: var(--sand);
 }
 
+.auth-carousel:focus-visible,
 .auth-carousel__arrow:focus-visible,
 .auth-carousel__dot:focus-visible {
   outline: 2px solid var(--sand);
@@ -1768,7 +1780,7 @@ textarea {
     animation: none;
   }
 
-  .auth-carousel__dot {
+  .auth-carousel__dot-mark {
     transition: none;
   }
 }
@@ -2001,6 +2013,7 @@ textarea {
 
   .app-shell__content {
     padding: 20px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
   }
 
   .grid--2,
@@ -2047,15 +2060,31 @@ textarea {
 
   .auth-carousel__controls {
     margin-top: 12px;
+    justify-content: space-between;
+  }
+
+  .auth-carousel__arrow,
+  .auth-carousel__dot {
+    width: 44px;
+    height: 44px;
+  }
+
+  .auth-carousel__dot {
+    background: rgba(var(--shell-rgb), 0.08);
   }
 
   .auth__panel {
-    padding: 24px 16px 40px;
+    padding: 24px 16px calc(40px + env(safe-area-inset-bottom));
+  }
+
+  .auth__card .input {
+    font-size: 16px;
+    min-height: 48px;
   }
 
   .demo-access__item {
-    min-height: 52px;
-    padding: 11px 12px;
+    min-height: 56px;
+    padding: 12px;
   }
 }
 

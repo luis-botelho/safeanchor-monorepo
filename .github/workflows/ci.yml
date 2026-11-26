@@ -70,3 +70,7 @@ jobs:
       - name: Build frontend
         working-directory: apps/frontend
         run: npm run build
+
+      - name: Verify local artifacts (no network)
+        working-directory: apps/frontend
+        run: node ../../scripts/verify-local.mjs
