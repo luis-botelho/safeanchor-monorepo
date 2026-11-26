@@ -193,6 +193,13 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 > Corrigir `DATABASE_URL`/migrations em produção é pré-requisito da Feature 038.
 > O `postinstall` executa `prisma generate`, que exige `DIRECT_URL` também nos
 > deployments de Preview — sem essa variável o build falha antes de iniciar.
+>
+> **Banco do Preview:** os deployments de Preview usam um Postgres temporário
+> configurado em `DATABASE_URL`/`DIRECT_URL` no ambiente de Preview da Vercel.
+> Projetos temporários expiram; para recriar, rode `npx neon claim create`,
+> aplique `npx prisma migrate deploy` + `npx prisma db seed` e atualize as
+> variáveis de Preview. Producao continua usando o Supabase configurado no
+> projeto Vercel.
 
 <details>
 <summary><strong>Testando rapidamente com curl</strong></summary>
