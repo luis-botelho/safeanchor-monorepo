@@ -79,8 +79,9 @@ Executada com `Origin: https://luis-botelho.github.io` para exercitar o CORS rea
   Pages e **recebimento confirmado pelo usuário**.
 - O WhatsApp **não é envio automático**: é um link `wa.me` com mensagem
   preenchida, disponível no botão flutuante do site e na tela de confirmação da
-  pesquisa. O número `24992772357` é injetado no build por
-  `VITE_RESEARCH_WHATSAPP` (variável do GitHub Actions). Envio automático exigiria
+  pesquisa. O número `5524992772357` (55 + DDD 24) é injetado no build por
+  `VITE_RESEARCH_WHATSAPP` (variável do GitHub Actions); `wa.me` exige o código
+  do país, então não use o número sem o `55`. Envio automático exigiria
   credenciais de WhatsApp Business API/Twilio.
 - A rota pública `/privacidade` documenta controlador, dados coletados, bases
   legais, compartilhamento (Supabase, Vercel, Resend, GitHub Pages e WhatsApp),
@@ -97,7 +98,7 @@ Executada com `Origin: https://luis-botelho.github.io` para exercitar o CORS rea
   sincronizadas pela integração Supabase (`POSTGRES_*`, `SUPABASE_*`). Nenhum
   valor está versionado.
 - GitHub Actions (variáveis do repositório): `VITE_API_URL`,
-  `VITE_RESEARCH_WHATSAPP=24992772357` e, se quiser alterar o link manual de
+  `VITE_RESEARCH_WHATSAPP=5524992772357` e, se quiser alterar o link manual de
   e-mail, `VITE_RESEARCH_INBOX`. Nenhuma chave do Resend vai para o frontend.
 - Preview (Vercel): `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET` e
   `FRONTEND_ORIGIN` próprios, apontando para o Neon temporário

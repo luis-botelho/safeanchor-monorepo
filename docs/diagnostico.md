@@ -304,7 +304,7 @@ jobs e IA. Qualquer rota desconhecida redireciona para `/`.
 | Endpoint temporário `/__setup` | removido (retorna `401` do `requireAuth`) |
 | `POST /research` (formulário de feedback) | `202` + id do Resend; e-mail recebido e confirmado |
 | Rota pública `/privacidade` | política LGPD com controlador, bases legais, compartilhamento, retenção e direitos |
-| `VITE_RESEARCH_WHATSAPP` no bundle | número `24992772357` presente; `wa.me` gerado com mensagem inicial |
+| `VITE_RESEARCH_WHATSAPP` no bundle | número `5524992772357` (55 + DDD) no build corrente; `wa.me` gerado com mensagem inicial |
 | Aviso de armazenamento local | `CookieNotice` com aceite em `safeanchor.cookieConsent` |
 
 > **Nota para a apresentação:** o dashboard e as listagens core mostram dados
