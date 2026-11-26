@@ -5,6 +5,7 @@ import { getChecklistTemplates } from "../services/checklistTemplateService";
 
 export default function ChecklistTemplatesPage() {
   const [templates, setTemplates] = useState([]);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     loadTemplates();
@@ -14,8 +15,11 @@ export default function ChecklistTemplatesPage() {
     try {
       const data = await getChecklistTemplates();
       setTemplates(data);
-    } catch (error) {
-      console.error(error);
+      setLoadError("");
+    } catch {
+      // Evita console.error: mensagens de erro podem incluir URLs com token,
+      // detalhes da API ou stack trace. Mostra texto genérico ao usuário.
+      setLoadError("Não foi possível carregar os modelos de checklist.");
     }
   }
 
@@ -26,6 +30,8 @@ export default function ChecklistTemplatesPage() {
       <Link to="/checklist-templates/new">
         Novo Template
       </Link>
+
+      {loadError && <p className="field__error">{loadError}</p>}
 
       {templates.length === 0 ? (
         <p>Nenhum template cadastrado.</p>
