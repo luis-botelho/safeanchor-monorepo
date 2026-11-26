@@ -101,6 +101,30 @@ test("aceite explicito grava resposta com versao do consentimento", async () => 
   assert.equal(db.created[0].contact, "ana@example.com");
 });
 
+test("aceite preserva respostas de multipla selecao", async () => {
+  const db = mockDb();
+  await submitResearchResponse(
+    {
+      summary: "Resumo de teste",
+      consent: {
+        accepted: true,
+        version: RESEARCH_CONSENT_VERSION,
+        answeredAt: new Date().toISOString(),
+      },
+      response: {
+        answers: { owner_problema: ["documentos", "prestadores", 42] },
+      },
+    },
+    db,
+  );
+
+  assert.deepEqual(db.created[0].answers.owner_problema, [
+    "documentos",
+    "prestadores",
+    "42",
+  ]);
+});
+
 test("diretoria atualiza resposta e registra auditoria minima", async () => {
   const db = mockDb();
   const updated = await updateResponse(

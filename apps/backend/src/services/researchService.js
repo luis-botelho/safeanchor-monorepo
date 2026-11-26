@@ -5,6 +5,7 @@ import prisma from "../lib/prisma.js";
 const MAX_SUMMARY_LENGTH = 12000;
 const MAX_TEXT_LENGTH = 500;
 const MAX_ANSWER_KEYS = 60;
+const MAX_ANSWER_ITEMS = 30;
 const MAX_ANSWER_LENGTH = 2000;
 
 // Versionado para que a politica aceita fique identificada em cada resposta.
@@ -16,6 +17,20 @@ function cleanText(value, maximum = MAX_TEXT_LENGTH) {
   return text ? text.slice(0, maximum) : null;
 }
 
+const isPrimitiveAnswer = (value) =>
+  ["string", "number", "boolean"].includes(typeof value);
+
+function cleanAnswerValue(value) {
+  if (Array.isArray(value)) {
+    return value
+      .filter(isPrimitiveAnswer)
+      .slice(0, MAX_ANSWER_ITEMS)
+      .map((item) => String(item).slice(0, MAX_ANSWER_LENGTH));
+  }
+
+  return isPrimitiveAnswer(value) ? String(value).slice(0, MAX_ANSWER_LENGTH) : null;
+}
+
 function cleanAnswers(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
@@ -23,10 +38,10 @@ function cleanAnswers(value) {
 
   return Object.entries(value).reduce((result, [key, item]) => {
     if (Object.keys(result).length >= MAX_ANSWER_KEYS) return result;
-    if (typeof item !== "string" && typeof item !== "number" && typeof item !== "boolean") {
-      return result;
+    const cleaned = cleanAnswerValue(item);
+    if (cleaned !== null) {
+      result[String(key).slice(0, 80)] = cleaned;
     }
-    result[String(key).slice(0, 80)] = String(item).slice(0, MAX_ANSWER_LENGTH);
     return result;
   }, {});
 }
