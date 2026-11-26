@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -30,7 +31,7 @@ export default function MarinaDetailPage() {
   }, [id]);
 
   if (!marina) {
-    return <p>Carregando marina...</p>;
+    return <LoadingFallback label="Carregando marina..." />;
   }
 
   return (

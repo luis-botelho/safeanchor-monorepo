@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useParams } from "react-router-dom";
 
 import { useInspectionHistoryViewModel } from "../viewmodels/useInspectionHistoryViewModel";
@@ -15,7 +16,7 @@ export default function InspectionHistoryPage() {
   } = useInspectionHistoryViewModel(id);
 
   if (isLoading) {
-    return <p>Carregando inspeções...</p>;
+    return <LoadingFallback label="Carregando inspeções..." />;
   }
 
   if (error) {

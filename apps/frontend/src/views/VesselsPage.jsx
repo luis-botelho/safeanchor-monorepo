@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useNavigate, Link } from "react-router-dom";
 import { useVesselsViewModel } from "../viewmodels/useVesselsViewModel";
 import { useAuth } from "../context/AuthContext";
@@ -13,7 +14,7 @@ export default function VesselsPage() {
   };
 
   if (isLoading) {
-    return <p>Carregando...</p>;
+    return <LoadingFallback label="Carregando..." />;
   }
 
   return (

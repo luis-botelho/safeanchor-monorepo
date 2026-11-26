@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 import Icon from "../components/Icon";
+import SubmitButton from "../components/SubmitButton";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -90,13 +91,12 @@ export default function LoginPage() {
 
               {error && <p className="field__error">{error}</p>}
 
-              <button
-                type="submit"
+              <SubmitButton
+                busy={isLoading}
+                idleLabel="Entrar"
+                busyLabel="Entrando..."
                 className="btn btn--primary btn--block"
-                disabled={isLoading}
-              >
-                {isLoading ? "Entrando..." : "Entrar"}
-              </button>
+              />
             </form>
 
             <p className="auth__footer">

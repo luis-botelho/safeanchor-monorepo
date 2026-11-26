@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -29,7 +30,7 @@ export default function MarinaServiceCatalogPage() {
   }, [marinaId]);
 
   if (!marina) {
-    return <p>Carregando catálogo...</p>;
+    return <LoadingFallback label="Carregando catálogo..." />;
   }
 
   async function handlePublish(service) {

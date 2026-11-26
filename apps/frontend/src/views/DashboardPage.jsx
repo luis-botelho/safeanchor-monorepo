@@ -8,6 +8,8 @@ import ReadinessGauge from "../components/ReadinessGauge";
 import StatusBadge from "../components/StatusBadge";
 import Icon from "../components/Icon";
 import StatCard from "../components/StatCard";
+import ErrorState from "../components/ErrorState";
+import { DashboardSkeleton } from "../components/PageSkeletons";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -31,11 +33,11 @@ export default function DashboardPage() {
   }, []);
 
   if (error) {
-    return <p className="field__error">{error}</p>;
+    return <ErrorState title="Dashboard indisponível" message={error} />;
   }
 
   if (!data) {
-    return <p>Carregando dashboard...</p>;
+    return <DashboardSkeleton />;
   }
 
   const quickActions = [

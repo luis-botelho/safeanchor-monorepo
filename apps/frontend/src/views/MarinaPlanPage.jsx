@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { useEffect, useState } from "react";
 
 import PageHeader from "../components/PageHeader";
@@ -16,7 +17,7 @@ export default function MarinaPlanPage() {
   }, []);
 
   if (!b2b) {
-    return <p>Carregando planos...</p>;
+    return <LoadingFallback label="Carregando planos..." />;
   }
 
   return (

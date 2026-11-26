@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { Link, useParams } from "react-router-dom";
 import { useMaintenanceHistoryViewModel } from "../viewmodels/useMaintenanceHistoryViewModel";
 
@@ -7,7 +8,7 @@ export default function MaintenanceHistoryPage() {
   const viewModel = useMaintenanceHistoryViewModel(id);
 
   if (viewModel.isLoading) {
-    return <p>Carregando histórico...</p>;
+    return <LoadingFallback label="Carregando histórico..." />;
   }
 
   if (viewModel.error) {

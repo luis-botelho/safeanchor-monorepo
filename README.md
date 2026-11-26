@@ -105,7 +105,7 @@ Features definidas no rebaseline 2026 (Features **031–038**):
 | **034** | Documents Core | 🔶 API + cadastro/listagem na UI (sem upload/Storage) |
 | **035** | Expiration & Compliance | ✅ status por validade e indicadores no dashboard |
 | **036** | Safety Completion & Mobile Polish | 🔶 inspeções via API; checklist desktop, sem mobile/offline |
-| **037** | MVP UX Polish | 🔶 loading/empty/error nos fluxos core |
+| **037** | MVP UX Polish | 🔶 skeletons contextuais, estados vazios/erro e spinner nos fluxos core (reformulação visual em `develop`, aguardando PR) |
 | **038** | CI/CD & Production Deploy | ✅ PR #175 mergeado; Pages e Vercel no ar; `/health` 200, migrations aplicadas, seed demo e deploy limpo |
 
 A **Definition of Ready** completa esta em
@@ -294,7 +294,7 @@ o recurso pertença ao escopo (owner ou organizacao) do usuario autenticado.
 | Camada | Tecnologia |
 |---|---|
 | Frontend | React 19, Vite 7, react-router-dom v7 |
-| CSS | BEM methodology, co-localizado por componente |
+| CSS | BEM em `apps/frontend/src/styles/global.css`, com tokens semânticos (Maritime Precision) |
 | Backend | Node.js 20+, Express 5, pino (logging) |
 | Persistencia | PostgreSQL (Supabase) via Prisma 7 |
 | Auth | JWT (bcrypt + jsonwebtoken) |
@@ -303,6 +303,22 @@ o recurso pertença ao escopo (owner ou organizacao) do usuario autenticado.
 
 Sem TypeScript, sem Tailwind, sem Next.js — por decisao explícita
 ([AGENTS.md](./AGENTS.md)).
+
+---
+
+### Sistema visual — Maritime Precision
+
+O tema da pasta `stitch_safeanchor_maritime_ux_architecture/` foi traduzido para
+tokens BEM sem novas dependencias: Light Mist, Deep Ocean Navy, Abyss Teal e Sea
+Teal, bordas de 1 px, raio 4 px e numerais tabulares. O contrato de carregamento
+e movimento esta em [`docs/visual-system.md`](./docs/visual-system.md):
+
+- **Skeleton** so para layout conhecido (1–10 s), com `aria-busy` e texto
+  `.sr-only`; o pulse e finito e opt-in via `prefers-reduced-motion`.
+- **Spinner inline** para acoes (submit), nunca skeleton de botao.
+- **State view** para erro/vazio, com explicacao e proxima acao.
+- `Skeleton`, `PageSkeletons`, `LoadingFallback`, `ErrorState`,
+  `SubmitButton` e `InlineSpinner` vivem em `apps/frontend/src/components/`.
 
 ---
 
@@ -398,7 +414,8 @@ safeanchor-monorepo/
 - [x] Services conectados a API: vessels, maintenance, preventive-maintenances, checklists, modules, documents, inspections e dashboard
 - [x] Telas reais de cadastro de vessel, manutencao, documento e inspecao; detalhe de inspecao com checklist
 - [x] Dashboard calcula prontidao a partir de dados reais da API (manutencoes, documentos, inspecoes e status da embarcacao)
-- [x] Estados de loading/empty/error nos fluxos core
+- [x] Estados de loading/empty/error nos fluxos core (skeletons contextuais, `aria-busy` e spinner inline)
+- [x] Tema Maritime Precision em tokens BEM, sem Tailwind e sem novas libs
 - [x] Deploy no GitHub Pages via Actions + fallback SPA `404.html`
 
 **Fundacao (documentacao):**
@@ -431,7 +448,6 @@ Itens do rebaseline ainda incompletos em `develop`:
 - Documentos nao tem upload/download de arquivos — a API guarda metadados/URLs.
 - A prontidao e calculada no cliente; a API nao expoe endpoint de `readiness`.
 - Nao ha testes automatizados no frontend e nao ha script de lint.
-- Backend em producao segue degradado por configuracao de banco.
 - Restam 3 vulnerabilidades high transitivas do Prisma 7 (`effect`); corrigi-las exigiria downgrade breaking.
 
 ---
@@ -678,6 +694,8 @@ Decisoes ja tomadas. Datas aproximadas pelo historico do git.
 | 2026 | Seed e operacoes destrutivas protegidas por flags | Evitar alteracoes acidentais no banco remoto |
 | 2026-09 | Rebaseline do MVP: Operational Readiness (Features 031–038) | Focar na jornada Login → Prontidao Operacional |
 | 2026 | Sem Next.js / TypeScript / Tailwind nesta fase | Fase de aprendizado, stack simples e didatica |
+| 2026-11 | Tema Maritime Precision traduzido para tokens BEM | Referencia visual do usuario sem introduzir Tailwind ou libs de animacao |
+| 2026-11 | Skeleton so para layout conhecido; acoes usam spinner inline | Evita piscar, salto visual e movimento que infringe WCAG 2.2.2 |
 
 ---
 
@@ -697,12 +715,14 @@ para ser validado por investidores, parceiros e PTM.
 
 > **Next Action**
 
-**Demo publicada e validada:** o PR #175 (`develop` → `main`) foi mergeado; o
-frontend roda no GitHub Pages e a API na Vercel, com `/health` `200`, migrations
-aplicadas, usuario demo e dados de demonstracao carregados. O proximo passo e
-continuar em `develop` com novas mudancas via PR. Antes de mexer, leia
-`docs/handoff-freeze.md` (estado operacional) e `docs/diagnostico.md` (stack e
-fluxo de uso).
+**Demo publicada e validada:** os PRs #175 e #176 (`develop` → `main`) foram
+mergeados; o frontend roda no GitHub Pages e a API na Vercel, com `/health`
+`200`, migrations aplicadas, usuario demo e dados de demonstracao carregados. Em
+`develop` esta a reformulação visual (tema Maritime Precision, skeletons,
+estados de erro e spinner de submit), pronta para promoção por PR — **nao fazer
+merge direto em `main`**. Antes de mexer, leia `docs/handoff-freeze.md` (estado
+operacional), `docs/diagnostico.md` (stack e fluxo de uso) e
+`docs/visual-system.md` (tema e contrato de carregamento).
 
 ---
 

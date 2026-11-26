@@ -7,6 +7,8 @@ import ReadinessGauge from "../components/ReadinessGauge";
 import StatusBadge from "../components/StatusBadge";
 import PageHeader from "../components/PageHeader";
 import Icon from "../components/Icon";
+import ErrorState from "../components/ErrorState";
+import { VesselGridSkeleton } from "../components/PageSkeletons";
 
 export default function FleetPage() {
   const [vessels, setVessels] = useState([]);
@@ -33,11 +35,11 @@ export default function FleetPage() {
   }, []);
 
   if (isLoading) {
-    return <p>Carregando frota...</p>;
+    return <VesselGridSkeleton count={3} />;
   }
 
   if (error) {
-    return <p className="field__error">{error}</p>;
+    return <ErrorState title="Não foi possível carregar a frota" message={error} />;
   }
 
   return (

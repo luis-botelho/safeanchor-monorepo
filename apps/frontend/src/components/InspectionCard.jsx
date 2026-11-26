@@ -56,7 +56,7 @@ export default function InspectionCard({ inspection }) {
       <div className="mnt__due">
         {inspection.status === "completed" && inspection.certificate ? (
           <>
-            <span className="mnt__due-date" style={{ color: "var(--color-success)" }}>
+            <span className="mnt__due-date mnt__due-date--success">
               Certificado
             </span>
             <span className="mnt__due-label">emitido</span>

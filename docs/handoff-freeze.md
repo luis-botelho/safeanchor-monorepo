@@ -2,7 +2,8 @@
 
 > **Demo funcional nos dois lugares.** O backend está no Vercel e o frontend no
 > GitHub Pages. O desenvolvimento continua na branch **`develop`**; o código de
-> produção saiu de **`main`** após o merge do PR #175.
+> produção saiu de **`main`** após os merges dos PRs #175 e #176. A reformulação
+> visual descrita abaixo está em `develop`, aguardando promoção por PR.
 
 ## Onde está publicado
 
@@ -40,6 +41,40 @@ Login da demo: `demo@safeanchor.test` / `demo123456` (conta `USER`, `persona: OW
    existe mais.
 5. O usuário demo foi criado em produção por `/auth/register` e os dados de
    demonstração foram semeados pela própria API (não por `prisma db seed`).
+6. O PR #176 (`develop` → `main`) levou o botão de WhatsApp, a política de
+   privacidade/LGPD e o aviso de armazenamento local para produção.
+
+## Reformulação visual — Maritime Precision (em `develop`)
+
+A pasta `stitch_safeanchor_maritime_ux_architecture/`, adicionada pelo usuário,
+foi versionada e traduzida para tokens BEM em
+`apps/frontend/src/styles/global.css`: Light Mist `#F2F6F5`, Deep Ocean Navy
+`#102A43`, Abyss Teal `#123C43`, Sea Teal `#167D83`, bordas de 1 px e raio 4 px.
+**Não** foi adicionado Tailwind, lib de UI ou lib de animação — a referência é
+fonte de decisão, não código para copiar. O contrato completo está em
+[`visual-system.md`](./visual-system.md).
+
+| Primitive | Onde vive | Uso |
+|---|---|---|
+| `Skeleton`, `SkeletonText`, `SkeletonRegion` | `components/Skeleton.jsx` | formas com a geometria da tela final, `aria-hidden`, `aria-busy` e `.sr-only` |
+| `PageSkeletons` | `components/PageSkeletons.jsx` | dashboard, grid de embarcações, lista, tabela e detalhe |
+| `LoadingFallback` | `components/LoadingFallback.jsx` | fallback único para 26 telas secundárias e validação de sessão |
+| `ErrorState` | `components/ErrorState.jsx` | erro com explicação e ação, no lugar de `<p>` solto |
+| `SubmitButton` + `InlineSpinner` | `components/` | 10 formulários com `disabled`, `aria-busy`, spinner e rótulo de largura estável |
+
+- Skeletons estão nas 8 telas principais: dashboard (3 personas), frota, detalhe
+  de embarcação, documentos, manutenções e inspeções.
+- `MarinasPage` agora tem `isLoading` real e empty state: uma lista vazia não
+  fica "carregando" para sempre.
+- O pulse do skeleton tem **2 ciclos finitos** e só roda sob
+  `prefers-reduced-motion: no-preference`. `transition: all` foi substituído por
+  propriedades explícitas; `fade-in`, `survey-in` e `whatsapp-card-in` também são
+  opt-in. Com movimento desligado, o estado final continua visível.
+- Commits em `develop`: `2b3f1a1`, `ba8533c`, `7440477`, `cef53e6`, `5854bd1`,
+  `fd3036d`, `f3c3388`, `214e69a`, `7d33a3b`, `e830dc9`, `aa62062`.
+- **PR #177** (`develop` → `main`) aberto em 26/11/2026: `MERGEABLE`, checks
+  verdes (backend `generate/validate/test`, frontend `build`, Vercel Preview).
+  Aguardando **autorização explícita** para merge — não fazer merge direto.
 
 ## Dados de demonstração em produção
 
@@ -79,8 +114,9 @@ Executada com `Origin: https://luis-botelho.github.io` para exercitar o CORS rea
   Pages e **recebimento confirmado pelo usuário**.
 - O WhatsApp **não é envio automático**: é um link `wa.me` com mensagem
   preenchida, disponível no botão flutuante do site e na tela de confirmação da
-  pesquisa. O número `24992772357` é injetado no build por
-  `VITE_RESEARCH_WHATSAPP` (variável do GitHub Actions). Envio automático exigiria
+  pesquisa. O número `5524992772357` (55 + DDD 24) é injetado no build por
+  `VITE_RESEARCH_WHATSAPP` (variável do GitHub Actions); `wa.me` exige o código
+  do país, então não use o número sem o `55`. Envio automático exigiria
   credenciais de WhatsApp Business API/Twilio.
 - A rota pública `/privacidade` documenta controlador, dados coletados, bases
   legais, compartilhamento (Supabase, Vercel, Resend, GitHub Pages e WhatsApp),
@@ -97,7 +133,7 @@ Executada com `Origin: https://luis-botelho.github.io` para exercitar o CORS rea
   sincronizadas pela integração Supabase (`POSTGRES_*`, `SUPABASE_*`). Nenhum
   valor está versionado.
 - GitHub Actions (variáveis do repositório): `VITE_API_URL`,
-  `VITE_RESEARCH_WHATSAPP=24992772357` e, se quiser alterar o link manual de
+  `VITE_RESEARCH_WHATSAPP=5524992772357` e, se quiser alterar o link manual de
   e-mail, `VITE_RESEARCH_INBOX`. Nenhuma chave do Resend vai para o frontend.
 - Preview (Vercel): `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET` e
   `FRONTEND_ORIGIN` próprios, apontando para o Neon temporário
@@ -126,6 +162,14 @@ Executada com `Origin: https://luis-botelho.github.io` para exercitar o CORS rea
    smoke test de `/health`, login e quatro listagens.
 6. Leia também [`diagnostico.md`](./diagnostico.md) para entender as tecnologias
    e o fluxo de uso antes de mexer na arquitetura.
+7. Antes de mexer em loading, animação ou cor, leia
+   [`visual-system.md`](./visual-system.md). Todo indicador novo precisa passar
+   pelo checklist de aceite daquele documento (inclusive leitor de tela e
+   `prefers-reduced-motion`).
+8. Para validar o frontend localmente, rode `npm.cmd run build` **dentro de**
+   `apps/frontend` com `VITE_BASE_URL`, `VITE_API_URL` e
+   `VITE_RESEARCH_WHATSAPP`. O script `build` não existe na raiz e `npm.ps1`
+   pode ser bloqueado pela execution policy do Windows.
 
 ## Pendências conhecidas
 

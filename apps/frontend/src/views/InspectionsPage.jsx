@@ -4,16 +4,18 @@ import { useInspectionsViewModel } from "../viewmodels/useInspectionViewModel";
 import PageHeader from "../components/PageHeader";
 import InspectionCard from "../components/InspectionCard";
 import Icon from "../components/Icon";
+import ErrorState from "../components/ErrorState";
+import { ListSkeleton } from "../components/PageSkeletons";
 
 export default function InspectionsPage() {
   const { inspections, isLoading, error } = useInspectionsViewModel();
 
   if (isLoading) {
-    return <p>Carregando inspeções...</p>;
+    return <ListSkeleton label="Carregando inspeções" rows={4} />;
   }
 
   if (error) {
-    return <p>{error}</p>;
+    return <ErrorState title="Não foi possível carregar as inspeções" message={error} />;
   }
 
   const scheduled = inspections.filter((i) => i.status === "scheduled");

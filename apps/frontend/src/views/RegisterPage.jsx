@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 import Icon from "../components/Icon";
+import SubmitButton from "../components/SubmitButton";
 
 const personas = [
   { value: "OWNER", label: "Proprietário" },
@@ -130,13 +131,12 @@ export default function RegisterPage() {
 
               {error && <p className="field__error">{error}</p>}
 
-              <button
-                type="submit"
+              <SubmitButton
+                busy={isLoading}
+                idleLabel="Criar conta"
+                busyLabel="Criando conta..."
                 className="btn btn--primary btn--block"
-                disabled={isLoading}
-              >
-                {isLoading ? "Criando conta..." : "Criar conta"}
-              </button>
+              />
             </form>
 
             <p className="auth__footer">

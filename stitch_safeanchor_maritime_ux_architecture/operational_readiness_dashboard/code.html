@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-error-container": "#93000a", "on-surface-variant": "#43474d", "secondary": "#3e646c", "tertiary-fixed-dim": "#7dd4da", "surface-container-high": "#dee8ff", "primary-fixed-dim": "#b0c9e8", "surface": "#f9f9ff", "surface-container-low": "#f0f3ff", "surface-dim": "#cedaf4", "outline-variant": "#c3c6ce", "secondary-fixed": "#c1eaf2", "on-secondary-fixed": "#001f24", "surface-container": "#e7eeff", "background": "#f9f9ff", "surface-container-lowest": "#ffffff", "on-tertiary-container": "#429ca3", "secondary-container": "#bee7ef", "tertiary": "#001819", "inverse-surface": "#253144", "on-secondary-fixed-variant": "#254c54", "primary-container": "#102a43", "on-tertiary-fixed": "#002022", "on-primary-fixed-variant": "#314863", "surface-variant": "#d7e3fc", "on-primary": "#ffffff", "on-background": "#0f1c2e", "error-container": "#ffdad6", "primary-fixed": "#d1e4ff", "on-primary-container": "#7a92b0", "on-secondary-container": "#426970", "outline": "#74777e", "secondary-fixed-dim": "#a5cdd6", "on-secondary": "#ffffff", "primary": "#00152a", "on-tertiary": "#ffffff", "inverse-on-surface": "#ebf1ff", "tertiary-fixed": "#9af1f7", "on-primary-fixed": "#011d35", "on-surface": "#0f1c2e", "tertiary-container": "#002e31", "surface-bright": "#f9f9ff", "on-error": "#ffffff", "surface-container-highest": "#d7e3fc", "surface-tint": "#49607c", "error": "#ba1a1a", "inverse-primary": "#b0c9e8", "on-tertiary-fixed-variant": "#004f53" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter": "1rem", "space-sm": "0.5rem", "margin": "1rem", "space-xl": "2rem", "margin-desktop": "2rem", "gutter-desktop": "1.5rem", "space-md": "0.75rem", "space-xs": "0.25rem", "space-lg": "1.25rem" }, "fontFamily": { "body-lg": ["Inter"], "body-md": ["Inter"], "headline-xl-mobile": ["Inter"], "headline-sm": ["Inter"], "label-sm": ["Inter"], "data-mono-md": ["Inter"], "headline-lg-mobile": ["Inter"], "headline-xl": ["Inter"], "label-md": ["Inter"], "headline-lg": ["Inter"], "body-sm": ["Inter"], "data-mono-sm": ["Inter"], "headline-md": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400" }], "headline-xl-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "headline-sm": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }], "data-mono-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "500" }], "headline-lg-mobile": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0", "fontWeight": "400" }], "data-mono-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0", "fontWeight": "500" }], "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-primary text-on-primary shadow-[0_1px_8px_rgba(0,0,0,0.06)] pt-safe"><div class="h-28 px-margin flex flex-col justify-between py-space-sm"><div class="flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0"><img alt="SafeAnchor Maritime Logo" class="h-8 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh7sPPVexPxRHoqKJFihlS1fUr2zLI-6F6uLO5RjgIK13H5C1BM2OsONcSo0yogvIJ1SrUV0L94z84gCzmPCyVrybp_iBbQoVlr8mGBXqGIc5YQ2l47xfbNBr8BsQWjcCGsrQfspU41YD8jUOBSXZPUXWbeQZkIEKXqcmugTWI0AHxOhFpUV5udj6RUiY3jKh0VWjtmy05j24sKOlk-WXL_YF5-wnQclp6_02Qj3iuVMhgJRatG9la"/><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-on-primary font-bold tracking-tight truncate">SafeAnchor</span><span class="font-label-sm text-label-sm text-on-primary-container px-space-xs py-0.5 rounded-full bg-primary-container uppercase">DeckOS</span></div><span class="font-label-sm text-label-sm text-primary-fixed-dim uppercase tracking-wider truncate">Readiness</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Notifications" class="min-w-[48px] min-h-[48px] w-12 h-12 flex items-center justify-center relative text-on-primary rounded-lg active:bg-primary-container" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-secondary-fixed"></span></button><button aria-label="Captain Profile" class="min-w-[48px] min-h-[48px] w-12 h-12 flex items-center justify-center rounded-full active:opacity-80" type="button"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIN0Gj2VYaaYaLmrwU0D1U2DMvyR_dtoJ7WbWaSbB29W1uCbmlbvqr5__2zsEP6bX05pHik5e1J07Tsk1NzhR4BxlkCWh-xqntx9DqIzTzx2nrWCHOttdXQ65UR6NQNTDU61pk2x6r8adoGbhkyQEm6YezmIEAPJ2emfZvEkjUkdEgnNSjlGvPM5wFpGZXuYTTQ0XPynRjR2EAoSFkHr37uIjwxsnds93Q0dv28j9rVAJ8Ug2fTs60"/></button></div></div><div class="flex items-center justify-between gap-space-sm pt-space-xs"><button class="flex items-center gap-space-xs bg-primary-container/80 text-on-primary px-space-sm py-1 rounded-lg min-h-[48px] flex-1 max-w-[70%] text-left active:bg-primary-container" type="button"><span class="material-symbols-outlined text-[18px] text-tertiary-fixed">directions_boat</span><div class="flex flex-col truncate"><span class="font-label-md text-label-md text-on-primary truncate font-semibold leading-tight">Njord Explorer</span><span class="font-data-mono-sm text-data-mono-sm text-primary-fixed-dim leading-tight">IMO 9812402</span></div><span class="material-symbols-outlined text-[18px] text-primary-fixed-dim ml-auto">expand_more</span></button><div class="flex items-center gap-space-xs bg-primary-container/60 px-space-sm py-1 rounded-full min-h-[48px]"><span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span><div class="flex flex-col"><span class="font-label-sm text-label-sm text-tertiary-fixed font-semibold uppercase leading-tight">Live</span><span class="font-data-mono-sm text-data-mono-sm text-on-primary-container leading-tight">Synced</span></div></div></div></div></header><main class="flex flex-col relative w-full pt-28 pb-24 bg-surface min-h-screen"><div class="flex flex-col w-full px-margin pb-space-xl space-y-space-md">
+<!-- Operational Readiness Hero Card -->
+<section class="relative overflow-hidden rounded-xl bg-primary text-on-primary shadow-md p-space-md">
+<div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-secondary-container/10 pointer-events-none blur-xl"></div>
+<div class="flex flex-col space-y-space-sm relative z-10">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-tertiary-fixed text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary-fixed-dim">Maritime Readiness Index</span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm bg-primary-container px-space-xs py-0.5 rounded-full text-secondary-fixed">
+          UTC 08:42
+        </span>
+</div>
+<div class="flex items-end justify-between pt-space-xs">
+<div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl-mobile text-headline-xl-mobile font-bold tracking-tight text-on-primary">92%</span>
+<span class="font-label-md text-label-md text-tertiary-fixed font-semibold">Fleet Mission-Ready</span>
+</div>
+<p class="font-body-sm text-body-sm text-primary-fixed-dim mt-0.5">4 active commercial vessels tracked</p>
+</div>
+<!-- Radial Micro Gauge -->
+<div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<circle class="stroke-primary-container" cx="18" cy="18" fill="none" r="14" stroke-width="3"></circle>
+<circle cx="18" cy="18" fill="none" r="14" stroke="#7dd4da" stroke-dasharray="88, 100" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<span class="material-symbols-outlined absolute text-[16px] text-tertiary-fixed">sailing</span>
+</div>
+</div>
+<!-- Quick Tally Bar -->
+<div class="grid grid-cols-2 gap-space-xs pt-space-xs">
+<div class="flex items-center gap-space-xs bg-primary-container/70 px-space-sm py-1.5 rounded-lg">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-on-primary">3 Fully Compliant</span>
+<span class="font-data-mono-sm text-data-mono-sm text-primary-fixed-dim">Clean Passage</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs bg-primary-container/70 px-space-sm py-1.5 rounded-lg">
+<span class="w-2 h-2 rounded-full bg-error-container"></span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-error-container">1 Attention Due</span>
+<span class="font-data-mono-sm text-data-mono-sm text-primary-fixed-dim">Sea Harrier</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Fast Deck Action Strip -->
+<section class="flex flex-col space-y-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant px-0.5">Rapid Action</span>
+<div class="grid grid-cols-3 gap-space-xs">
+<button class="flex flex-col items-center justify-center min-h-[52px] p-space-xs rounded-xl bg-surface-container shadow-sm active:bg-surface-container-high transition-colors text-center" type="button">
+<span class="material-symbols-outlined text-[20px] text-primary">fact_check</span>
+<span class="font-label-sm text-label-sm text-on-surface mt-1 leading-tight font-semibold">Pre-Departure</span>
+</button>
+<button class="flex flex-col items-center justify-center min-h-[52px] p-space-xs rounded-xl bg-surface-container shadow-sm active:bg-surface-container-high transition-colors text-center" type="button">
+<span class="material-symbols-outlined text-[20px] text-secondary">handyman</span>
+<span class="font-label-sm text-label-sm text-on-surface mt-1 leading-tight font-semibold">Log Defect</span>
+</button>
+<button class="flex flex-col items-center justify-center min-h-[52px] p-space-xs rounded-xl bg-surface-container shadow-sm active:bg-surface-container-high transition-colors text-center" type="button">
+<span class="material-symbols-outlined text-[20px] text-primary">description</span>
+<span class="font-label-sm text-label-sm text-on-surface mt-1 leading-tight font-semibold">Cert Vault</span>
+</button>
+</div>
+</section>
+<!-- Core Maritime Questions (Accordion / Fast Access) -->
+<section class="flex flex-col space-y-space-xs">
+<div class="flex items-center justify-between px-0.5">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Mission Integrity Focus</h2>
+<span class="font-label-sm text-label-sm text-secondary uppercase font-semibold">5 Checks</span>
+</div>
+<!-- Question 1: Vessel Operation Status -->
+<div class="rounded-xl bg-surface-container-lowest p-space-md shadow-sm space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">anchor</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">Is my vessel ready to operate?</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Real-time seaworthiness verification</p>
+</div>
+</div>
+</div>
+<!-- Vessel Grid Chips -->
+<div class="grid grid-cols-2 gap-space-xs pt-space-xs">
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-low">
+<div class="flex flex-col min-w-0 pr-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Njord Explorer</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Class A1</span>
+</div>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Ready
+          </span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-low">
+<div class="flex flex-col min-w-0 pr-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Atlantic Pioneer</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Class A1</span>
+</div>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Ready
+          </span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-error-container/20">
+<div class="flex flex-col min-w-0 pr-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Sea Harrier</span>
+<span class="font-data-mono-sm text-data-mono-sm text-error font-medium truncate">Annual Liferaft Due</span>
+</div>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>Check
+          </span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-low">
+<div class="flex flex-col min-w-0 pr-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Ocean Falcon</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Class A1</span>
+</div>
+<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Ready
+          </span>
+</div>
+</div>
+</div>
+<!-- Question 2: Immediate Deck Attention -->
+<div class="rounded-xl bg-surface-container-lowest p-space-md shadow-sm space-y-space-xs">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-7 h-7 rounded-lg bg-error-container/40 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">What needs attention right now?</h3>
+<span class="font-label-sm text-label-sm text-error font-medium">Critical safety compliance window</span>
+</div>
+</div>
+</div>
+<div class="mt-space-xs p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="material-symbols-outlined text-[20px] text-error flex-shrink-0">emergency</span>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md text-on-surface font-medium truncate">Liferaft Station B Hydrostatic Release</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Sea Harrier • SOLAS Ch. III Reg. 20</span>
+</div>
+</div>
+<span class="px-space-xs py-1 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-bold flex-shrink-0">
+          4d Expire
+        </span>
+</div>
+</div>
+<!-- Question 3 & 4: Preventive Tasks & Duty Assignment -->
+<div class="rounded-xl bg-surface-container-lowest p-space-md shadow-sm space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">pending_actions</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold leading-tight">Which tasks are due this week?</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Scheduled machinery preservation</p>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">2 Due</span>
+</div>
+<div class="space-y-space-xs">
+<div class="p-space-xs rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="material-symbols-outlined text-[18px] text-secondary flex-shrink-0">oil_barrel</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-medium truncate">Main Engine #1 Lube Oil Viscosity Check</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Every 500 Running Hours</span>
+</div>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">Thu 14:00</span>
+</div>
+<div class="p-space-xs rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="material-symbols-outlined text-[18px] text-secondary flex-shrink-0">water</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-medium truncate">Bilge High-Level Sensor Float Alarm Test</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">MARPOL Annex I Protocol</span>
+</div>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-semibold">Sat 09:30</span>
+</div>
+</div>
+<!-- Question 4: Assigned Responsible Officer -->
+<div class="pt-space-xs mt-space-xs flex items-center justify-between bg-surface-container px-space-sm py-2 rounded-lg">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm font-bold">
+            CH
+          </div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Assigned Lead</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Chief Engineer Hansen</span>
+</div>
+</div>
+<button class="min-h-[44px] px-space-sm rounded-lg bg-surface-container-lowest text-primary font-label-sm text-label-sm font-semibold active:bg-surface-container-high transition-colors" type="button">
+          Verify Deck
+        </button>
+</div>
+</div>
+</section>
+<!-- Primary Fleet Metrics Matrix -->
+<section class="flex flex-col space-y-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant px-0.5">Telemetry Matrix</span>
+<div class="grid grid-cols-2 gap-space-xs">
+<!-- Metric 1 -->
+<div class="p-space-sm rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between space-y-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm font-medium">Readiness Index</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">speed</span>
+</div>
+<div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">92%</span>
+<p class="font-body-sm text-body-sm text-secondary font-medium mt-0.5 flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +3% vs Q2
+          </p>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="p-space-sm rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between space-y-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm font-medium">Work Orders</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">construction</span>
+</div>
+<div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">4 Active</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium mt-0.5">
+            3 open • <span class="text-error font-semibold">1 overdue</span>
+</p>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="p-space-sm rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between space-y-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm font-medium">Audits Done</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">checklist_rtl</span>
+</div>
+<div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">18 / 18</span>
+<p class="font-body-sm text-body-sm text-secondary font-medium mt-0.5">100% On-schedule</p>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="p-space-sm rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between space-y-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm font-medium">Cert Compliance</span>
+<span class="material-symbols-outlined text-[18px] text-secondary">verified_user</span>
+</div>
+<div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">96%</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium mt-0.5">Class &amp; Flag Valid</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Live Maritime Vessel Map Visual -->
+<section class="rounded-xl bg-surface-container-lowest shadow-sm overflow-hidden p-space-sm space-y-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">navigation</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Vessel Transit Corridor</span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">AIS Signal: Nominal</span>
+</div>
+<div class="w-full h-36 bg-cover bg-center rounded-lg relative overflow-hidden flex items-end p-space-xs" data-location="North Sea, Norway" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBYIW8EFzQZITBlZIYFTrdZZqN6JH8q-JABP9IYOwXREkoMQSOT-kBqsgjGrB9gB6HUn3m-TiSCpbncXpYNOFCJh6OStFCAvP1-uD4Mp96DfkqjJ-S-SMFYfzBLdx4gGUIrCeA4BPEeb0qWpUoVIGFOJebHHELwI1FVrhlLWN3g3FXlmu4Kg71hx2XadZgg4BMGRZArk080QcPZ675fp1xG04zG_91LkFS0Q2iPvbMbRt-YXpQMBBbE');">
+<div class="absolute inset-0 bg-primary/20 backdrop-brightness-95"></div>
+<div class="relative z-10 w-full bg-surface-container-lowest/90 backdrop-blur-sm p-space-xs rounded flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface font-medium">Njord Explorer: 59.9139° N, 10.7522° E</span>
+</div>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary font-bold">14.2 kn</span>
+</div>
+</div>
+</section>
+<!-- Recent Deck & Regulatory Activity Feed -->
+<section class="flex flex-col space-y-space-xs">
+<div class="flex items-center justify-between px-0.5">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">Operational Log Feed</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Real-time Stream</span>
+</div>
+<div class="rounded-xl bg-surface-container-lowest shadow-sm divide-y-0 p-space-xs space-y-1">
+<!-- Feed Item 1 -->
+<div class="p-space-sm rounded-lg hover:bg-surface-container-low transition-colors flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">done_all</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface truncate">Hull Thickness Ultrasonic Report</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant flex-shrink-0">12m ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Atlantic Pioneer certified without condition by DNV</p>
+<div class="flex items-center gap-space-xs mt-1">
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-primary-fixed font-label-sm text-label-sm uppercase">Production</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">Surveyor J. Vane</span>
+</div>
+</div>
+</div>
+<!-- Feed Item 2 -->
+<div class="p-space-sm rounded-lg bg-surface-container-low/50 flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-error-container flex items-center justify-center text-on-error-container flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface truncate">Liferaft Survey Notice Raised</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant flex-shrink-0">1h ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Auto-flagged via Safety Management System</p>
+<div class="flex items-center gap-space-xs mt-1">
+<span class="px-1.5 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm uppercase">Demo Feed</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">DeckOS Sentinel</span>
+</div>
+</div>
+</div>
+<!-- Feed Item 3 -->
+<div class="p-space-sm rounded-lg hover:bg-surface-container-low transition-colors flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">badge</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface truncate">STCW Crew Endorsement Synced</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant flex-shrink-0">3h ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">2nd Officer E. Lindqvist signed onboard Njord Explorer</p>
+<div class="flex items-center gap-space-xs mt-1">
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-primary-fixed font-label-sm text-label-sm uppercase">Production</span>
+<span class="font-data-mono-sm text-data-mono-sm text-secondary">Port Control Oslo</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Regulatory Compliance Badge Footer -->
+<section class="rounded-xl bg-surface-container p-space-sm flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-secondary">policy</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold uppercase text-on-surface">ISM / ISPS / MLC Verified</span>
+<span class="font-data-mono-sm text-data-mono-sm text-on-surface-variant">Class Society Sync: Active</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-secondary">lock_clock</span>
+</section>
+</div>
+<script>
+  // Micro-interaction for fast action feedback
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('touchstart', function() {
+      this.classList.add('scale-[0.98]');
+    });
+    btn.addEventListener('touchend', function() {
+      this.classList.remove('scale-[0.98]');
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.06)]" data-active-classes="text-primary font-semibold"><div class="flex justify-between items-center h-20 px-space-xs"><a class="flex-1 flex flex-col items-center justify-center min-h-[48px] h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="fleet" href="#"><span class="material-symbols-outlined text-[24px]">directions_boat</span><span class="font-label-sm text-label-sm mt-1">Fleet</span></a><a aria-current="page" class="flex-1 flex flex-col items-center justify-center min-h-[48px] h-full transition-colors text-primary font-semibold" data-path="readiness" href="#"><span class="material-symbols-outlined text-[24px]">speed</span><span class="font-label-sm text-label-sm mt-1">Readiness</span></a><a class="flex-1 flex flex-col items-center justify-center min-h-[48px] h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="inspect" href="#"><span class="material-symbols-outlined text-[24px]">fact_check</span><span class="font-label-sm text-label-sm mt-1">Inspect</span></a><a class="flex-1 flex flex-col items-center justify-center min-h-[48px] h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="maintenance" href="#"><span class="material-symbols-outlined text-[24px]">build_circle</span><span class="font-label-sm text-label-sm mt-1">Maintenance</span></a><a class="flex-1 flex flex-col items-center justify-center min-h-[48px] h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="more" href="#"><span class="material-symbols-outlined text-[24px]">more_horiz</span><span class="font-label-sm text-label-sm mt-1">More</span></a></div></nav></body></html>

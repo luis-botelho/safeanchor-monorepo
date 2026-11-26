@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Icon from "../components/Icon";
+import SubmitButton from "../components/SubmitButton";
 import { STAGES } from "../mock/researchQuestions";
 import {
   buildMailtoUrl,
@@ -146,9 +147,12 @@ function ContactForm({ onSubmit, isSubmitting, submissionError }) {
         <p className="field__error">{error || submissionError}</p>
       )}
 
-      <button type="submit" className="btn btn--accent btn--block" disabled={isSubmitting}>
-        {isSubmitting ? "Enviando…" : "Concluir e enviar"}
-      </button>
+      <SubmitButton
+        busy={isSubmitting}
+        idleLabel="Concluir e enviar"
+        busyLabel="Enviando…"
+        className="btn btn--accent btn--block"
+      />
     </form>
   );
 }
@@ -235,14 +239,14 @@ function FinalStep({ model }) {
           {model.submissionError && (
             <p className="field__error" role="alert">{model.submissionError}</p>
           )}
-          <button
+          <SubmitButton
             type="button"
+            busy={model.isSubmitting}
+            idleLabel="Finalizar sem contato"
+            busyLabel="Enviando…"
             className="btn btn--ghost btn--block"
             onClick={model.finish}
-            disabled={model.isSubmitting}
-          >
-            {model.isSubmitting ? "Enviando…" : "Finalizar sem contato"}
-          </button>
+          />
         </div>
 
         <p className="survey__hint-inline survey__hint-inline--center">

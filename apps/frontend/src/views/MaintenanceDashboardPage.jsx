@@ -1,3 +1,4 @@
+import LoadingFallback from "../components/LoadingFallback";
 import { Link } from "react-router-dom";
 import { useMaintenanceDashboardViewModel } from "../viewmodels/useMaintenanceDashboardViewModel";
 
@@ -5,7 +6,7 @@ export default function MaintenanceDashboardPage() {
   const viewModel = useMaintenanceDashboardViewModel();
 
   if (viewModel.isLoading) {
-    return <p>Carregando...</p>;
+    return <LoadingFallback label="Carregando..." />;
   }
 
   if (viewModel.error) {

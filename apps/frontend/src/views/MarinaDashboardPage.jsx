@@ -23,6 +23,7 @@ import StatCard from "../components/StatCard";
 import StatusBadge from "../components/StatusBadge";
 import Avatar from "../components/Avatar";
 import Icon from "../components/Icon";
+import { DashboardSkeleton } from "../components/PageSkeletons";
 
 const marinaTabs = [
   { to: "/marina/dashboard", label: "Dashboard" },
@@ -66,7 +67,7 @@ export default function MarinaDashboardPage() {
   }, [marinaId]);
 
   if (!marina) {
-    return <p>Carregando visão da marina...</p>;
+    return <DashboardSkeleton label="Carregando visão da marina..." />;
   }
 
   const openRequests = received.filter((item) => item.status !== "Concluído");
