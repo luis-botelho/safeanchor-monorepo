@@ -5,6 +5,7 @@ import pinoHttp from "pino-http";
 
 import logger from "./lib/logger.js";
 import prisma from "./lib/prisma.js";
+import { applyBootstrapMigrations } from "./services/bootstrapService.js";
 import { createHealthHandler } from "./controllers/healthController.js";
 import { modulesRouter } from "./routes/modulesRoutes.js";
 import vesselRoutes from "./routes/vesselRoutes.js";
@@ -120,5 +121,14 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
 
   return app;
 };
+
+try {
+  const result = await applyBootstrapMigrations();
+  if (result.applied) {
+    logger.info("Bootstrap da diretoria concluído.");
+  }
+} catch (error) {
+  logger.error({ err: error }, "Falha no bootstrap da diretoria.");
+}
 
 export default createApp();
