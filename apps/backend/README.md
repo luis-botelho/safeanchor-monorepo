@@ -188,11 +188,12 @@ separados; configure a URL pública da API como variável `VITE_API_URL` no GitH
 Actions (Settings → Secrets and variables → Actions → Variables).
 
 > **Estado atual da implantação:** o frontend está no ar no GitHub Pages e a API
-> responde em `https://safeanchor-monorepo.vercel.app`, mas `/health` ainda
-> retorna `{"status":"degraded","database":"down"}` por configuração de banco.
-> Corrigir `DATABASE_URL`/migrations em produção é pré-requisito da Feature 038.
-> O `postinstall` executa `prisma generate`, que exige `DIRECT_URL` também nos
-> deployments de Preview — sem essa variável o build falha antes de iniciar.
+> responde em `https://safeanchor-monorepo.vercel.app` com `/health` `200` e
+> `database: "up"` após a conexão do Supabase à Vercel. A implantação de produção
+> ainda executa o código de `main`; as rotas de documentos e inspeções só chegarão
+> a ela após o merge do PR #175. O `postinstall` executa `prisma generate`, que
+> exige `DIRECT_URL` também nos deployments de Preview — sem essa variável o
+> build falha antes de iniciar.
 >
 > **Banco do Preview:** os deployments de Preview usam um Postgres temporário
 > configurado em `DATABASE_URL`/`DIRECT_URL` no ambiente de Preview da Vercel.
@@ -439,7 +440,7 @@ Nunca use `prisma migrate reset` ou `prisma db push` no projeto remoto.
 - [ ] Notificacoes
 - [ ] Refresh token
 - [ ] Documentacao OpenAPI/Swagger
-- [ ] Corrigir `database: down` em producao
+- [x] Corrigir `database: down` em producao (`/health` 200 apos conexao Supabase)
 - [ ] Scanner de dependencias no CI (3 high transitivas restantes)
 
 ---

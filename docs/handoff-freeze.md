@@ -1,13 +1,13 @@
-# Handoff — estado congelado do MVP
+# Handoff — estado do MVP
 
-> Este ambiente foi usado apenas para execução do trabalho. Todo o código foi
-> versionado na branch **`develop`** e enviado para `origin/develop`.
+> O desenvolvimento foi retomado após o congelamento. Todo o código continua
+> sendo versionado na branch **`develop`** e enviado para `origin/develop`.
 > **`main` não foi alterada.** O PR `develop` → `main` permanece aberto para
 > revisão: https://github.com/luis-botelho/safeanchor-monorepo/pull/175
 
 ## Branch e commits
 
-Branch: `develop` · ponta: `2085842` · sincronizada com `origin/develop`.
+Branch: `develop` · ponta atualizada a cada entrega · sincronizada com `origin/develop`.
 `main` continua em `84826e0` (inalterada).
 
 | Commit | Assunto |
@@ -68,14 +68,15 @@ Branch: `develop` · ponta: `2085842` · sincronizada com `origin/develop`.
 
 ## Pendências para retomar em casa
 
-1. **Produção**: `https://safeanchor-monorepo.vercel.app/health` ainda responde
-   `503` com `database: down`. É preciso atualizar `DATABASE_URL`/`DIRECT_URL`
-   no ambiente de produção da Vercel (as atuais são de 01/10) e rodar
-   `npx prisma migrate deploy`. Nenhuma mudança foi feita na produção.
-2. **Revisar e fazer merge do PR #175**. Nenhum merge foi feito aqui.
+1. **Revisar e fazer merge do PR #175**. Nenhum merge foi feito aqui; a produção
+   ainda roda o código antigo de `main` (sem `/documents` e `/inspections`).
+2. **Produção**: após conectar o Supabase à Vercel,
+   `https://safeanchor-monorepo.vercel.app/health` responde `200` com
+   `database: up`. O usuário demo foi criado via `/auth/register` para validar
+   login e listagens; a lista de embarcações está vazia.
 3. **Frontend**: o GitHub Pages usa `VITE_API_URL` apontando para a API de
-   produção (que está 503). Se quiser UI no Preview, aponte essa variável para
-   a URL do Preview ou crie um deploy de frontend separado.
+   produção, que agora está funcional. Se quiser UI no Preview, aponte essa
+   variável para a URL do Preview ou crie um deploy de frontend separado.
 4. Reivindicar/substituir o banco temporário do Preview antes da expiração.
 5. Ainda em mock: catálogos (marinas, prestadores, jobs, community, eventos,
    trips, academy, IA), feed de atividades do dashboard e upload de arquivos

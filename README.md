@@ -106,7 +106,7 @@ Features definidas no rebaseline 2026 (Features **031–038**):
 | **035** | Expiration & Compliance | ✅ status por validade e indicadores no dashboard |
 | **036** | Safety Completion & Mobile Polish | 🔶 inspeções via API; checklist desktop, sem mobile/offline |
 | **037** | MVP UX Polish | 🔶 loading/empty/error nos fluxos core |
-| **038** | CI/CD & Production Deploy | 🔶 Preview funcional (`/health` 200 + seed); producao com `/health` 503 (`database: down`) |
+| **038** | CI/CD & Production Deploy | ✅ Preview e producao com `/health` 200 e banco up; aguardando merge do PR para levar as rotas novas a `main` |
 
 A **Definition of Ready** completa esta em
 [`docs/product/mvp-rebaseline.md`](./docs/product/mvp-rebaseline.md): a jornada
@@ -411,14 +411,13 @@ Itens do rebaseline ainda incompletos em `develop`:
 
 - [ ] **034** — upload de arquivos e Supabase Storage (metadados, validade e listagem ja funcionam)
 - [ ] **036** — checklist mobile/offline e revalidacao de QR Code
-- [ ] **038** — producao: `/health` da Vercel responde `503` com `database: down` (Preview ja responde `200`)
+- [x] **038** — producao: `/health` da Vercel responde `200` com `database: up` após conexão do Supabase
 
 ### Next
 
-1. Corrigir `DATABASE_URL`/migrations em producao e validar `/health` + smoke test (Feature 038).
+1. Revisar o PR `develop` → `main` e promover as mudancas apos aprovacao (a producao ainda roda o codigo antigo).
 2. Reivindicar o Postgres temporario do Preview antes que expire (`npx neon claim accept wispy-forest-67479829`) ou criar outro.
-3. Revisar o PR `develop` → `main` e promover as mudancas apos aprovacao.
-4. Upload de documentos (Supabase Storage) e polish mobile do checklist.
+3. Upload de documentos (Supabase Storage) e polish mobile do checklist.
 
 ### Blocked
 
@@ -693,8 +692,9 @@ para ser validado por investidores, parceiros e PTM.
 **Revisar e publicar o PR `develop` → `main`:** o ciclo de Features 031–037
 (autenticacao, frota, manutencao, documentos, inspecoes e dashboard) esta
 implementado e validado em `develop`. O proximo passo e o review do PR, sem
-merge direto. Em paralelo, a Feature 038 segue bloqueada pela configuracao do
-banco de producao na Vercel (`/health` com `database: down`).
+merge direto. A Feature 038 esta concluida: com o Supabase conectado na Vercel,
+`/health` responde `200` com `database: "up"` em producao e no Preview. Ate o
+merge, a producao continua executando o codigo antigo de `main`.
 
 ---
 
