@@ -200,6 +200,14 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 > aplique `npx prisma migrate deploy` + `npx prisma db seed` e atualize as
 > variáveis de Preview. Producao continua usando o Supabase configurado no
 > projeto Vercel.
+>
+> **Preview validado:** `https://safeanchor-monorepo-git-develop-luisbotelhos-projects.vercel.app`
+> responde `200` em `/health` com `database: "up"`. Login demo
+> (`demo@safeanchor.test` / `demo123456`) e as listagens de vessels,
+> maintenances, documents e inspections retornam `200` com dados do seed.
+> A proteção por login da Vercel (`ssoProtection`) foi desativada no projeto
+> para que o Preview seja acessível sem autenticação; reative em
+> Settings → Deployment Protection se preferir.
 
 <details>
 <summary><strong>Testando rapidamente com curl</strong></summary>

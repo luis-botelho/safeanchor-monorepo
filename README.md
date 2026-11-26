@@ -106,7 +106,7 @@ Features definidas no rebaseline 2026 (Features **031–038**):
 | **035** | Expiration & Compliance | ✅ status por validade e indicadores no dashboard |
 | **036** | Safety Completion & Mobile Polish | 🔶 inspeções via API; checklist desktop, sem mobile/offline |
 | **037** | MVP UX Polish | 🔶 loading/empty/error nos fluxos core |
-| **038** | CI/CD & Production Deploy | 🔶 Pages no ar; Vercel com `/health` 503 (`database: down`) |
+| **038** | CI/CD & Production Deploy | 🔶 Preview funcional (`/health` 200 + seed); producao com `/health` 503 (`database: down`) |
 
 A **Definition of Ready** completa esta em
 [`docs/product/mvp-rebaseline.md`](./docs/product/mvp-rebaseline.md): a jornada
@@ -411,13 +411,14 @@ Itens do rebaseline ainda incompletos em `develop`:
 
 - [ ] **034** — upload de arquivos e Supabase Storage (metadados, validade e listagem ja funcionam)
 - [ ] **036** — checklist mobile/offline e revalidacao de QR Code
-- [ ] **038** — producao: `/health` da Vercel responde `503` com `database: down`
+- [ ] **038** — producao: `/health` da Vercel responde `503` com `database: down` (Preview ja responde `200`)
 
 ### Next
 
 1. Corrigir `DATABASE_URL`/migrations em producao e validar `/health` + smoke test (Feature 038).
-2. Revisar o PR `develop` → `main` e promover as mudancas apos aprovacao.
-3. Upload de documentos (Supabase Storage) e polish mobile do checklist.
+2. Reivindicar o Postgres temporario do Preview antes que expire (`npx neon claim accept wispy-forest-67479829`) ou criar outro.
+3. Revisar o PR `develop` → `main` e promover as mudancas apos aprovacao.
+4. Upload de documentos (Supabase Storage) e polish mobile do checklist.
 
 ### Blocked
 

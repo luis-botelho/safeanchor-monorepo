@@ -93,9 +93,12 @@ O produto é organizado em torno dessa jornada. Cada feature do rebaseline contr
 | 035 | ✅ | Status por validade (válido/próximo/vencido) e indicadores no dashboard. |
 | 036 | 🔶 | Inspeções via API com checklist e certificado; falta mobile/offline e revalidação de QR Code. |
 | 037 | 🔶 | Loading/empty/error nos fluxos core; demais catálogos seguem mock. |
-| 038 | 🔶 | Pages no ar e API na Vercel, mas `/health` responde `database: down`. |
+| 038 | 🔶 | Pages no ar; Preview com `/health` 200 e seed carregado; produção responde `database: down`. |
 
-Bloqueio atual da Feature 038: sem credenciais/acesso ao Supabase para corrigir
+O Preview usa um Postgres temporário (Neon claim) com migrations e seed aplicados;
+`/health`, login demo e listagens core foram validados na URL do Preview. A
+proteção por login da Vercel foi desativada para que o Preview seja público.
+Bloqueio restante da Feature 038: sem credenciais/acesso ao Supabase para corrigir
 `DATABASE_URL` e aplicar migrations em produção. As mudanças de `develop` serão
 promovidas a `main` somente por pull request.
 
