@@ -35,6 +35,5 @@ CREATE TABLE "DirectorAction" (
 CREATE INDEX "DirectorAction_actorId_idx" ON "DirectorAction"("actorId");
 CREATE INDEX "DirectorAction_targetType_targetId_idx" ON "DirectorAction"("targetType", "targetId");
 
--- Conta de demonstracao criada pela API publica e promovida aqui.
--- Se a conta ainda nao existir, a migration nao faz nada.
-UPDATE "User" SET "role" = 'DIRECTOR' WHERE "email" = 'diretoria@safeanchor.app';
+-- Promocoes para DIRECTOR nao sao feitas por migration nem por conta publica.
+-- Provisione a conta da diretoria fora do repositorio e rotacione suas credenciais.

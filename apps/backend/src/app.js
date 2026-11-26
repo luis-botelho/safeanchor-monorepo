@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
 import pinoHttp from "pino-http";
 
 import logger from "./lib/logger.js";
@@ -12,18 +13,50 @@ import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import preventiveMaintenanceRoutes from "./routes/preventiveMaintenanceRoutes.js";
 import checklistTemplateRoutes from "./routes/checklistTemplateRoutes.js";
 import checklistExecutionRoutes from "./routes/checklistExecutionRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import researchRoutes from "./routes/researchRoutes.js";
+import { createAuthRouter } from "./routes/authRoutes.js";
+import { createResearchRouter } from "./routes/researchRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import inspectionRoutes from "./routes/inspectionRoutes.js";
 import directorRoutes from "./routes/directorRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
 
-const genReqId = (request) => request.headers["x-request-id"] || randomUUID();
+// IDs de correlação são sempre gerados no servidor: o header do cliente
+// não é confiável e não deve ser refletido em logs nem em respostas.
+const genReqId = () => randomUUID();
 
 export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   const app = express();
 
+  app.disable("x-powered-by");
+
+  // A API não serve HTML: a CSP é configurada no frontend. Aqui mantemos
+  // HSTS, nosniff, frame-ancestors e Referrer-Policy sem quebrar o CORS.
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: false,
+      referrerPolicy: { policy: "no-referrer" },
+      frameguard: { action: "deny" },
+      hsts: {
+        maxAge: 63072000,
+        includeSubDomains: true,
+        preload: true,
+      },
+    }),
+  );
+
+  app.use((request, response, next) => {
+    response.setHeader(
+      "Permissions-Policy",
+      "camera=(), microphone=(), geolocation=()",
+    );
+
+    return next();
+  });
+
+  // A Vercel Termina o TLS e repassa o IP real em X-Forwarded-For.
+  app.set("trust proxy", 1);
   app.locals.prisma = db;
 
   app.use(
@@ -77,8 +110,8 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
 
   app.get("/health", createHealthHandler(db));
 
-  app.use("/auth", authRoutes);
-  app.use("/research", researchRoutes);
+  app.use("/auth", createAuthRouter());
+  app.use("/research", createResearchRouter());
 
   if (beforeAuth) {
     beforeAuth(app);

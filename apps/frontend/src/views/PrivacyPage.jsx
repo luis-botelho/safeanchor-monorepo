@@ -133,9 +133,13 @@ export default function PrivacyPage() {
           </p>
           <ConsentControls />
           <p>
-            Se você <strong>autorizar</strong>, enviamos ao servidor as respostas,
-            o perfil informado e, caso você deixe, nome, cidade e e-mail ou
-            WhatsApp. A diretoria analisa esses dados para priorizar mudanças no
+            Se você <strong>autorizar</strong>, o servidor emite um nonce
+            assinado, com validade curta, e valida esse nonce no envio. Só assim
+            as respostas, o perfil
+            informado e, caso você deixe, nome, cidade e e-mail ou WhatsApp são
+            gravados. O registro do consentimento inclui IP, user-agent, data e
+            hora gerados no servidor, versão da política e identificador do
+            nonce; a diretoria analisa os dados para priorizar mudanças no
             produto. Cada decisão sobre uma resposta ou sobre o papel de um
             usuário gera um registro mínimo de auditoria, sem senhas ou tokens.
           </p>
@@ -223,8 +227,9 @@ export default function PrivacyPage() {
               automaticamente;
             </li>
             <li>
-              <strong>Admin da diretoria</strong> — único perfil interno com
-              acesso às respostas capturadas e às ferramentas de alteração.
+              <strong>Diretoria (acesso restrito)</strong> — perfil interno,
+              provisionado fora do repositório, com acesso às respostas
+              capturadas e às ferramentas de alteração.
             </li>
           </ul>
           <p>
@@ -238,7 +243,10 @@ export default function PrivacyPage() {
           <p>
             Esta demonstração não usa cookies de rastreamento, analytics ou
             publicidade. Usamos o armazenamento local do navegador para funções
-            essenciais e para lembrar sua escolha de consentimento:
+            essenciais e para lembrar sua escolha de consentimento.
+            O token de acesso e o perfil da sessão ficam somente na memória da
+            aba: não são gravados no navegador e desaparecem ao recarregar a
+            página. Para continuar usando a área privada, entre novamente.
           </p>
           <div className="legal__table-wrap">
             <table className="legal__table">
@@ -251,24 +259,17 @@ export default function PrivacyPage() {
               </thead>
               <tbody>
                 <tr>
-                  <td><code>token</code></td>
-                  <td>Manter o JWT que autentica as chamadas à API.</td>
-                  <td>Até expirar (1 hora) ou sair da conta.</td>
-                </tr>
-                <tr>
-                  <td><code>safeanchor:session</code></td>
-                  <td>Guardar o perfil exibido na interface.</td>
-                  <td>Até sair da conta ou limpar o navegador.</td>
-                </tr>
-                <tr>
                   <td><code>safeanchor.research.draft</code></td>
                   <td>Restaurar o rascunho da pesquisa.</td>
-                  <td>Até finalizar ou reiniciar a pesquisa.</td>
+                  <td>Até 24 horas, ou até finalizar/reiniciar a pesquisa.</td>
                 </tr>
                 <tr>
                   <td><code>safeanchor.researchResponses</code></td>
-                  <td>Guardar cópia local do resumo quando você autoriza a captura.</td>
-                  <td>Até você limpar os dados do site.</td>
+                  <td>
+                    Guardar apenas a última resposta local quando você autoriza
+                    a captura. Nome e contato não são salvos nessa cópia.
+                  </td>
+                  <td>Até 24 horas.</td>
                 </tr>
                 <tr>
                   <td><code>safeanchor.researchConsent</code></td>

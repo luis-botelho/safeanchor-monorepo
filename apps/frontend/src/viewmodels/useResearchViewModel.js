@@ -19,22 +19,76 @@ import {
 } from "../services/researchConsent";
 
 const STORAGE_KEY = "safeanchor.research.draft";
+const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
+const MAX_SAVED_KEYS = 60;
+const MAX_TEXT_LENGTH = 2000;
+
+function cleanDraftAnswers(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+
+  return Object.entries(value).reduce((result, [key, item]) => {
+    if (Object.keys(result).length >= MAX_SAVED_KEYS) return result;
+
+    const cleaned = Array.isArray(item)
+      ? item
+          .filter((entry) => ["string", "number", "boolean"].includes(typeof entry))
+          .slice(0, 30)
+          .map((entry) => String(entry).slice(0, 200))
+      : ["string", "number", "boolean"].includes(typeof item)
+        ? String(item).slice(0, MAX_TEXT_LENGTH)
+        : null;
+
+    if (cleaned !== null) result[key.slice(0, 80)] = cleaned;
+    return result;
+  }, {});
+}
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* nada a remover */
+  }
+}
 
 function readDraft() {
   try {
     const draft = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-    if (draft && typeof draft === "object" && draft.answers) {
-      return draft;
+    const savedAt = Number(draft?.savedAt);
+
+    if (
+      draft &&
+      draft.answers &&
+      Number.isFinite(savedAt) &&
+      Date.now() - savedAt <= DRAFT_TTL_MS
+    ) {
+      return {
+        answers: cleanDraftAnswers(draft.answers),
+        step: Number.isInteger(draft.step) && draft.step >= 0 ? draft.step : 0,
+        startedAt:
+          typeof draft.startedAt === "number" ? draft.startedAt : null,
+      };
     }
+
+    clearDraft();
   } catch {
-    /* rascunho inválido: começa limpo */
+    clearDraft();
   }
+
   return { answers: {}, step: 0, startedAt: null };
 }
 
 function writeDraft(draft) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        answers: cleanDraftAnswers(draft.answers),
+        step: draft.step,
+        startedAt: draft.startedAt,
+        savedAt: Date.now(),
+      }),
+    );
   } catch {
     /* modo privado: seguir sem salvar */
   }
@@ -164,6 +218,7 @@ export default function useResearchViewModel() {
         contact: contactData?.contato || null,
         city: contactData?.cidade || null,
         profile: contactData?.perfil || answers.perfil || null,
+        website: contactData?.website || null,
         answers,
       };
 
@@ -189,6 +244,7 @@ export default function useResearchViewModel() {
           });
         }
 
+        clearDraft();
         setSummary(text);
         setSent(true);
         setConsent(currentConsent);
@@ -212,11 +268,7 @@ export default function useResearchViewModel() {
   }, [submit]);
 
   const restart = useCallback(() => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      /* sem rascunho salvo */
-    }
+    clearDraft();
     setAnswers({});
     setStep(0);
     setStartedAt(null);

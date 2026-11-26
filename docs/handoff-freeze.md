@@ -21,12 +21,12 @@ Contas de demonstração (criadas via `/auth/register` na API de produção):
 | Proprietário legado | `demo@safeanchor.test` | `demo123456` | `OWNER` | `USER` |
 | Prestador | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` | `USER` |
 | Marina | `gestao@marinacostaazul.com` | `demo123` | `MARINA` | `USER` |
-| Admin da diretoria | `diretoria@safeanchor.app` | `demo123` | `OWNER` | `DIRECTOR` |
 
 Na tela de login, o bloco **“Acessos de demonstração”** preenche as contas com
-um clique; o botão **“Admin da diretoria”** abre `/director`. `persona` controla
-apenas menus e dashboards — a autorização real é por `role` e o isolamento de
-dados é por `Party`. O roteiro completo está em
+um clique. Não há botão nem credencial pública de diretoria: a área `/director`
+depende de conta `DIRECTOR` provisionada pelo mantenedor fora do repositório.
+`persona` controla apenas menus e dashboards — a autorização real é por `role` e
+o isolamento de dados é por `Party`. O roteiro completo está em
 [`demo-apresentacao.md`](./demo-apresentacao.md).
 
 ## Branch, PR e deployments
@@ -48,7 +48,7 @@ dados é por `Party`. O roteiro completo está em
 2. Reformulação visual **Maritime Precision**, acessos de demonstração e roteiro de apresentação publicados nos PRs #175–#179.
 3. Captura da pesquisa passou a exigir aceite explícito e versionado (`2026-11-26`). Com aceite, a resposta é gravada em `ResearchResponse` e enviada por Resend. Com recusa, nada vai ao servidor e o resumo fica só no navegador.
 4. Área da diretoria publicada em `/director`, `/director/responses`, `/director/users` e `/director/audit`, com guard por `roleKey` no frontend e `authorizeRoles("DIRECTOR", "ADMIN")` no backend.
-5. A conta `diretoria@safeanchor.app` foi criada como `USER` e promovida a `DIRECTOR` no mesmo ciclo.
+5. A conta pública de diretoria foi removida do código, dos documentos e do bundle; a conta antiga precisa de rotação de senha e invalidação de sessões pelo mantenedor.
 6. As migrations `20261127000000_add_director_role` e `20261127000100_add_research_consent_and_director` foram aplicadas em produção por um **bootstrap temporário** controlado por `BOOTSTRAP_DIRECTOR_SCHEMA=true`. O código do bootstrap e a variável foram **removidos no mesmo ciclo**; nenhuma credencial foi lida, impressa ou versionada.
 7. Uma resposta aceita real foi enviada por `POST /research` (`id cmwxycph5000008jqobyp0fxa`, `emailSent: true`) e aparece na área da diretoria.
 8. SEO sem SSR: prerender de `/`, `/pesquisa/` e `/privacidade/`, `noindex` nas rotas privadas, `robots.txt`, `sitemap.xml`, JSON-LD, Open Graph, canonical, favicon SVG/ICO/PNG, manifest e og-image. Fonte única: `apps/frontend/src/seo/pageMeta.js`.

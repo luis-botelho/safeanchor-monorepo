@@ -83,7 +83,7 @@ apps/backend/
 │   └── migrations/                    # inclui role DIRECTOR, ResearchResponse e DirectorAction
 ├── src/
 │   ├── controllers/
-│   │   ├── authController.js          # cadastro, login e /auth/me
+│   │   ├── authController.js          # cadastro, login, /auth/me e logout
 │   │   ├── vesselController.js        # embarcacoes
 │   │   ├── maintenanceController.js   # manutencoes
 │   │   ├── preventiveMaintenanceController.js
@@ -96,10 +96,14 @@ apps/backend/
 │   │   └── healthController.js        # health check
 │   ├── lib/
 │   │   ├── prisma.js                  # cliente Prisma (singleton)
-│   │   └── logger.js                  # pino logger
+│   │   ├── logger.js                  # pino logger
+│   │   ├── jwtConfig.js               # secret (min. 32), issuer/audience
+│   │   ├── researchConsent.js         # nonce assinado do consentimento
+│   │   └── validation.js              # validacao simples de payloads
 │   ├── middleware/
 │   │   ├── authMiddleware.js          # requireAuth (JWT)
-│   │   └── authorizeRoles.js         # controle por role (USER/MANAGER/ADMIN/DIRECTOR)
+│   │   ├── authorizeRoles.js          # controle por role (USER/MANAGER/ADMIN/DIRECTOR)
+│   │   └── rateLimits.js              # limites por IP/e-mail
 │   ├── models/
 │   │   ├── vesselModel.js
 │   │   ├── maintenanceModel.js
@@ -119,6 +123,7 @@ apps/backend/
 │   │   └── inspectionRoutes.js
 │   ├── services/
 │   │   ├── authService.js             # hashing, JWT, validacoes
+│   │   ├── tokenRevocation.js         # revogacao de jti em memoria
 │   │   ├── accessScopeService.js      # controle de acesso por ownership
 │   │   ├── vesselService.js
 │   │   ├── maintenanceService.js
@@ -135,13 +140,17 @@ apps/backend/
 │   └── server.js                      # bootstrap e start do servidor
 ├── test/
 │   ├── authMiddleware.test.js
+│   ├── auth-logout.routes.test.js     # revogacao via POST /auth/logout
 │   ├── authorization.integration.test.js
 │   ├── database.smoke.test.js
 │   ├── documents.inspections.test.js
 │   ├── documents.inspections.routes.test.js
+│   ├── input-validation.test.js       # payloads invalidos retornam 400
 │   ├── observability.test.js
 │   ├── ownership-scope.integration.test.js
-│   └── research-consent.test.js       # consentimento e decisoes da diretoria
+│   ├── rate-limit.test.js             # limites de auth e /research
+│   ├── research-consent.test.js       # consentimento, nonce e diretoria
+│   └── security-headers.test.js       # helmet e X-Powered-By
 ├── .env.example
 ├── package.json
 └── README.md
@@ -178,7 +187,7 @@ Variables**:
 - `DATABASE_URL`: URL de runtime do pooler Supabase.
 - `DIRECT_URL`: URL direta ou de sessão necessária pela configuração do Prisma
   durante a geração do cliente.
-- `JWT_SECRET`: segredo aleatório longo.
+- `JWT_SECRET`: segredo aleatório com no mínimo 32 caracteres (assina JWT e nonce de pesquisa).
 - `FRONTEND_ORIGIN`: `https://luis-botelho.github.io`.
 - `RESEND_API_KEY`: chave secreta do Resend. Nunca use uma variável `VITE_*`.
 - `RESEARCH_FROM_EMAIL`: remetente verificado no Resend, por exemplo
@@ -214,8 +223,9 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 > `https://luis-botelho.github.io`. As migrations de `persona`, campos de perfil
 > da embarcação e tabelas de documentos/inspeções já estão aplicadas no
 > Supabase. O endpoint temporário `/__setup` e a variável `SETUP_TOKEN` foram
-> removidos e não devem ser reintroduzidos. O JWT dura 1h e não há refresh; deep
-> links no Pages respondem `404` com o HTML da SPA (esperado). Para novas
+> removidos e não devem ser reintroduzidos. O JWT dura 15 min, tem `jti`,
+> `iss`/`aud` e pode ser revogado por `/auth/logout`; não há refresh. Deep links
+> no Pages respondem `404` com o HTML da SPA (esperado). Para novas
 > migrations, a Vercel não devolve segredos via CLI: é necessário fornecer
 > `DIRECT_URL` com acesso ao banco (ver
 > [`../../docs/handoff-freeze.md`](../../docs/handoff-freeze.md)). Não rode
@@ -225,10 +235,11 @@ Actions (Settings → Secrets and variables → Actions → Variables).
 > **Aplicadas em produção:** as migrations
 > `20261127000000_add_director_role` (`UserRole.DIRECTOR`) e
 > `20261127000100_add_research_consent_and_director` (tabelas
-> `ResearchResponse`/`DirectorAction` e promoção da conta da diretoria) foram
-> executadas por bootstrap temporário, removido junto com a variável
-> `BOOTSTRAP_DIRECTOR_SCHEMA`. A conta pública `diretoria@safeanchor.app` /
-> `demo123` tem role `DIRECTOR` e as rotas `/director/*` funcionam em produção.
+> `ResearchResponse`/`DirectorAction`) foram executadas por bootstrap temporário,
+> removido junto com a variável `BOOTSTRAP_DIRECTOR_SCHEMA`. A promoção de
+> diretoria foi retirada da migration: a conta antiga precisa ser rotacionada e
+> invalidação de sessões pelo mantenedor. Veja
+> `../../docs/security-hardening.md`.
 
 ## Contas de demonstracao
 
@@ -241,13 +252,12 @@ demonstracao"** que preenchem e-mail e senha das quatro principais.
 | `demo@safeanchor.app` | `demo123` | `OWNER` | `USER` |
 | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` | `USER` |
 | `gestao@marinacostaazul.com` | `demo123` | `MARINA` | `USER` |
-| `diretoria@safeanchor.app` ("Admin da diretoria") | `demo123` | `OWNER` | `DIRECTOR` |
 | `demo@safeanchor.test` (legado, sem botao) | `demo123456` | `OWNER` | `USER` |
 
-As contas de negocio sao `USER`; a da diretoria e `DIRECTOR`. `persona` e
-metadado de navegacao; a autorizacao e por `role` (`authorizeRoles`) e o
-isolamento por `Party` (`accessScopeService`). O botao "Admin da diretoria" leva
-a `/director` no frontend.
+Todas as contas publicas sao `USER`. `persona` e metadado de navegacao; a
+autorizacao e por `role` (`authorizeRoles`) e o isolamento por `Party`
+(`accessScopeService`). Nao ha conta publica de `DIRECTOR`: as rotas
+`/director/*` exigem credencial provisionada fora do repositorio.
 
 Dados demo em producao (via API, nao via seed): `demo@safeanchor.app` e
 `demo@safeanchor.test` tem 3 vessels, 5 maintenances, 5 documents,
@@ -294,15 +304,17 @@ curl http://localhost:3001/vessels \
 |---|---|---|
 | `GET` | `/` | Status da API |
 | `GET` | `/health` | Health check (verifica conexao com o banco) |
-| `POST` | `/auth/register` | Cadastro de novo usuario |
-| `POST` | `/auth/login` | Login — retorna JWT |
-| `POST` | `/research` | Envia uma resposta da pesquisa pelo Resend; so grava e envia com aceite explicito e versao `2026-11-26` |
+| `POST` | `/auth/register` | Cadastro de novo usuario (nome, e-mail valido e senha com 12+ caracteres) |
+| `POST` | `/auth/login` | Login — retorna JWT com `jti`, `iss`/`aud` e 15 min de validade |
+| `GET` | `/research/nonce` | Emite nonce assinado, com validade de 10 min, para o aceite |
+| `POST` | `/research` | Envia uma resposta da pesquisa pelo Resend; so grava e envia com nonce valido e versao `2026-11-26` |
 
 ### Autenticados (requer `Authorization: Bearer <token>`)
 
 | Metodo | Rota | Descricao |
 |---|---|---|
 | `GET` | `/auth/me` | Dados do usuario autenticado (inclui `persona`) |
+| `POST` | `/auth/logout` | Revoga o token atual (`jti`) |
 | `GET` | `/modules` | Modulos disponiveis |
 | `GET` | `/vessels` | Lista embarcacoes do escopo do usuario |
 | `POST` | `/vessels` | Cria embarcacao |
@@ -357,9 +369,12 @@ continua liberando somente `https://luis-botelho.github.io`.
 - Senhas sao armazenadas com **bcrypt** (custo 12).
 - `/auth/register` aceita `persona` (`OWNER`, `SERVICE_PROVIDER` ou `MARINA`), cria
   o `Party`/`User` e retorna o usuario — sem token.
-- O login retorna um **JWT** (1h) com `userId`, `partyId`, `role` e `persona`.
-- `/auth/me` exige token e devolve o perfil; register e login sao publicos.
-- O frontend faz register e login em sequencia para obter a sessao.
+- O login retorna um **JWT** (15 min) com `userId`, `partyId`, `role`, `persona`,
+  `jti`, `iss` e `aud`; a verificacao usa HS256 explicitamente.
+- `/auth/me` exige token, reconsulta o `role` no banco e devolve o perfil;
+  `/auth/logout` revoga o `jti` da requisicao. Register e login sao publicos.
+- O frontend guarda o token apenas em memoria e faz register+login em sequencia
+  para obter a sessao. Tokens antigos, sem `iss`/`aud`/`jti`, deixam de ser aceitos.
 
 ### Ownership (controle de acesso)
 
@@ -374,18 +389,23 @@ filtrados pelo `partyId` do usuario e pelas organizacoes das quais ele e membro.
   pelo `authorizeRoles`; a diretoria e `ADMIN` acessam `/director/*`.
 - `Persona`: `OWNER`, `SERVICE_PROVIDER` e `MARINA` — perfil de negocio, exposto
   em register/login/me e no JWT; define a navegacao no frontend, nunca a
-  autorizacao. A conta demo da diretoria tem persona `OWNER` e role `DIRECTOR`.
+  autorizacao. **Nao ha credencial publica de diretoria**: a conta `DIRECTOR`
+  e provisionada pelo mantenedor fora do repositorio.
 - Escritas nos recursos core aceitam `USER`, `MANAGER` e `ADMIN`.
 
 ### Pesquisa com consentimento
 
 - A versao atual do aceite e `2026-11-26` (`RESEARCH_CONSENT_VERSION`, tambem no
   frontend em `src/services/researchConsent.js`).
-- `POST /research` so persiste em `ResearchResponse` e envia pelo Resend quando
-  `consent.accepted === true`, com `version` e `answeredAt` validos. Respostas,
-  perfil e contato opcional ficam no banco para analise da diretoria.
+- `GET /research/nonce` emite um nonce assinado com 10 min de validade.
+  `POST /research` so persiste em `ResearchResponse` e envia pelo Resend quando
+  `consent.accepted === true` e o nonce e valido para a versao `2026-11-26`.
+  Respostas, perfil e contato opcional ficam no banco para analise da diretoria.
+- O registro do aceite inclui IP, user-agent e timestamp gerados no servidor,
+  versao da politica e `jti` do nonce, em `DirectorAction` (auditoria minima).
 - Sem aceite, o servidor nao grava nem envia nada; o resumo permanece apenas no
   navegador e pode ser compartilhado manualmente pelo usuario (WhatsApp/e-mail).
+  Links de compartilhamento omitem contato por padrao; a inclusao e explicita.
 - A escolha pode ser alterada/revogada em `/privacidade`. Nao ha cookies de
   rastreamento, analytics ou publicidade.
 
@@ -412,9 +432,12 @@ filtrados pelo `partyId` do usuario e pelas organizacoes das quais ele e membro.
 
 ### Validacoes
 
-- Emails devem ser unicos (constraint do banco).
-- Campos obrigatorios sao validados antes de chegar ao Prisma.
-- `createdAt` e controlado pelo servidor, nunca pelo cliente.
+- Emails devem ser unicos (constraint do banco) e validados por formato.
+- Senhas de cadastro exigem 12 a 128 caracteres.
+- Campos obrigatorios sao validados por tipo e tamanho antes de chegar ao
+  Prisma, retornando `400` para payloads malformados.
+- `createdAt` e `acceptedAt` sao controlados pelo servidor, nunca pelo cliente.
+- Helmet aplica headers de seguranca; `X-Powered-By` esta desabilitado.
 
 ### Seed de desenvolvimento
 
@@ -451,9 +474,10 @@ operacao rotineira (sem `DIRECT_URL` operacional).
   Supabase oferece PostgreSQL gerenciado com backup automatico, conexoes via pooling
   e painel de admin — ideal para MVP sem infraestrutura propria.
 
-- **JWT sem refresh token (MVP)**
-  Para o MVP de apresentacao, o token com expiracao simples e suficiente.
-  Um sistema de refresh sera necessario na fase de producao.
+- **JWT curto sem refresh token (MVP)**
+  O token expira em 15 min, carrega `jti`/`iss`/`aud` e pode ser revogado por
+  instancia via `/auth/logout`. Para invalidar globalmente, rotacione
+  `JWT_SECRET`. Um refresh rotacionado sera necessario em producao.
 
 - **RLS habilitado sem policies**
   Todas as tabelas tem RLS ativo mas sem policies publicas. O acesso acontece
@@ -478,10 +502,12 @@ que exigem banco real são pulados; os demais rodam com banco em memoria/fake.
 - `ownership-scope.integration.test.js` — escopo de acesso por ownership
 - `documents.inspections.test.js` — regras de documentos e inspecoes com fake db
 - `documents.inspections.routes.test.js` — controllers/rotas HTTP com banco injetado
-- `research-consent.test.js` — recusa sem captura, aceite versionado, insights e
-  auditoria das decisoes da diretoria
+- `research-consent.test.js` — recusa sem captura, nonce assinado, aceite
+  versionado, auditoria do consentimento e decisoes da diretoria
+- `auth-logout.routes.test.js`, `security-headers.test.js`, `rate-limit.test.js`
+  e `input-validation.test.js` — correcoes da auditoria de seguranca
 
-Resultado atual: 20 testes passando e 3 integracoes puladas sem banco (`npm test`).
+Resultado atual: 35 testes passando e 3 integracoes puladas sem banco (`npm test`).
 
 ### Smoke test contra o banco
 
@@ -516,21 +542,21 @@ produção:
 
 ```text
 20261127000000_add_director_role                  # enum UserRole.DIRECTOR
-20261127000100_add_research_consent_and_director  # ResearchResponse, DirectorAction e role da conta demo
+20261127000100_add_research_consent_and_director  # ResearchResponse e DirectorAction
 ```
 
 Elas foram aplicadas em producao com `DIRECT_URL` operacional por bootstrap
 temporario removido no mesmo ciclo; a Vercel nao devolve segredos via CLI
-(`../../docs/handoff-freeze.md`). A migration so promoveu a conta
-`diretoria@safeanchor.app` porque ela ja existia na API — crie a conta por
-`/auth/register` antes de aplicar em outro ambiente. Nunca use
-`prisma migrate reset` ou `prisma db push` no projeto remoto.
+(`../../docs/handoff-freeze.md`). A migration nao promove contas: crie a conta
+da diretoria por `/auth/register` e altere o papel em ambiente controlado, sem
+versionar credenciais. Nunca use `prisma migrate reset` ou `prisma db push` no
+projeto remoto.
 
 ---
 
 ## Roadmap
 
-- [x] Autenticacao com JWT + bcrypt e `persona` em register/login/me
+- [x] Autenticacao com JWT (15 min, `jti`, `iss`/`aud`, logout) + bcrypt e `persona` em register/login/me
 - [x] CRUD de embarcacoes
 - [x] Manutencao (criar, listar, dashboard)
 - [x] Manutencao preventiva
@@ -539,7 +565,8 @@ temporario removido no mesmo ciclo; a Vercel nao devolve segredos via CLI
 - [x] Endpoints de inspecoes (checklist, certificado e cancelamento)
 - [x] Controle de acesso por ownership
 - [x] Roles (`USER`, `MANAGER`, `ADMIN`) e personas (`OWNER`, `SERVICE_PROVIDER`, `MARINA`); role `DIRECTOR`
-- [x] Pesquisa com consentimento explicito versionado e captura no banco
+- [x] Pesquisa com consentimento explicito, nonce assinado e captura no banco
+- [x] Rate limit por IP/e-mail e headers de seguranca (CSP em Report-Only no frontend)
 - [x] Rotas e servicos da diretoria com auditoria minima
 - [x] Health check com conexao ao banco
 - [x] Seed de desenvolvimento

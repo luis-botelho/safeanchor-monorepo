@@ -1,8 +1,17 @@
 import express from "express";
-import { submitResearch } from "../controllers/researchController.js";
+import {
+  researchNonce,
+  submitResearch,
+} from "../controllers/researchController.js";
+import { createResearchLimiters } from "../middleware/rateLimits.js";
 
-const router = express.Router();
+export function createResearchRouter(limiters = createResearchLimiters()) {
+  const router = express.Router();
 
-router.post("/", submitResearch);
+  router.get("/nonce", limiters.nonceByIp, researchNonce);
+  router.post("/", limiters.submitByIp, submitResearch);
 
-export default router;
+  return router;
+}
+
+export default createResearchRouter();

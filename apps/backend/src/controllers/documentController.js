@@ -1,3 +1,4 @@
+import { hasRequiredStrings } from "../lib/validation.js";
 import { getAccessScope } from "../services/accessScopeService.js";
 import {
   createDocument,
@@ -27,12 +28,8 @@ export async function createNewDocument(request, response) {
   const body = request.body;
 
   if (
-    !body?.vesselId ||
-    !body?.name?.trim() ||
-    !body?.category?.trim() ||
-    !body?.number?.trim() ||
-    !body?.validFrom ||
-    !body?.expiresAt
+    !hasRequiredStrings(body, ["vesselId", "name", "category", "number"]) ||
+    !hasRequiredStrings(body, ["validFrom", "expiresAt"], 40)
   ) {
     return response.status(400).json({
       message: "Vessel, name, category, number, validFrom and expiresAt are required",

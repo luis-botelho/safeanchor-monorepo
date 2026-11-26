@@ -1,6 +1,9 @@
+import { randomUUID } from "node:crypto";
+
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+import { getJwtSecret, JWT_AUDIENCE, JWT_ISSUER } from "../lib/jwtConfig.js";
 import prisma from "../lib/prisma.js";
 
 const SALT_ROUNDS = 12;
@@ -69,20 +72,19 @@ export const loginUser = async ({ email, password }) => {
     return null;
   }
 
-  if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET is not configured");
-  }
-
   const token = jwt.sign(
     {
       userId: user.id,
       partyId: user.partyId,
       role: user.role,
       persona: user.persona,
+      jti: randomUUID(),
     },
-    process.env.JWT_SECRET,
+    getJwtSecret(),
     {
-      expiresIn: "1h",
+      expiresIn: "15m",
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
     },
   );
 

@@ -1,5 +1,9 @@
 import { Resend } from "resend";
 
+import {
+  RESEARCH_CONSENT_VERSION,
+  verifyResearchNonce,
+} from "../lib/researchConsent.js";
 import prisma from "../lib/prisma.js";
 
 const MAX_SUMMARY_LENGTH = 12000;
@@ -8,8 +12,8 @@ const MAX_ANSWER_KEYS = 60;
 const MAX_ANSWER_ITEMS = 30;
 const MAX_ANSWER_LENGTH = 2000;
 
-// Versionado para que a politica aceita fique identificada em cada resposta.
-export const RESEARCH_CONSENT_VERSION = "2026-11-26";
+// Reexportado para compatibilidade com consumidores existentes.
+export { RESEARCH_CONSENT_VERSION };
 
 function cleanText(value, maximum = MAX_TEXT_LENGTH) {
   if (typeof value !== "string") return null;
@@ -96,13 +100,30 @@ export async function sendResearchResponse(summary) {
   return emailResearchSummary(summary);
 }
 
-export async function submitResearchResponse(payload, db = prisma) {
+export async function submitResearchResponse(
+  payload,
+  db = prisma,
+  requestContext = {},
+) {
   const summary = payload?.summary;
 
   if (typeof summary !== "string" || !summary.trim() || summary.length > MAX_SUMMARY_LENGTH) {
     const error = new Error("Invalid research summary.");
     error.status = 400;
     throw error;
+  }
+
+  // Campo escondido do formulario: bots preenchem, pessoas nao veem.
+  // Responde como "nao capturado" para nao sinalizar o filtro ao bot.
+  if (
+    typeof payload?.response?.website === "string" &&
+    payload.response.website.trim()
+  ) {
+    return {
+      captured: false,
+      emailSent: false,
+      message: "Consentimento nao concedido; nenhuma resposta foi capturada.",
+    };
   }
 
   const consent = payload?.consent;
@@ -116,31 +137,58 @@ export async function submitResearchResponse(payload, db = prisma) {
     };
   }
 
-  if (
-    consent.version !== RESEARCH_CONSENT_VERSION ||
-    typeof consent.answeredAt !== "string" ||
-    !consent.answeredAt.trim()
-  ) {
-    const error = new Error("Consentimento invalido ou desatualizado.");
+  // O nonce é emitido e assinado pelo servidor. Aceitar apenas
+  // `consent.accepted: true` do cliente permitiria gravar respostas sem gate.
+  const nonce = verifyResearchNonce(consent?.nonce);
+
+  if (!nonce || consent.version !== RESEARCH_CONSENT_VERSION) {
+    const error = new Error("Consentimento invalido ou expirado.");
     error.status = 400;
     throw error;
   }
 
+  const acceptedAt = new Date().toISOString();
   const responseData = payload.response || {};
   const saved = await db.researchResponse.create({
     data: {
-      consentVersion: RESEARCH_CONSENT_VERSION,
-      acceptedAt: consent.answeredAt.slice(0, 40),
+      consentVersion: nonce.consentVersion,
+      acceptedAt,
       name: cleanText(responseData.name),
       contact: cleanText(responseData.contact),
       city: cleanText(responseData.city, 120),
       profile: cleanText(responseData.profile, 120),
       answers: cleanAnswers(responseData.answers),
       summary,
-      createdAt: new Date().toISOString(),
+      createdAt: acceptedAt,
     },
     select: { id: true },
   });
+
+  // Reaproveita a tabela de auditoria ja existente: sem migration nova.
+  // IP, user-agent e timestamp sao do servidor, nunca do navegador.
+  if (db.directorAction?.create) {
+    try {
+      await db.directorAction.create({
+        data: {
+          actorId: "research-consent",
+          targetType: "RESEARCH_RESPONSE",
+          targetId: saved.id,
+          action: "CAPTURE_CONSENT",
+          details: {
+            ip: requestContext.ip || null,
+            userAgent: cleanText(requestContext.userAgent, 300),
+            acceptedAt,
+            clientAnsweredAt: cleanText(consent.answeredAt, 40),
+            consentVersion: nonce.consentVersion,
+            nonceJti: nonce.jti,
+          },
+          createdAt: acceptedAt,
+        },
+      });
+    } catch {
+      // A captura principal ja foi gravada; a auditoria e best-effort.
+    }
+  }
 
   let emailSent = false;
   let emailWarning = null;

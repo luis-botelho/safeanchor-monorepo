@@ -1,3 +1,4 @@
+import { hasRequiredStrings } from "../lib/validation.js";
 import { getAccessScope } from "../services/accessScopeService.js";
 import {
   getMaintenances,
@@ -18,12 +19,12 @@ export const createMaintenanceController = async (request, response) => {
   const body = request.body;
 
   if (
-    !body?.vesselId ||
-    !body?.title?.trim() ||
-    !body?.description?.trim() ||
-    !body?.type?.trim() ||
-    !body?.date ||
-    !body?.status?.trim()
+    !hasRequiredStrings(
+      body,
+      ["vesselId", "title", "description", "type", "status"],
+      300,
+    ) ||
+    !hasRequiredStrings(body, ["date"], 40)
   ) {
     return response.status(400).json({
       message: "Vessel, title, description, type, date and status are required",

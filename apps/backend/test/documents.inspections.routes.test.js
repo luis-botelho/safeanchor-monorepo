@@ -5,8 +5,9 @@ import { test } from "node:test";
 import jwt from "jsonwebtoken";
 
 import { createApp } from "../src/app.js";
+import { JWT_AUDIENCE, JWT_ISSUER } from "../src/lib/jwtConfig.js";
 
-process.env.JWT_SECRET ||= "test-secret";
+process.env.JWT_SECRET ||= "test-secret-with-at-least-32-characters";
 
 const token = jwt.sign(
   {
@@ -14,8 +15,10 @@ const token = jwt.sign(
     partyId: "party-1",
     role: "ADMIN",
     persona: "OWNER",
+    jti: "test-documents-jti",
   },
   process.env.JWT_SECRET,
+  { issuer: JWT_ISSUER, audience: JWT_AUDIENCE },
 );
 
 function createFakeDb() {
@@ -27,6 +30,14 @@ function createFakeDb() {
 
   return {
     state,
+    user: {
+      findUnique: async () => ({
+        id: "user-1",
+        partyId: "party-1",
+        role: "ADMIN",
+        persona: "OWNER",
+      }),
+    },
     vessel: {
       findFirst: async ({ where }) =>
         where.id === "ves-1" ? { id: "ves-1", ownerPartyId: "party-1" } : null,

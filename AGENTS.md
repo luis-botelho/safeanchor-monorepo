@@ -27,12 +27,12 @@ Este projeto agora e uma base simples para estudo.
   em `https://safeanchor-monorepo.vercel.app` (`/health`). Apresente sempre a
   producao; o Preview expira em `2026-11-29T14:19:24Z`.
 - O login tem botoes "Acessos de demonstracao" para `demo@safeanchor.app`/`demo123`
-  (`OWNER`), `carlos@tecno.boat`/`demo123` (`SERVICE_PROVIDER`),
-  `gestao@marinacostaazul.com`/`demo123` (`MARINA`) e
-  `diretoria@safeanchor.app`/`demo123` ("Admin da diretoria": persona `OWNER`,
-  role real `DIRECTOR`); conta legada `demo@safeanchor.test`/`demo123456`. As
-  contas sao reais, criadas via API; persona e so navegacao — autorizacao por
-  role e isolamento por Party. O botao da diretoria abre `/director`.
+  (`OWNER`), `carlos@tecno.boat`/`demo123` (`SERVICE_PROVIDER`) e
+  `gestao@marinacostaazul.com`/`demo123` (`MARINA`), todos com role `USER`;
+  conta legada `demo@safeanchor.test`/`demo123456`. **Nao ha credencial publica
+  de diretoria** — a conta `DIRECTOR` e provisionada fora do repositorio e nao
+  aparece na UI. As contas sao reais, criadas via API; persona e so navegacao —
+  autorizacao por role e isolamento por Party.
 - Area da diretoria em `/director`, `/director/responses`, `/director/users` e
   `/director/audit`: guard por `roleKey` no frontend e
   `authorizeRoles("DIRECTOR","ADMIN")` no backend. A diretoria filtra respostas
@@ -56,9 +56,20 @@ Este projeto agora e uma base simples para estudo.
   Graph, canonical, favicon SVG/ICO/PNG, manifest e og-image. Fonte unica:
   `apps/frontend/src/seo/pageMeta.js`. Ver `docs/seo.md`.
 - CORS so aceita `https://luis-botelho.github.io`; deep links no Pages respondem
-  `404` com o HTML da SPA (esperado); JWT dura 1h sem refresh.
-- `npm test` no backend passa (21 testes, 3 integrações puladas),
-  incluindo `test/research-consent.test.js`. As migrations
+  `404` com o HTML da SPA (esperado); JWT dura 15 min, com `jti`, `iss`/`aud`,
+  fica apenas na memoria da aba e nao ha refresh — ao recarregar, faca login.
+  `POST /auth/logout` revoga o token por `jti`; para revogacao global, rotacione
+  `JWT_SECRET` (minimo 32 caracteres).
+- A pesquisa usa nonce assinado pelo servidor (`GET /research/nonce`, validade
+  de 10 min) no `POST /research`; IP, user-agent e timestamp do aceite ficam em
+  `DirectorAction`. Links wa.me/mailto omitem contato por padrao. Rascunho e
+  copia local expiram em 24h.
+- Backend aplica `helmet`, esconde `X-Powered-By`, limita auth/research por IP e
+  e-mail e valida payloads com `400`. Frontend tem headers no `vercel.json` e
+  `public/_headers`, com CSP em `Report-Only`. Detalhes em
+  `docs/security-hardening.md`.
+- `npm test` no backend passa (35 testes, 3 integrações puladas),
+  incluindo `test/research-consent.test.js`, logout, headers e validacao. As migrations
   `20261127000000_add_director_role` e
   `20261127000100_add_research_consent_and_director` foram aplicadas em
   produção por bootstrap temporário removido no mesmo ciclo.

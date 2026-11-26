@@ -7,8 +7,10 @@ import { STAGES } from "../mock/researchQuestions";
 import {
   buildMailtoUrl,
   buildWhatsappUrl,
+  hasContactSection,
   hasWhatsappTarget,
   researchPhone,
+  stripContactFromSummary,
 } from "../services/researchService";
 import {
   clearResearchConsent,
@@ -18,7 +20,13 @@ import {
 } from "../services/researchConsent";
 import useResearchViewModel from "../viewmodels/useResearchViewModel";
 
-const EMPTY_CONTACT = { nome: "", contato: "", cidade: "", perfil: "" };
+const EMPTY_CONTACT = {
+  nome: "",
+  contato: "",
+  cidade: "",
+  perfil: "",
+  website: "",
+};
 
 function ConsentGate({ onDecide }) {
   return (
@@ -164,6 +172,16 @@ function ContactForm({ onSubmit, isSubmitting, submissionError }) {
 
   return (
     <form className="survey__contact" onSubmit={handleSubmit}>
+      <input
+        type="text"
+        name="website"
+        value={form.website}
+        onChange={(event) => update("website", event.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        hidden
+      />
       <div className="field">
         <label className="field__label" htmlFor="research-nome">
           Como podemos te chamar?
@@ -235,7 +253,14 @@ function ContactForm({ onSubmit, isSubmitting, submissionError }) {
 }
 
 function Finished({ model, onRestart }) {
-  const whatsapp = hasWhatsappTarget() ? buildWhatsappUrl(model.summary) : null;
+  const [includeContact, setIncludeContact] = useState(false);
+  const hasContact = hasContactSection(model.summary);
+  const shareSummary = includeContact
+    ? model.summary
+    : stripContactFromSummary(model.summary);
+  const whatsapp = hasWhatsappTarget()
+    ? buildWhatsappUrl(shareSummary)
+    : null;
 
   return (
     <div className="survey__done">
@@ -250,6 +275,18 @@ function Finished({ model, onRestart }) {
           : "Você recusou a captura: nada foi enviado ao servidor. O resumo ficou apenas neste navegador e você pode compartilhar uma cópia manualmente."}
       </p>
 
+      {hasContact && (
+        <label className="survey__share-consent">
+          <input
+            type="checkbox"
+            checked={includeContact}
+            onChange={(event) => setIncludeContact(event.target.checked)}
+          />
+          Incluir nome e contato nos links de compartilhamento. Por padrão, o
+          resumo enviado não contém dados pessoais.
+        </label>
+      )}
+
       <div className="survey__send">
         {whatsapp && (
           <a
@@ -263,7 +300,7 @@ function Finished({ model, onRestart }) {
           </a>
         )}
 
-        <a href={buildMailtoUrl(model.summary)} className="btn btn--ghost btn--block">
+        <a href={buildMailtoUrl(shareSummary)} className="btn btn--ghost btn--block">
           <Icon name="send" size={16} />
           Enviar por e-mail
         </a>

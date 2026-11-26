@@ -167,12 +167,13 @@ preenche e-mail e senha das contas abaixo:
 | `demo@safeanchor.app` | `demo123` | `OWNER` | `USER` |
 | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` | `USER` |
 | `gestao@marinacostaazul.com` | `demo123` | `MARINA` | `USER` |
-| `diretoria@safeanchor.app` (botão “Admin da diretoria”) | `demo123` | `OWNER` | `DIRECTOR` |
 
 A conta legada `demo@safeanchor.test` / `demo123456` (`OWNER`, `USER`) também
-existe, mas não tem botão. As contas de negócio são `USER` e a da diretoria é
-`DIRECTOR`: `persona` é metadado de navegação; a autorização é por `role` e o
-isolamento por `Party`. O botão da diretoria leva a `/director`.
+existe, mas não tem botão. Todas as contas públicas são `USER`: `persona` é
+metadado de navegação; a autorização é por `role` e o isolamento por `Party`.
+Não existe credencial pública para `/director`; a conta de diretoria é
+provisionada fora do repositório, conforme
+[`security-hardening.md`](./security-hardening.md).
 
 ## Validação antes de apresentar
 

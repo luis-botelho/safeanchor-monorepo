@@ -1,3 +1,4 @@
+import { hasRequiredStrings } from "../lib/validation.js";
 import { getAccessScope } from "../services/accessScopeService.js";
 import {
   cancelInspection,
@@ -46,10 +47,8 @@ export async function createNewInspection(request, response) {
   const body = request.body;
 
   if (
-    !body?.vesselId ||
-    !body?.type?.trim() ||
-    !body?.scheduledAt ||
-    !body?.inspector?.trim()
+    !hasRequiredStrings(body, ["vesselId", "type", "inspector"], 120) ||
+    !hasRequiredStrings(body, ["scheduledAt"], 40)
   ) {
     return response.status(400).json({
       message: "Vessel, type, scheduledAt and inspector are required",
@@ -76,6 +75,14 @@ export async function updateInspectionChecklist(request, response) {
 
   if (!Number.isInteger(itemIndex) || itemIndex < 0) {
     return response.status(400).json({ message: "Invalid checklist item" });
+  }
+
+  if (
+    !hasRequiredStrings(request.body, ["status"], 40) ||
+    (request.body.notes !== undefined &&
+      typeof request.body.notes !== "string")
+  ) {
+    return response.status(400).json({ message: "Invalid checklist payload" });
   }
 
   const inspection = await updateChecklistItem(

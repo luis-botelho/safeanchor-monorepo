@@ -2,14 +2,22 @@ import express from "express";
 import {
   register,
   login,
+  logout,
   me,
 } from "../controllers/authController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
+import { createAuthLimiters } from "../middleware/rateLimits.js";
 
-const router = express.Router();
+export function createAuthRouter(limiters = createAuthLimiters()) {
+  const router = express.Router();
 
-router.post("/register", register);
-router.post("/login", login);
-router.get("/me", requireAuth, me);
+  router.post("/register", limiters.registerByIp, limiters.registerByEmail, register);
+  router.post("/login", limiters.loginByIp, limiters.loginByEmail, login);
+  router.post("/logout", requireAuth, logout);
+  router.get("/me", requireAuth, me);
 
-export default router;
+  return router;
+}
+
+// Compatibilidade com testes que montam o router diretamente.
+export default createAuthRouter();

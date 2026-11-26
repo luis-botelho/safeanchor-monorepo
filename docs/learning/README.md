@@ -127,7 +127,8 @@ apps/
 - `DATABASE_URL` é usada no runtime; `DIRECT_URL` é usada pelo Prisma CLI.
 - Trabalhe em `develop` e promova para `main` somente por pull request.
 - `persona` escolhe a navegação; `role` autoriza. Não tente liberar a diretoria
-  trocando apenas a persona no login — use a conta `diretoria@safeanchor.app`.
+  trocando apenas a persona no login — a conta `DIRECTOR` é privada e não está
+  no repositório.
 - Sem aceite versionado na pesquisa, não envie respostas nem grave no banco; o
   resumo recusado fica só no navegador.
 - Não use `transition: all`, shimmer agressivo ou animação infinita: o contrato

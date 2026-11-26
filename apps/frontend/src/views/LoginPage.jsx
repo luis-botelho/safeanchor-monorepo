@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
+import AuthCarousel from "../components/AuthCarousel";
 import Icon from "../components/Icon";
 import SubmitButton from "../components/SubmitButton";
 import { personaAccounts as personasForDemo } from "../mock/users";
@@ -47,10 +48,7 @@ export default function LoginPage() {
             Gestão náutica, manutenção e comunidade para quem vive o mar.
           </p>
         </div>
-        <p className="auth__brand-quote">
-          "Sua frota operacionalmente pronta, com manutenção em dia e a comunidade náutica
-          ao seu lado — tudo em um só lugar."
-        </p>
+        <AuthCarousel />
       </aside>
 
       <main className="auth__panel">

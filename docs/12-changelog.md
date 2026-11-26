@@ -33,8 +33,8 @@ deploy confirmados.
 
 ### Added
 
-- Conta demo `diretoria@safeanchor.app` / `demo123` (persona `OWNER`, role
-  `DIRECTOR`) e botão "Admin da diretoria" no login, com destino `/director`.
+- Área da diretoria em `/director`, sem conta pública: credencial `DIRECTOR`
+  provisionada fora do repositório.
 - Área da diretoria em `/director`, `/director/responses`, `/director/users` e
   `/director/audit`, com guard por `roleKey` no frontend e
   `authorizeRoles("DIRECTOR", "ADMIN")` no backend.

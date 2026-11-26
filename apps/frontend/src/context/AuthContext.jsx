@@ -6,65 +6,31 @@ import {
   useState,
 } from "react";
 
-import { clearToken, getToken } from "../services/api";
-import { getCurrentUser, loginUser, registerUser } from "../services/authService";
-
-const SESSION_KEY = "safeanchor:session";
+import { clearToken } from "../services/api";
+import {
+  loginUser,
+  logoutUser,
+  registerUser,
+} from "../services/authService";
 
 const AuthContext = createContext(null);
 
-function readSession() {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-
-    if (raw) {
-      return JSON.parse(raw);
-    }
-  } catch {
-    // Sessão inválida; ignora.
-  }
-
-  return null;
-}
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(readSession);
-  const [initializing, setInitializing] = useState(Boolean(getToken()));
+  // Token e perfil ficam apenas em memória. Ao recarregar, a demo pede login
+  // novamente — o access token expira em 15 minutos e não há refresh cookie.
+  const [user, setUser] = useState(null);
+  const [initializing, setInitializing] = useState(false);
 
-  const saveUser = useCallback((profile) => {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(profile));
-    setUser(profile);
-  }, []);
+  const logout = useCallback(async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // Token pode já estar expirado ou revogado; limpa a sessão local mesmo assim.
+    }
 
-  const logout = useCallback(() => {
     clearToken();
-    localStorage.removeItem(SESSION_KEY);
     setUser(null);
   }, []);
-
-  useEffect(() => {
-    if (!getToken()) {
-      setInitializing(false);
-      return;
-    }
-
-    let active = true;
-
-    getCurrentUser()
-      .then((profile) => {
-        if (active) saveUser(profile);
-      })
-      .catch(() => {
-        if (active) logout();
-      })
-      .finally(() => {
-        if (active) setInitializing(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [logout, saveUser]);
 
   useEffect(() => {
     window.addEventListener("auth:unauthorized", logout);
@@ -72,24 +38,21 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("auth:unauthorized", logout);
   }, [logout]);
 
-  const login = useCallback(
-    async (email, password) => {
-      const profile = await loginUser({ email, password });
-      saveUser(profile);
+  const login = useCallback(async (email, password) => {
+    const profile = await loginUser({ email, password });
+    setUser(profile);
 
-      return profile;
-    },
-    [saveUser],
-  );
+    return profile;
+  }, []);
 
   const register = useCallback(
     async (name, email, password, persona) => {
       const profile = await registerUser({ name, email, password, persona });
-      saveUser(profile);
+      setUser(profile);
 
       return profile;
     },
-    [saveUser],
+    [],
   );
 
   return (

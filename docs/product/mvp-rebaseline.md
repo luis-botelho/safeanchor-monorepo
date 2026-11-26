@@ -99,13 +99,12 @@ O produto é organizado em torno dessa jornada. Cada feature do rebaseline contr
 
 Fora das Features 031–038, sem novo número de feature definido:
 
-- **Diretoria:** conta `diretoria@safeanchor.app` / `demo123` (persona `OWNER`,
-  role `DIRECTOR`), botão "Admin da diretoria" no login com destino `/director`,
-  e rotas `/director`, `/responses`, `/users` e `/audit`. Frontend protege por
-  `roleKey`; backend usa `authorizeRoles("DIRECTOR","ADMIN")`. A diretoria
-  filtra respostas por status/perfil/cidade, registra decisão/status, altera
-  papel/persona e consulta auditoria mínima (ator, alvo, ação, antes/depois e
-  data; nunca senha ou token).
+- **Diretoria:** área `/director` com `/responses`, `/users` e `/audit`, sem
+  credencial pública no repositório. A conta `DIRECTOR` é provisionada pelo
+  mantenedor fora do código; backend usa `authorizeRoles("DIRECTOR","ADMIN")`.
+  A diretoria filtra respostas por status/perfil/cidade, registra decisão/status,
+  altera papel/persona e consulta auditoria mínima (ator, alvo, ação, antes/depois
+  e data; nunca senha ou token). Veja [`../security-hardening.md`](../security-hardening.md).
 - **Consentimento da pesquisa:** versão `2026-11-26`; aceite grava
   `ResearchResponse`, envia por Resend e permite análise; recusa não envia nem
   grava, mantendo o resumo no navegador para compartilhamento manual. A escolha
@@ -141,9 +140,8 @@ As contas demo foram criadas em produção por `/auth/register` (não por
 `demo@safeanchor.test`/`demo123456` (`OWNER`). Os três primeiros são
 preenchidos automaticamente pelos botões do login. Todas são `USER`: `persona`
 é metadado de navegação; a autorização é por `role` e o isolamento por `Party`.
-Em `develop` surge a quinta conta, `diretoria@safeanchor.app`/`demo123` (botão
-"Admin da diretoria"): persona `OWNER`, mas role real `DIRECTOR` na API, com
-acesso a `/director`.
+A área `/director` continua disponível, mas sem conta pública: o acesso é
+provisionado fora do repositório e não aparece nos botões do login.
 
 Os dados de demonstração foram semeados pela própria API: `demo@safeanchor.app`
 e `demo@safeanchor.test` têm 3 embarcações, 5 manutenções, 5 documentos,
@@ -159,7 +157,7 @@ conhecidos os catálogos mock/localStorage (marinas, prestadores, jobs, eventos,
 viagens, locações, marketplace, comunidade, academy e IA), o feed de atividades
 e a “prontidão” calculada no cliente (a API não expõe `readiness`), o CORS
 restrito a `https://luis-botelho.github.io`, deep links com `404` HTML da SPA e
-o JWT de 1h sem refresh. Mudanças futuras em `develop` são promovidas a `main`
+o JWT de 15 min em memória sem refresh. Mudanças futuras em `develop` são promovidas a `main`
 por pull request; o roteiro em [`../demo-apresentacao.md`](../demo-apresentacao.md)
 é a referência autorizada, com verificação via `node scripts/verify-demo.mjs`.
 

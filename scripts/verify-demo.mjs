@@ -74,12 +74,8 @@ const accounts = [
   },
 ];
 
-const directorAccount = {
-  email: "diretoria@safeanchor.app",
-  password: "demo123",
-  persona: "OWNER",
-  label: "Admin da diretoria",
-};
+// Nao existe credencial publica de DIRECTOR. O verificador so exercita contas USER.
+const publicDirectorEmail = ["diretoria", "safeanchor.app"].join("@");
 
 const legacyAccount = {
   email: "demo@safeanchor.test",
@@ -127,9 +123,13 @@ async function verifyFrontend() {
   check("Área da diretoria no bundle", bundle.includes("/director"));
   check("Links manuais no bundle", bundle.includes("wa.me") && bundle.includes("mailto:"));
 
-  for (const email of [...accounts, directorAccount].map((account) => account.email)) {
+  for (const email of accounts.map((account) => account.email)) {
     check(`Conta demo no bundle: ${email}`, bundle.includes(email));
   }
+  check(
+    "Sem credencial de diretoria no bundle",
+    !bundle.includes(publicDirectorEmail),
+  );
   check("IDs de catálogo no bundle", bundle.includes("prov-carlos") && bundle.includes("marin-costa-azul"));
 
   check("Skeleton no CSS", css.includes("skeleton") && css.includes("skeleton-pulse"));
@@ -301,64 +301,6 @@ async function verifyBackend() {
       `Dashboard de manutenção ${account.label}`,
       dashboard.status === 200 && Number(dashboard.body.total) >= account.expected.maintenances,
       `HTTP ${dashboard.status} · total=${dashboard.body.total}`,
-    );
-  }
-
-  const directorSession = await login(directorAccount);
-  check(
-    `Login ${directorAccount.label}`,
-    directorSession.status === 200 && Boolean(directorSession.token),
-    `HTTP ${directorSession.status}`,
-  );
-
-  if (directorSession.token) {
-    check(
-      `Role ${directorAccount.label}`,
-      directorSession.body.user?.role === "DIRECTOR",
-      directorSession.body.user?.role || "ausente",
-    );
-    check(
-      `Persona ${directorAccount.label}`,
-      directorSession.body.user?.persona === directorAccount.persona,
-      directorSession.body.user?.persona || "ausente",
-    );
-
-    const directorMe = await request("GET", "/auth/me", { token: directorSession.token });
-    check(
-      `/auth/me ${directorAccount.label}`,
-      directorMe.status === 200 && directorMe.body.role === "DIRECTOR",
-      `HTTP ${directorMe.status}`,
-    );
-
-    for (const [path, isValid] of [
-      ["director/insights", (body) => typeof body?.total === "number"],
-      ["director/responses", (body) => Array.isArray(body)],
-      ["director/users", (body) => Array.isArray(body) && body.some((item) => item.role === "DIRECTOR")],
-      ["director/actions", (body) => Array.isArray(body)],
-    ]) {
-      const result = await request("GET", `/${path}`, {
-        token: directorSession.token,
-        withOrigin: true,
-      });
-      check(
-        `GET /${path} (${directorAccount.label})`,
-        result.status === 200 && isValid(result.body),
-        `HTTP ${result.status}`,
-      );
-      check(
-        `CORS /${path} (${directorAccount.label})`,
-        result.cors === origin,
-        result.cors || "ausente",
-      );
-    }
-
-    const capturedResponses = await request("GET", "/director/responses", {
-      token: directorSession.token,
-    });
-    check(
-      "Resposta consentida disponível para a diretoria",
-      capturedResponses.status === 200 && countOf(capturedResponses.body) >= 1,
-      `${countOf(capturedResponses.body)} respostas`,
     );
   }
 
