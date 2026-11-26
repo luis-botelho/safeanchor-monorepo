@@ -51,7 +51,7 @@ migration nem por campo enviado no cadastro.
 - Bundle local sem `diretoria@safeanchor.app`, `safeanchor:session` ou
   `localStorage.getItem("token")`.
 - `vercel.json` válido e `dist/_headers` presente.
-- `npm run verify:local` — 18 verificações offline dos artefatos (sem rede).
+- `npm run verify:local` — 20 verificações offline dos artefatos (sem rede).
 - `npm audit` no backend — 0 vulnerabilidades após o override do `effect`.
 - Nenhuma requisição foi feita contra a API de produção; nenhum login ou teste
   de IDOR ao vivo foi executado.
