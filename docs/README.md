@@ -10,7 +10,7 @@ pesquisa e SEO publicados em produção.
 - [Roteiro de apresentacao](./demo-apresentacao.md) — contas demo (inclui a
   diretoria), ordem de cliques, consentimento da pesquisa, o que e real x mock
   e `node scripts/verify-demo.mjs`.
-- [Handoff operacional](./handoff-freeze.md) — PRs #175 a #181,
+- [Handoff operacional](./handoff-freeze.md) — PRs #175 a #182,
   deploys, contas demo e validacao com `node scripts/verify-demo.mjs`.
 - [Deploy](./deployment.md) — GitHub Pages + Vercel, variaveis, CORS, migrations
   aplicadas e Preview com Neon temporario que expira em `2026-11-29T14:19:24Z`.

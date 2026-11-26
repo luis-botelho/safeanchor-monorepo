@@ -2,7 +2,7 @@
 
 > **Demo funcional e publicada.** Frontend no GitHub Pages, API no Vercel e
 > dados reais no Supabase. A produção sai de **`main`** por pull request; o
-> desenvolvimento continua em **`develop`**. Os PRs #175 a #181 foram
+> desenvolvimento continua em **`develop`**. Os PRs #175 a #182 foram
 > mergeados. A validação final fechou **157/157 checks** contra a produção.
 
 ## Onde está publicado
@@ -38,7 +38,8 @@ dados é por `Party`. O roteiro completo está em
 - PR #178 (`develop` → `main`): **MERGED** em `2026-11-26T18:41:26Z`; somente documentação (não dispara build do Pages).
 - PR #179 (`develop` → `main`): **MERGED** em `2026-11-26T19:03:10Z`; CI `45880688216`, Pages `45880688204`, Vercel `6XuzHMq9x4birnWVH761otQ1eGJQ`.
 - PR #180 (`develop` → `main`): **MERGED** em `2026-11-26T19:34:19Z`; merge commit `f45ba74d256eb3ff4cf4a7b5e3164df2f35cf7a3`; CI `45884632862`, Pages `45884632720`. Levou consentimento explícito, área da diretoria, SEO com prerender, bootstrap temporário e verificador com 157 checks.
-- PR #181 (`develop` → `main`): **MERGED**; remove o bootstrap temporário, corrige as checagens de SEO publicado e sincroniza a documentação. IDs finais de CI/deploy: a registrar na última atualização deste handoff.
+- PR #181 (`develop` → `main`): **MERGED** em `2026-11-26T19:43:30Z`; merge commit `456340c1cdcb54bc30d852e742fa84538e178bf8`; CI `45885763975`, Pages `45885763954`, Vercel `dpl_48h92TKLDyNpWYtKP1VpiPJwZW7T`. Removeu o bootstrap temporário, corrigiu as checagens de SEO publicado e sincronizou a documentação.
+- PR #182 (`develop` → `main`): documentação final com os IDs acima; somente documentação.
 - A promoção foi sempre por PR; nenhum merge direto em `main` e nenhum endpoint temporário permaneceu no código.
 
 ## O que foi concluído nesta rodada
