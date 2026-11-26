@@ -122,7 +122,7 @@ têm explicação e saída. Tudo respeita `prefers-reduced-motion`.
 |---|---|---|---|---|
 | **Node.js** | `>=22` | Runtime local e da função serverless. | `src/server.js`: escuta na porta 3001 fora da Vercel; na Vercel apenas exporta o app. | [expressjs.com — Migrating 5](https://expressjs.com/guide/migrating-5) |
 | **Express** | `^5.0.0` (5.2.1) | Framework HTTP minimalista. A v5 encaminha promises rejeitadas em handlers async para o error handler. | Rotas, middleware de auth/CORS e handler global em `src/app.js`. | [Introducing Express v5](https://expressjs.com/2024/10/15/v5-release) |
-| **jsonwebtoken** | `^9.0.3` (9.0.3) | Emissão/verificação de JWT. | `POST /auth/login` devolve token com `userId`, `partyId`, `role` (`USER`/`MANAGER`/`ADMIN`/`DIRECTOR`) e `persona`, validade de **1 hora**; `requireAuth` valida o `Bearer`. | [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) |
+| **jsonwebtoken** | `^9.0.3` (9.0.3) | Emissão/verificação de JWT e do nonce de consentimento. | `POST /auth/login` devolve token com `userId`, `partyId`, `role` (`USER`/`MANAGER`/`ADMIN`/`DIRECTOR`), `persona`, `jti`, `iss` e `aud`, validade de **15 minutos**; `requireAuth` valida o `Bearer` em HS256 e reconsulta o papel. | [RFC 7519](https://www.rfc-editor.org/rfc/rfc7519) |
 | **bcrypt** | `^6.0.0` (6.0.0) | Hash de senha com salt. | Custo 12 no cadastro, 10 no seed local. | OWASP Password Storage Cheat Sheet |
 | **CORS** | `^2.8.6` (2.8.6) | Controle de origens permitidas. | `FRONTEND_ORIGIN` + localhost em dev; requisições sem `Origin` passam (health/curl); origem não autorizada → 403. | [MDN — CORS](https://developer.mozilla.org/docs/Web/HTTP/CORS) |
 | **dotenv** | `^17.4.2` | Carrega `.env` apenas fora da Vercel. | `prisma.config.ts` e `src/lib/prisma.js`. | [dotenv](https://github.com/motdotla/dotenv) |
@@ -177,11 +177,11 @@ Exemplos concretos:
 - `DirectorResponsesPage.jsx`/`DirectorUsersPage.jsx` → `useDirectorViewModel` →
   `directorService.js` → `GET/PATCH /director/*` publicados.
 
-`src/services/api.js` guarda o token em `localStorage["token"]`, envia
+`src/services/api.js` mantém o token apenas em memória, envia
 `Authorization: Bearer ...`, trata `204` e dispara `auth:unauthorized` em `401`.
-`AuthContext` guarda o perfil em `safeanchor:session` e chama `/auth/me` ao
-recarregar. Note que o token expira em 1h e **não há refresh**: depois disso o
-usuário precisa entrar de novo.
+`AuthContext` mantém o perfil em memória e chama `POST /auth/logout` ao sair.
+Não há `localStorage` para sessão: ao recarregar, o usuário entra de novo. O
+token expira em 15 min e **não há refresh**.
 
 Os services são adaptadores: normalizam status e datas para as views. Alguns
 importam metadados de `src/mock/` (por exemplo `vesselStatusMeta` e categorias
@@ -213,9 +213,10 @@ Endpoints principais (os protegidos vêm depois de `requireAuth` em `app.js`):
 | Método | Rota | Finalidade |
 |---|---|---|
 | GET | `/`, `/health` | Identidade da API e checagem real de banco (`SELECT 1`) |
-| POST | `/auth/register`, `/auth/login` | Cadastro e login |
+| POST | `/auth/register`, `/auth/login`, `/auth/logout` | Cadastro, login e revogação do token |
 | GET | `/auth/me` | Perfil do token |
-| POST | `/research` | Pesquisa: só grava `ResearchResponse` e envia pelo Resend com aceite versionado (`2026-11-26`) |
+| GET | `/research/nonce` | Nonce assinado (10 min) para o aceite da pesquisa |
+| POST | `/research` | Pesquisa: só grava `ResearchResponse` e envia pelo Resend com nonce válido e aceite versionado (`2026-11-26`) |
 | GET | `/modules` | Módulos fixos do produto |
 | GET/POST/PUT/DELETE | `/vessels`, `/vessels/:id` | CRUD da frota |
 | GET | `/vessels/:id/maintenances`, `/vessels/:id/inspections` | Histórico por embarcação |
@@ -278,10 +279,10 @@ causa do `404.html`; as públicas têm HTML prerenderizado e as privadas são
    de rastreamento, analytics ou publicidade. O botão flutuante
    `WhatsAppButton` usa o mesmo número quando `VITE_RESEARCH_WHATSAPP` está
    definido no build.
-3. **Autenticar** — `LoginPage` → `AuthContext.login` → `POST /auth/login`. O
-   token é salvo em `localStorage` e o perfil em `safeanchor:session`.
-   `/register` envia `POST /auth/register` (nome, e-mail, senha mínima de 6
-   caracteres e persona) e faz login automático. Em `401`, a sessão é limpa.
+3. **Autenticar** — `LoginPage` → `AuthContext.login` → `POST /auth/login`. Token
+   e perfil ficam apenas em memória; `/auth/logout` revoga o `jti`. `/register`
+   envia `POST /auth/register` (nome, e-mail, senha mínima de 12 caracteres e
+   persona) e faz login automático. Em `401`, a sessão é limpa.
 4. **Dashboard** (`/dashboard`) — `PersonaDashboardPage` escolhe o painel conforme
    `persona`. `DashboardPage` faz **4 chamadas em paralelo**
    (`GET /vessels`, `/maintenances`, `/documents`, `/inspections`) e calcula
@@ -383,8 +384,9 @@ causa do `404.html`; as públicas têm HTML prerenderizado e as privadas são
   acoplamento além de HTTP + CORS; fallback `404.html` para rotas diretas.
 - **Observabilidade**: pino estruturado, request id, redaction de segredos e
   `/health` com checagem real de banco.
-- **Segurança básica sólida para MVP**: bcrypt, JWT, proteção de rotas e sessão
-  invalidada no cliente em `401`.
+- **Segurança reforçada após auditoria**: bcrypt, JWT curto com `jti`, logout com
+  revogação, sessão apenas em memória, nonce de consentimento, rate limit e
+  headers/CSP em Report-Only. Veja `security-hardening.md`.
 - **Seed protegido e idempotente** (`ALLOW_DATABASE_SEED=true`), documentado no
   handoff.
 - **Documentação operacional**: handoff, rebaseline, guia de estudo e este
@@ -397,10 +399,10 @@ causa do `404.html`; as públicas têm HTML prerenderizado e as privadas são
 | Migrations em produção dependem de segredo não lido pela CLI | Bloqueia evolução do schema | As duas migrations novas (`DIRECTOR` e consentimento) foram aplicadas por
 bootstrap temporário removido no mesmo ciclo |
 | Banco do Preview é temporário (expira 29/11) | Preview pode quebrar | Reivindicar ou substituir |
-| JWT de 1h sem refresh, em `localStorage` | Sessão cai e exige novo login; risco XSS | Aceitável no MVP; no roadmap |
+| JWT de 15 min sem refresh, apenas em memória | Ao recarregar exige novo login; protege contra roubo via XSS persistido | Aceitável no MVP; refresh no roadmap |
 | Persona é só navegação; `ProtectedRoute` checa presença, não `role` | Menu por persona não autoriza | `DirectorRoute` já exige `roleKey` `DIRECTOR`/`ADMIN`; estender às demais rotas |
 | 16 views não roteadas (links órfãos antigos já removidos) | APIs prontas parecem inexistentes | Corrigir `AppRouter` para preventivas e checklists |
-| Captura da pesquisa depende de aceite explícito e versão `2026-11-26` | Respostas recusadas não entram na diretoria | Comportamento desejado; recusa mantém o resumo só no navegador |
+| Captura da pesquisa depende de aceite explícito, nonce do servidor e versão `2026-11-26` | Respostas recusadas ou sem nonce não entram na diretoria | Comportamento desejado; recusa mantém o resumo só no navegador |
 | WhatsApp é link manual (`wa.me`), não envio automático | Depende de clique do usuário; sem disparo server-side | Aceito na demo; automatizar exige API business/Twilio |
 | Upload de documentos ausente | Documentos são só metadados | Pendente (Supabase Storage) |
 | Prontidão calculada no cliente; detalhe devolve `readiness: null` | Métricas inconsistentes | Levar regra para o backend |
@@ -410,7 +412,7 @@ bootstrap temporário removido no mesmo ciclo |
 | Muitos catálogos em mock + texto "dados sincronizados com a API" | Demo mistura real/falso | Ajustar textos ou conectar dados |
 | Divergência de doc/config | Node 22 e CSS BEM global precisavam de alinhamento | Resolvido: READMEs atualizados para Node 22 e `global.css` com tokens |
 | 3 vulnerabilidades high transitivas do Prisma 7 (`effect`) | Alerta no audit | Downgrade seria breaking; aceito por enquanto |
-| Sem lint, testes de componente, OpenAPI, rate limiting ou scanner no CI | Dívida de engenharia | Priorizar após a demo |
+| Sem lint, testes de componente, OpenAPI ou scanner no CI | Dívida de engenharia | Rate limiting e validação já implementados; priorizar o restante |
 
 ---
 
@@ -430,11 +432,14 @@ bootstrap temporário removido no mesmo ciclo |
    metadados atuais.
 6. **Levar a prontidão para o backend** (`readiness` calculado em service) e
    alinhar o detalhe da embarcação.
-7. **Adicionar refresh token**, validação leve de request e autorização por
-   persona onde fizer sentido, antes de expor a API a terceiros.
+7. **Adicionar refresh token rotacionado** e autorização por persona onde fizer
+   sentido; validação leve de request e rate limit já estão implementados.
 8. **Reduzir mocks visíveis** na apresentação e corrigir o texto da tela inicial.
 9. **Manter a área da diretoria e o consentimento** em produção; após qualquer
    mudança, valide com os 157 checks do verificador versionado.
+10. **Concluir as ações externas da auditoria** (rotação de senha/`JWT_SECRET`,
+    remoção da conta antiga e decisão sobre limpeza de histórico), conforme
+    `security-hardening.md`.
 
 ---
 

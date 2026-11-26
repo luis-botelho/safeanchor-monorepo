@@ -157,7 +157,7 @@ conhecidos os catálogos mock/localStorage (marinas, prestadores, jobs, eventos,
 viagens, locações, marketplace, comunidade, academy e IA), o feed de atividades
 e a “prontidão” calculada no cliente (a API não expõe `readiness`), o CORS
 restrito a `https://luis-botelho.github.io`, deep links com `404` HTML da SPA e
-o JWT de 1h sem refresh. Mudanças futuras em `develop` são promovidas a `main`
+o JWT de 15 min em memória sem refresh. Mudanças futuras em `develop` são promovidas a `main`
 por pull request; o roteiro em [`../demo-apresentacao.md`](../demo-apresentacao.md)
 é a referência autorizada, com verificação via `node scripts/verify-demo.mjs`.
 

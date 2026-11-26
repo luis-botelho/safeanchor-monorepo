@@ -440,8 +440,9 @@ A API e https://safeanchor-monorepo.vercel.app (`/health`). O CORS de producao
 aceita somente `https://luis-botelho.github.io`: um frontend local nao deve
 apontar para a API publica. Deep links no Pages (`/login`, `/pesquisa`,
 `/privacidade`, `/director/*`) respondem `404` com o HTML da SPA — comportamento
-esperado do fallback. O JWT dura 1h sem refresh; se a sessao expirar, faca login
-novamente. A diretoria, o consentimento e o SEO estao publicados em `main`; a
+esperado do fallback. O JWT dura 15 min, fica apenas na memoria da aba e nao ha
+refresh; ao recarregar ou expirar, faca login novamente. A diretoria, o
+consentimento e o SEO estao publicados em `main`; a
 validacao final fechou 157/157 checks.
 Apresente sempre a producao: o Preview da Vercel usa Neon temporario que expira
 em `2026-11-29T14:19:24Z`.

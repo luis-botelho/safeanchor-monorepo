@@ -131,7 +131,8 @@ Mostre os cartões de frota, manutenções e documentos. Números esperados:
 
 ### Passo 8 — Diretoria (4 min, quando o deploy estiver confirmado)
 
-1. Saia e clique em **Admin da diretoria** → entrar. O login direciona para
+1. Use a credencial de diretoria **provisionada pelo mantenedor fora do
+   repositório** — não há botão público na tela de login. O login direciona para
    `/director` (nos demais perfis, abre `/dashboard`).
 2. Em **Visão geral** (`/director`), mostre os indicadores das respostas
    capturadas; em **Respostas da pesquisa** (`/director/responses`), filtre por

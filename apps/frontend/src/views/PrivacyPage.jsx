@@ -227,8 +227,9 @@ export default function PrivacyPage() {
               automaticamente;
             </li>
             <li>
-              <strong>Admin da diretoria</strong> — único perfil interno com
-              acesso às respostas capturadas e às ferramentas de alteração.
+              <strong>Diretoria (acesso restrito)</strong> — perfil interno,
+              provisionado fora do repositório, com acesso às respostas
+              capturadas e às ferramentas de alteração.
             </li>
           </ul>
           <p>

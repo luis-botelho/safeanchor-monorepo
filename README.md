@@ -131,8 +131,8 @@ Marinas, prestadores, jobs, eventos, viagens, locacoes, marketplace, comunidade,
 academy e IA sao catalogos mock/localStorage; o feed de atividades e a
 "prontidao" do dashboard tambem sao mock (a API nao expoe `readiness`). O CORS
 de producao aceita somente `https://luis-botelho.github.io`; deep links no Pages
-respondem `404` com o HTML da SPA (comportamento esperado); o JWT dura 1h sem
-refresh. Apresente sempre a producao — o Preview usa um Neon temporario que
+respondem `404` com o HTML da SPA (comportamento esperado); o JWT dura 15 min,
+fica apenas na memoria da aba e nao ha refresh — ao recarregar, entre novamente. Apresente sempre a producao — o Preview usa um Neon temporario que
 expira em `2026-11-29T14:19:24Z`.
 
 ---
@@ -458,7 +458,7 @@ safeanchor-monorepo/
 
 **Backend (API real, PostgreSQL via Prisma):**
 
-- [x] Autenticacao (register/login/me) com **bcrypt (custo 12)** + **JWT** (1h) e `persona` no payload
+- [x] Autenticacao (register/login/me/logout) com **bcrypt (custo 12)** + **JWT** (15 min, `jti`, `iss`/`aud`) e `persona` no payload
 - [x] Autorizacao por roles **USER / MANAGER / ADMIN** (`authorizeRoles`); `DIRECTOR` na area da diretoria
 - [x] **Ownership & Access Scope** (Feature 031) — `accessScopeService` filtra por party do usuario + organizacoes em todas as rotas core
 - [x] CRUD de embarcacoes (listar, criar, detalhe, atualizar, remover)
@@ -473,14 +473,14 @@ safeanchor-monorepo/
 - [x] Logging estruturado com pino + redacao de campos sensiveis
 - [x] Prisma + PostgreSQL + migrations versionadas (baseline `0_init` registrada)
 - [x] Seed de desenvolvimento protegido por `ALLOW_DATABASE_SEED`
-- [x] Testes com `node --test`: 21 passando e 3 integracoes puladas sem banco, incluindo controllers/rotas de documentos/inspecoes e `research-consent.test.js`
+- [x] Testes com `node --test`: 35 passando e 3 integracoes puladas sem banco, incluindo controllers/rotas de documentos/inspecoes, `research-consent.test.js`, logout, headers, rate limit e validacao de entrada
 
 **Frontend (React 19 + Vite, MVVM):**
 
 - [x] Arquitetura MVVM (views → viewmodels → services)
 - [x] AppShell com navegacao por persona vinda do usuario autenticado
-- [x] Autenticacao real via `/auth/register`, `/auth/login` e `/auth/me` (JWT no localStorage, logout em 401)
-- [x] Botoes "Acessos de demonstracao" no login (quatro contas, incluindo "Admin da diretoria"; nao ha picker de persona)
+- [x] Autenticacao real via `/auth/register`, `/auth/login`, `/auth/me` e `/auth/logout` (JWT apenas em memoria da aba, sem persistencia)
+- [x] Botoes "Acessos de demonstracao" no login (contas com `role: USER`; nao ha credencial publica de diretoria nem picker de persona)
 - [x] Rota `/director` e subrotas com guard por `roleKey`; login da diretoria abre `/director`
 - [x] Pesquisa com "Aceitar captura" / "Recusar captura" e escolha revisavel em `/privacidade`
 - [x] Cadastro faz register e login automatico (register nao devolve token)
@@ -531,7 +531,7 @@ final fechou 157/157 checks.
 - A prontidao e calculada no cliente; a API nao expoe endpoint de `readiness`.
 - O CORS de producao so aceita `https://luis-botelho.github.io`; um frontend local nao deve apontar para a API publica.
 - Deep links no Pages (`/login`, `/pesquisa`, `/privacidade`, `/director/*`) respondem `404` com o HTML da SPA — esperado pelo fallback.
-- O JWT dura 1h e nao ha refresh; se expirar, faca login novamente.
+- O JWT dura 15 min e nao ha refresh; se expirar, ou ao recarregar a pagina, faca login novamente.
 - Nao ha testes automatizados no frontend e nao ha script de lint.
 - Restam 3 vulnerabilidades high transitivas do Prisma 7 (`effect`); corrigi-las exigiria downgrade breaking.
 
@@ -546,13 +546,13 @@ Mapa em blocos sequenciais. O objetivo aqui e mostrar o mapa, nao detalha-lo.
 3. **Backend / API** — Nucleo REST pronto (auth, vessels, maintenances, checklists, documents, inspections, modules, research) e rotas `/director/*` publicadas. Pendente: notificacoes, OpenAPI/Swagger, refresh token.
 4. **Database** — Prisma + PostgreSQL + migrations e RLS sem policies prontos, com `Document`, `Inspection`, `ResearchResponse` e `DirectorAction`. Migrations novas aplicadas em producao por bootstrap temporario removido no mesmo
 ciclo; pendente: politicas de Storage.
-5. **Authentication** — JWT + bcrypt no backend e login/cadastro reais no frontend. Cinco botoes demo, incluindo "Admin da diretoria". Pendente: refresh token.
+5. **Authentication** — JWT (15 min, `jti`, `iss`/`aud`) + bcrypt no backend e login/cadastro reais no frontend. Botoes demo apenas com `role: USER`; sem credencial publica de diretoria. Token em memoria e logout com revogacao. Pendente: refresh token.
 6. **Authorization** — Roles + ownership + persona prontos; `DIRECTOR`/`ADMIN` protegem a diretoria no frontend e no backend. Pendente: permissoes por modulo e por organizacao.
 7. **Core Maritime Domain** — Frota, manutencao, preventiva, checklists, documentos e inspecoes prontos. Proximo: compliance avancado.
 8. **Storage** — Nao iniciado; necessario para upload/download de documentos (Supabase Storage).
 9. **Mobile** — Nao iniciado; mobile polish de checklists (Feature 036) e PWA sao itens futuros.
-10. **Testing** — Backend com 20 testes passando (incluindo documentos/inspecoes e `research-consent.test.js`); 3 integracoes puladas sem banco. Faltam testes no frontend.
-11. **Security** — Base presente (hashing, JWT, ownership, RLS, redacao de logs, `npm audit` manual). Pendente: rate limiting, upload security e scanner no CI.
+10. **Testing** — Backend com 35 testes passando (incluindo documentos/inspecoes, `research-consent.test.js`, logout, headers, rate limit e validacao); 3 integracoes puladas sem banco. Faltam testes no frontend.
+11. **Security** — Correcoes da auditoria 26/11 aplicadas: rate limit, JWT curto com revogacao, token em memoria, nonce de consentimento, headers/CSP em Report-Only e validacao de entrada. Pendente: upload security, scanner no CI e rotacao de segredos pelo mantenedor.
 12. **Observability** — Logging estruturado + health check prontos. Pendente: metricas, tracing e alertas.
 13. **Infrastructure** — Frontend no GitHub Pages e API na Vercel, com Supabase saudavel (`/health` 200).
 14. **CI/CD** — CI e deploys (Pages + Vercel) prontos; verificacao da demo em `scripts/verify-demo.mjs` e roteiro em `docs/demo-apresentacao.md`.
@@ -719,7 +719,7 @@ valor sensivel aqui** — nunca versione `.env`.
 |---|---|---|
 | `DATABASE_URL` | sim | Conexao de runtime (Supabase pooler) |
 | `DIRECT_URL` | sim* | Conexao para Prisma CLI (migrations/generate/validate) |
-| `JWT_SECRET` | sim | Assinatura dos tokens JWT (valor aleatorio longo) |
+| `JWT_SECRET` | sim | Assinatura dos tokens JWT e do nonce de pesquisa (minimo 32 caracteres; valor aleatorio) |
 | `PORT` | nao | Porta do servidor (padrao `3001`) |
 | `FRONTEND_ORIGIN` | sim em prod | Origem liberada no CORS: `https://luis-botelho.github.io` |
 | `RESEND_API_KEY` | sim (para `/research`) | Chave da API Resend; nunca usar variavel `VITE_*` |
@@ -771,13 +771,13 @@ Principios de seguranca do MVP — marcados pelos que **ja existem** no reposito
 
 | Tema | Situacao |
 |---|---|
-| Authentication | ✅ JWT + bcrypt (custo 12), expiracao 1h; frontend consome a API real |
+| Authentication | ✅ JWT + bcrypt (custo 12), expiracao 15 min; token apenas em memoria no frontend |
 | Authorization | ✅ Roles `USER`/`MANAGER`/`ADMIN` e persona no backend; `DIRECTOR`/`ADMIN` nas rotas da diretoria |
 | Ownership / Access Scope | ✅ `accessScopeService` isola vessels, documents e inspections por party/organizacao |
 | Password hashing | ✅ bcrypt; hash nunca exposto |
-| JWT security | ✅ payload com `userId`, `partyId`, `role` e `persona`; `JWT_SECRET` via env |
+| JWT security | ✅ payload com `userId`, `partyId`, `role`, `persona` e `jti`; `iss`/`aud`, HS256, secret minimo 32 caracteres e logout com revogacao |
 | Input validation | ✅ validacoes nos controllers, incluindo documentos e inspecoes |
-| Rate limiting | ⬜ nao implementado |
+| Rate limiting | ✅ auth por IP/e-mail e `/research` por IP, com honeypot |
 | Secure secrets | ✅ `.env*` ignorado; apenas `.env.example` versionado |
 | Database security | ✅ RLS ativo sem policies; privilegios de `anon`/`authenticated` revogados; acesso so via backend |
 | Upload security | ⬜ depende de Supabase Storage (ainda nao implementado) |
@@ -833,10 +833,12 @@ decidir e auditar; tudo publicado em `main`.
 **Demo publicada e validada:** os PRs #175 a #181 (`develop` → `main`) foram
 mergeados; o ciclo final removeu o bootstrap temporário e sincronizou a
 documentação. O frontend roda no GitHub Pages, a API na Vercel com `/health`
-`200`, as migrations aplicadas e as cinco contas demo criadas via
+`200`, as migrations aplicadas e as contas demo publicas criadas via
 `/auth/register`. O tema Maritime Precision, a área da diretoria, o
 consentimento e o SEO estão em produção desde 26/11/2026 — validação final com
-**157/157 checks**. Para novas mudanças, trabalhe em `develop` e abra PR:
+**157/157 checks**. A rodada de endurecimento posterior corrigiu os achados da
+auditoria de 26/11; detalhes e ações externas pendentes em
+`docs/security-hardening.md`. Para novas mudanças, trabalhe em `develop` e abra PR:
 **nao fazer merge direto em `main`**. Antes de apresentar,
 leia `docs/demo-apresentacao.md` (roteiro e verificacao via
 `node scripts/verify-demo.mjs`); antes de mexer, leia `docs/handoff-freeze.md`,
