@@ -1,6 +1,7 @@
 # Sistema visual e contrato de carregamento — SafeAnchor
 
-**Data:** 2026-11-26 · **Status:** contrato em produção desde 26/11/2026 (PR #177).
+**Data:** 2026-11-26 · **Status:** contrato em produção desde 26/11/2026
+(PR #177); blocos `.consent-gate*` e `.director-*` publicados em produção.
 
 > Objetivo: fazer a interface parecer produto de equipe sênior — densa, calma,
 > confiável e acessível — sem trocar a stack. Continua sendo React + Vite, CSS
@@ -35,8 +36,9 @@ código para copiar e colar.
 1. **Token-first.** Nenhuma cor, raio, sombra ou duração "solta" nos componentes.
    Se precisar de um valor novo, crie um token semântico em `:root`.
 2. **BEM primeiro.** Um bloco por responsabilidade (`app-shell`, `page-header`,
-   `data-card`, `skeleton`, `state-view`). Modificadores descrevem estado, não
-   aparência (`--active`, `--loading`, `--compact`).
+   `data-card`, `skeleton`, `state-view`, `consent-gate`, `director-panel`).
+   Modificadores descrevem estado, não aparência (`--active`, `--loading`,
+   `--compact`, `--accept`).
 3. **Uma hierarquia, não muitas.** No máximo três tamanhos de fonte e dois pesos
    por tela. O número de um KPI fica entre 24 e 32 px, sem semibold/fino extremo.
 4. **Densidade com respiro.** Fontes e linhas compactas; espaçamento entre
@@ -107,6 +109,20 @@ Esses componentes e o tema Maritime Precision estão em produção desde
   manter largura do botão para não dançar o layout.
 - `prefers-reduced-motion: reduce` desliga movimento espacial e mantém trocas de
   cor. Nunca usar `animation-duration: 0.01ms` global.
+
+### 3.5 Blocos de consentimento e diretoria
+
+Os blocos abaixo seguem o mesmo contrato de tokens, densidade e foco visível;
+não introduzem nova biblioteca de UI:
+
+| Bloco | Uso | Regra visual |
+|---|---|---|
+| `.consent-gate*` | Porta de entrada da pesquisa, com "Aceitar captura" e "Recusar captura" | Duas opções com o mesmo peso de leitura; `--accept` marca apenas o aceite, sem induzir a escolha por cor de status |
+| `.director-*` | Painéis de respostas, usuários e auditoria da diretoria | Tabelas/listas densas (`.director-list`, `.director-answers`) e `.director-json` para o par antes/depois da auditoria, com rótulo curto e texto monoespaçado |
+
+A escolha de consentimento não é um estado de carregamento: use botões com rótulo
+estável (`SubmitButton` quando houver ação assíncrona), nunca skeleton. Nas telas
+da diretoria, o estado vazio/erro continua resolvido por `EmptyState`/`ErrorState`.
 
 ---
 

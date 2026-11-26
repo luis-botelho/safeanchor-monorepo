@@ -95,6 +95,37 @@ O produto é organizado em torno dessa jornada. Cada feature do rebaseline contr
 | 037 | ✅ | Concluída: tema Maritime Precision, skeletons contextuais, estados vazios/erro e spinner de submit no PR #177; demais catálogos seguem mock. |
 | 038 | ✅ | Concluída: Pages e Vercel no ar, `/health` 200 com banco up; PRs #175, #177, #178 e #179 mergeados em `main`. |
 
+### Trabalho adicional publicado
+
+Fora das Features 031–038, sem novo número de feature definido:
+
+- **Diretoria:** conta `diretoria@safeanchor.app` / `demo123` (persona `OWNER`,
+  role `DIRECTOR`), botão "Admin da diretoria" no login com destino `/director`,
+  e rotas `/director`, `/responses`, `/users` e `/audit`. Frontend protege por
+  `roleKey`; backend usa `authorizeRoles("DIRECTOR","ADMIN")`. A diretoria
+  filtra respostas por status/perfil/cidade, registra decisão/status, altera
+  papel/persona e consulta auditoria mínima (ator, alvo, ação, antes/depois e
+  data; nunca senha ou token).
+- **Consentimento da pesquisa:** versão `2026-11-26`; aceite grava
+  `ResearchResponse`, envia por Resend e permite análise; recusa não envia nem
+  grava, mantendo o resumo no navegador para compartilhamento manual. A escolha
+  pode ser alterada/revogada em `/privacidade`. Chaves locais:
+  `safeanchor.researchConsent` (decisão, versão e data) e
+  `safeanchor.cookieConsent` (aviso lido). Sem rastreamento, analytics ou
+  publicidade; WhatsApp segue link manual `wa.me`.
+- **SEO/favicon:** prerender estático de `/`, `/pesquisa/` e `/privacidade/`,
+  `noindex` nas privadas, `robots.txt`, `sitemap.xml`, JSON-LD, Open Graph,
+  canonical, favicon SVG/ICO/PNG, manifest e og-image. Fonte única:
+  `apps/frontend/src/seo/pageMeta.js` (ver [`../seo.md`](../seo.md)).
+- **Backend/testes:** endpoints `GET /director/responses`, `/insights`, `/users`,
+  `/actions` e `PATCH /director/users/:id`, `/responses/:id`, com JWT e
+  `DIRECTOR`/`ADMIN`; `npm test` passa, incluindo
+  `apps/backend/test/research-consent.test.js`.
+
+Promovido para `main` nos PRs #180 e #181, com deploy de produção concluído.
+As duas migrations foram aplicadas em produção por bootstrap temporário
+removido no mesmo ciclo, sem expor segredos.
+
 O PR #175 levou as rotas de documentos e inspeções para `main`; o #177 levou a
 reformulação visual, o #178 a documentação da demo e o #179 os acessos de
 demonstração, a correção de perfil e a verificação versionada. `main` estava em
@@ -110,6 +141,9 @@ As contas demo foram criadas em produção por `/auth/register` (não por
 `demo@safeanchor.test`/`demo123456` (`OWNER`). Os três primeiros são
 preenchidos automaticamente pelos botões do login. Todas são `USER`: `persona`
 é metadado de navegação; a autorização é por `role` e o isolamento por `Party`.
+Em `develop` surge a quinta conta, `diretoria@safeanchor.app`/`demo123` (botão
+"Admin da diretoria"): persona `OWNER`, mas role real `DIRECTOR` na API, com
+acesso a `/director`.
 
 Os dados de demonstração foram semeados pela própria API: `demo@safeanchor.app`
 e `demo@safeanchor.test` têm 3 embarcações, 5 manutenções, 5 documentos,

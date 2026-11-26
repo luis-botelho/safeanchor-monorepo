@@ -80,6 +80,7 @@ apps/frontend/
 ├── src/
 │   ├── components/
 │   │   ├── AppShell.jsx               # shell de navegacao por persona
+│   │   ├── DirectorRoute.jsx          # guard por roleKey (DIRECTOR/ADMIN)
 │   │   ├── ProtectedRoute.jsx         # guard de autenticacao
 │   │   ├── VesselForm.jsx             # formulario de embarcacoes
 │   │   ├── MaintenanceForm.jsx        # formulario de manutencao
@@ -111,7 +112,9 @@ apps/frontend/
 │   │   └── AppShell.jsx               # shell com sidebar por persona
 │   ├── services/
 │   │   ├── api.js                     # fetch + token JWT (VITE_API_URL)
-│   │   ├── authService.js             # register/login/me
+│   │   ├── authService.js             # register/login/me (roleKey por role)
+│   │   ├── researchConsent.js         # aceite/recusa versionado (localStorage)
+│   │   ├── directorService.js         # chamadas /director/* (API)
 │   │   ├── vesselService.js           # embarcacoes via API
 │   │   ├── maintenanceService.js      # manutencao via API
 │   │   ├── documentService.js         # documentos via API + status por validade
@@ -133,8 +136,15 @@ apps/frontend/
 │   │   ├── useChecklistTemplatesViewModel.js
 │   │   ├── useChecklistExecutionViewModel.js
 │   │   └── ...
+│   ├── seo/
+│   │   ├── pageMeta.js                # fonte unica de titulo/OG/canonical/JSON-LD
+│   │   └── SeoRoute.jsx               # aplica metadados ao trocar de rota
 │   ├── views/
 │   │   ├── LoginPage.jsx
+│   │   ├── DirectorDashboardPage.jsx  # /director (em develop)
+│   │   ├── DirectorResponsesPage.jsx  # /director/responses
+│   │   ├── DirectorUsersPage.jsx      # /director/users
+│   │   ├── DirectorAuditPage.jsx      # /director/audit
 │   │   ├── RegisterPage.jsx
 │   │   ├── DashboardPage.jsx
 │   │   ├── FleetPage.jsx
@@ -152,6 +162,9 @@ apps/frontend/
 │   │   └── *.css                      # BEM global
 │   ├── App.jsx
 │   └── main.jsx                       # BrowserRouter com basename
+├── scripts/
+│   ├── prerender.mjs                  # HTML publico, robots.txt e sitemap.xml
+│   └── generate-brand-assets.mjs      # favicon, manifest e og-image
 ├── vite.config.js                     # base via VITE_BASE_URL
 └── package.json
 ```
@@ -171,11 +184,13 @@ Aplicacao em `http://localhost:5173`. **O backend precisa estar rodando** em
 `http://localhost:3001` para autenticacao e dados reais.
 
 ```bash
-npm run build    # build de producao
+npm run build    # vite build + node scripts/prerender.mjs (HTML publico, robots e sitemap)
 npm run preview  # previsualiza o build
 ```
 
-> Nao ha script de lint neste projeto (sem ESLint configurado).
+> Nao ha script de lint neste projeto (sem ESLint configurado). Ver
+> [`../../docs/seo.md`](../../docs/seo.md) para o contrato de SEO e os assets de
+> marca gerados por `npm run generate:assets`.
 
 Build local validado no Windows (dentro de `apps/frontend`, com `npm.cmd`):
 
@@ -194,30 +209,47 @@ npm.cmd run build
   paginas e o link "Enviar por WhatsApp" na confirmacao da pesquisa.
 - `VITE_RESEARCH_INBOX`: destino do link manual de e-mail na confirmacao.
 
-A rota publica `/privacidade` traz a politica de privacidade/LGPD. O
-`CookieNotice` avisa sobre o armazenamento local (sessao, rascunho da pesquisa e
-o proprio aceite); nao ha cookies de rastreamento.
+A rota publica `/privacidade` traz a politica de privacidade/LGPD e permite
+alterar ou revogar a decisao de captura da pesquisa. O `CookieNotice` avisa
+sobre o armazenamento local (sessao, rascunho da pesquisa e o proprio aceite).
+`/pesquisa` começa com **"Aceitar captura"** ou **"Recusar captura"**: com aceite
+(`safeanchor.researchConsent`, versao `2026-11-26`) respostas, perfil e contato
+opcional sao enviados a `/research` e analisados pela diretoria; com recusa nada
+e enviado ao servidor e o resumo fica so no navegador, com compartilhamento
+manual por WhatsApp/e-mail. `safeanchor.cookieConsent` registra apenas que o
+aviso foi lido. Nao ha cookies de rastreamento, analytics ou publicidade; o
+WhatsApp e sempre link `wa.me`, nunca envio automatico.
 
 ---
 
 ## Acessos de demonstracao
 
 A tela `/login` mostra o bloco **"Acessos de demonstracao"**: um clique em
-Proprietario, Prestador ou Marina preenche e-mail e senha. **Nao** ha picker de
-persona — as contas existem de verdade na API de producao e foram criadas via
-`/auth/register`.
+Proprietario, Prestador, Marina ou **Admin da diretoria** preenche e-mail e
+senha. **Nao** ha picker de persona — as contas existem de verdade na API de
+producao e foram criadas via `/auth/register`.
 
-| Botao | Conta | Senha | Persona |
-|---|---|---|---|
-| Proprietario | `demo@safeanchor.app` | `demo123` | `OWNER` |
-| Prestador | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` |
-| Marina | `gestao@marinacostaazul.com` | `demo123` | `MARINA` |
-| (sem botao, legado) | `demo@safeanchor.test` | `demo123456` | `OWNER` |
+| Botao | Conta | Senha | Persona | Role na API |
+|---|---|---|---|---|
+| Proprietario | `demo@safeanchor.app` | `demo123` | `OWNER` | `USER` |
+| Prestador | `carlos@tecno.boat` | `demo123` | `SERVICE_PROVIDER` | `USER` |
+| Marina | `gestao@marinacostaazul.com` | `demo123` | `MARINA` | `USER` |
+| Admin da diretoria | `diretoria@safeanchor.app` | `demo123` | `OWNER` | `DIRECTOR` |
+| (sem botao, legado) | `demo@safeanchor.test` | `demo123456` | `OWNER` | `USER` |
 
 Depois do preenchimento, o botao **Entrar** chama `/auth/login` (JWT de 1h, sem
 refresh). A persona vem do usuario autenticado e define apenas a navegacao: a
-autorizacao e por `role` (todas essas contas sao `USER`) e o isolamento por
-`Party`. Trocar a persona no login nao concede permissoes extras.
+autorizacao e por `role` (as contas de negocio sao `USER` e a da diretoria e
+`DIRECTOR`) e o isolamento por `Party`. Trocar a persona no login nao concede
+permissoes extras. O login com role `DIRECTOR` direciona para `/director`.
+
+A area da diretoria (publicada) tem `/director`,
+`/director/responses`, `/director/users` e `/director/audit`. O componente
+`DirectorRoute` exige `roleKey` `DIRECTOR` ou `ADMIN`; no backend as mesmas
+rotas usam `authorizeRoles("DIRECTOR","ADMIN")`. Lá a diretoria filtra respostas
+por status/perfil/cidade, registra decisao/status, altera papel/persona de
+usuarios e consulta auditoria minima (ator, alvo, acao, antes/depois e data —
+nunca senha ou token).
 
 Cada conta enxerga dados proprios: `demo@safeanchor.app` e
 `demo@safeanchor.test` tem 3 vessels, 5 maintenances, 5 documents, 4 inspections
@@ -297,6 +329,8 @@ sequencia para abrir a sessao.
 | Documentos | `documentService.js` | `useCreateDocumentViewModel` | Funcional (sem upload) |
 | Inspecoes | `inspectionService.js` | `useInspectionViewModel` | Funcional |
 | Dashboard | `dashboardService.js` | pagina `DashboardPage` | Dados reais; feed mock |
+| Diretoria | `directorService.js` | `useDirectorViewModel` | Em `develop`: respostas, insights, usuarios e auditoria via API |
+| Pesquisa | `researchService.js` / `researchConsent.js` | `useResearchViewModel` | Em `develop`: captura so com aceite versionado (`2026-11-26`) |
 
 ### Com dados mock (demonstracao)
 
@@ -336,6 +370,10 @@ Tailwind, lib de ícones ou lib de animação. O contrato completo está em
 | `ErrorState` | falha com explicação e botão de nova tentativa |
 | `SubmitButton` | ações assíncronas: `disabled`, `aria-busy`, spinner e rótulo estável |
 
+Os blocos `.consent-gate*` (aceite/recusa da pesquisa) e `.director-*`
+(painéis, listas e auditoria da diretoria) usam os mesmos tokens BEM; as regras
+estão em [`../../docs/visual-system.md`](../../docs/visual-system.md).
+
 Regras que o próximo agente precisa preservar:
 
 1. Skeleton só para layout conhecido (1–10 s). Botão/input/modal/toast não
@@ -370,14 +408,21 @@ Regras que o próximo agente precisa preservar:
 - **AppShell com navegacao por persona.**
   O `AppShell` renderiza itens de navegacao diferentes conforme a `persona` do
   usuario autenticado (`OWNER`, `SERVICE_PROVIDER`, `MARINA`), obtida do `/auth/me`.
+  Para `roleKey` `DIRECTOR`/`ADMIN`, renderiza o menu da diretoria; `DirectorRoute`
+  bloqueia o acesso a quem nao tem esse role. Persona escolhe menu, role autoriza.
 
 - **VITE_BASE_URL para SPA no GitHub Pages.**
   O `base` do Vite e lido de `import.meta.env.VITE_BASE_URL`, setado no CI.
   O `BrowserRouter` usa `basename` dinamico para rotas corretas em subpath.
 
 - **404.html como fallback.**
-  O deploy no GitHub Pages copia `index.html` para `404.html` para que rotas
-  do react-router funcionem direto na URL.
+  O build gera `404.html` com `noindex` e o deploy no GitHub Pages o entrega como
+  fallback, para que rotas do react-router funcionem direto na URL.
+- **SEO sem SSR.**
+  `src/seo/pageMeta.js` e a fonte unica de titulo, descricao, canonical, Open
+  Graph e JSON-LD; `scripts/prerender.mjs` grava HTML estatico para `/`,
+  `/pesquisa/` e `/privacidade/`, além de `robots.txt` e `sitemap.xml`. As rotas
+  privadas ficam com `noindex`. Detalhes em `../../docs/seo.md`.
 
 ---
 
@@ -385,8 +430,8 @@ Regras que o próximo agente precisa preservar:
 
 O frontend e deployado automaticamente via **GitHub Actions** no branch `main`:
 
-1. `npm run build` (Vite)
-2. Copia `dist/index.html` → `dist/404.html` (SPA fallback)
+1. `npm run build` (Vite + prerender das rotas publicas)
+2. Gera `dist/404.html`, `dist/robots.txt`, `dist/sitemap.xml` e os assets de marca
 3. Deploy via `actions/upload-pages-artifact` + `actions/deploy-pages`
 
 **URL:** https://luis-botelho.github.io/safeanchor-monorepo/
@@ -394,8 +439,10 @@ O frontend e deployado automaticamente via **GitHub Actions** no branch `main`:
 A API e https://safeanchor-monorepo.vercel.app (`/health`). O CORS de producao
 aceita somente `https://luis-botelho.github.io`: um frontend local nao deve
 apontar para a API publica. Deep links no Pages (`/login`, `/pesquisa`,
-`/privacidade`) respondem `404` com o HTML da SPA — comportamento esperado do
-fallback. O JWT dura 1h sem refresh; se a sessao expirar, faca login novamente.
+`/privacidade`, `/director/*`) respondem `404` com o HTML da SPA — comportamento
+esperado do fallback. O JWT dura 1h sem refresh; se a sessao expirar, faca login
+novamente. A diretoria, o consentimento e o SEO estao publicados em `main`; a
+validacao final fechou 157/157 checks.
 Apresente sempre a producao: o Preview da Vercel usa Neon temporario que expira
 em `2026-11-29T14:19:24Z`.
 
@@ -415,6 +462,9 @@ em `2026-11-29T14:19:24Z`.
 - [x] Deploy no GitHub Pages
 - [x] CI com build (sem lint configurado)
 - [x] Tema Maritime Precision e skeletons com acessibilidade (em produção, PR #177)
+- [x] Area da diretoria com guard por `roleKey` e paginas `/director/*`
+- [x] Consentimento explicito e versionado da pesquisa, revisavel em `/privacidade`
+- [x] Prerender de rotas publicas e metadados centralizados em `pageMeta.js`
 - [ ] Conectar marinas ao backend
 - [ ] Conectar marketplace ao backend
 - [ ] Upload de arquivos de documentos
