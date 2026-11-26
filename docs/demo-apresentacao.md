@@ -124,10 +124,10 @@ Mostre os cartões de frota, manutenções e documentos. Números esperados:
 | `gestao@marinacostaazul.com` | 2 | 2 | 2 | 1 (concluída) | 1 | 1 |
 
 Clientes fictícios que aparecem nos catálogos e relatórios: Paulo Andrade,
-Fernanda Luz, Rafael Souza, Ana Ribeiro, Marina Guedes, Tomás Pires, Julia Ramos,
-Marcos Vieira e Pedro Lima. Prestadores: Carlos Mendes (TecnoMar), Felipe Rocha
-(NautiTech Elétrica), Cláudia (casco e pintura). Marina: Renata Almeida (Marina
-Costa Azul).
+Fernanda Luz, Rafael Souza, Marina Guedes, Tomás Pires, Julia Ramos, Marcos
+Vieira e Pedro Lima. Inspetora de exemplo: Ana Ribeiro. Prestadores: Carlos
+Mendes (TecnoMar), Felipe Rocha (NautiTech Elétrica) e Cláudia Nunes (casco e
+pintura). Marina: Renata Almeida (Marina Costa Azul).
 
 ## 5. O que é API real e o que é mock
 
@@ -175,10 +175,10 @@ No Windows, em qualquer diretório com Node 22:
 node scripts/verify-demo.mjs
 ```
 
-O script checa Pages, bundle, rotas da SPA, `/health`, login das três contas,
-listagens, CORS e contagens de dados. Ele não imprime segredos e não modifica
-dados. Se algum check falhar, veja [`handoff-freeze.md`](./handoff-freeze.md)
-antes de seguir.
+O script checa Pages, bundle, rotas da SPA, `/health`, login das quatro contas,
+listagens, CORS, contagens de dados e isolamento por `Party`. Ele não imprime
+senhas e não modifica dados. Se algum check falhar, veja
+[`handoff-freeze.md`](./handoff-freeze.md) antes de seguir.
 
 ## 8. Se algo der errado
 
