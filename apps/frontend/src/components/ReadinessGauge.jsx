@@ -4,7 +4,23 @@ function toneFor(value) {
   return "danger";
 }
 
-export default function ReadinessGauge({ value = 0, size = 72, label }) {
+export default function ReadinessGauge({ value, size = 72, label }) {
+  if (value === null || value === undefined) {
+    return (
+      <div
+        className="gauge gauge--neutral"
+        style={{ width: size, height: size }}
+        role="img"
+        aria-label="Prontidão operacional indisponível"
+      >
+        <div className="gauge__inner">
+          <strong className="gauge__value">—</strong>
+          {label && <span className="gauge__label">{label}</span>}
+        </div>
+      </div>
+    );
+  }
+
   const tone = toneFor(value);
   const angle = Math.round(value * 3.6);
 

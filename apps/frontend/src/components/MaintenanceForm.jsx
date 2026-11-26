@@ -6,6 +6,7 @@ export default function MaintenanceForm({
 }) {
   return (
     <form
+      className="stack"
       onSubmit={async (event) => {
         event.preventDefault();
 
@@ -16,9 +17,23 @@ export default function MaintenanceForm({
         }
       }}
     >
-      <h1>{title}</h1>
+      <h1 className="vessel-hero__title">{title}</h1>
+
+      <select
+        className="select"
+        value={viewModel.vesselId}
+        onChange={(event) => viewModel.setVesselId(event.target.value)}
+      >
+        <option value="">Selecione a embarcação</option>
+        {viewModel.vessels.map((vessel) => (
+          <option key={vessel.id} value={vessel.id}>
+            {vessel.name}
+          </option>
+        ))}
+      </select>
 
       <input
+        className="input"
         type="text"
         placeholder="Título"
         value={viewModel.title}
@@ -26,6 +41,7 @@ export default function MaintenanceForm({
       />
 
       <input
+        className="input"
         type="text"
         placeholder="Descrição"
         value={viewModel.description}
@@ -33,29 +49,36 @@ export default function MaintenanceForm({
       />
 
       <input
+        className="input"
         type="text"
-        placeholder="Tipo"
+        placeholder="Tipo (ex.: Preventiva)"
         value={viewModel.type}
         onChange={(event) => viewModel.setType(event.target.value)}
       />
 
       <input
+        className="input"
         type="date"
         value={viewModel.date}
         onChange={(event) => viewModel.setDate(event.target.value)}
       />
 
       <input
+        className="input"
         type="text"
-        placeholder="Status"
+        placeholder="Status (ex.: Pendente)"
         value={viewModel.status}
         onChange={(event) => viewModel.setStatus(event.target.value)}
       />
 
-      <button type="submit">{button}</button>
+      <button className="btn btn--primary" type="submit" disabled={viewModel.isLoading}>
+        {viewModel.isLoading ? "Salvando..." : button}
+      </button>
 
-      {viewModel.error && <p>{viewModel.error}</p>}
-      {viewModel.successMessage && <p>{viewModel.successMessage}</p>}
+      {viewModel.error && <p className="field__error">{viewModel.error}</p>}
+      {viewModel.successMessage && (
+        <p className="badge badge--success">{viewModel.successMessage}</p>
+      )}
     </form>
   );
 }

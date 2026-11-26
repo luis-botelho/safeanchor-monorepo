@@ -82,6 +82,27 @@ O produto é organizado em torno dessa jornada. Cada feature do rebaseline contr
 - Smoke test.
 - Documentação de deploy.
 
+## Status de implementação (branch `develop`)
+
+| Feature | Situação | Observação |
+| --- | --- | --- |
+| 031 | ✅ | Roles + ownership aplicados a vessels, manutenções, documentos e inspeções. |
+| 032 | 🔶 | Shell e dashboard consomem a API; feed de atividades ainda mock. |
+| 033 | 🔶 | Perfil com dados reais; prontidão calculada no cliente (a API não expõe `readiness`). |
+| 034 | 🔶 | Modelo `Document`, API e cadastro/listagem na UI prontos; faltam upload e Supabase Storage. |
+| 035 | ✅ | Status por validade (válido/próximo/vencido) e indicadores no dashboard. |
+| 036 | 🔶 | Inspeções via API com checklist e certificado; falta mobile/offline e revalidação de QR Code. |
+| 037 | 🔶 | Loading/empty/error nos fluxos core; demais catálogos seguem mock. |
+| 038 | ✅ | Pages no ar; `/health` 200 com banco up no Preview e na produção. |
+
+O Preview usa um Postgres temporário (Neon claim) com migrations e seed aplicados.
+A produção passou a responder `200` após a conexão do Supabase à Vercel; o usuário
+demo foi criado por `/auth/register` e o login/consulta de listas foi validado.
+A proteção por login da Vercel foi desativada para que o Preview seja público.
+A produção ainda executa o código de `main`: as rotas de documentos e inspeções
+entram nela somente após o merge do PR #175. As mudanças de `develop` serão
+promovidas a `main` somente por pull request.
+
 ## Definição de Pronto (DoD)
 
 - O usuário consegue percorrer a jornada completa (Login → Prontidão) sem erros.

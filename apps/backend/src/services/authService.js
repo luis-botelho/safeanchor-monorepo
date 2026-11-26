@@ -5,7 +5,9 @@ import prisma from "../lib/prisma.js";
 
 const SALT_ROUNDS = 12;
 
-export const registerUser = async ({ name, email, password }) => {
+const validPersonas = ["OWNER", "SERVICE_PROVIDER", "MARINA"];
+
+export const registerUser = async ({ name, email, password, persona }) => {
   const existingUser = await prisma.user.findUnique({
     where: {
       email,
@@ -28,6 +30,7 @@ export const registerUser = async ({ name, email, password }) => {
           email,
           passwordHash,
           role: "USER",
+          persona: validPersonas.includes(persona) ? persona : "OWNER",
         },
       },
     },
@@ -40,6 +43,7 @@ export const registerUser = async ({ name, email, password }) => {
           name: true,
           email: true,
           role: true,
+          persona: true,
         },
       },
     },
@@ -74,6 +78,7 @@ export const loginUser = async ({ email, password }) => {
       userId: user.id,
       partyId: user.partyId,
       role: user.role,
+      persona: user.persona,
     },
     process.env.JWT_SECRET,
     {
@@ -88,6 +93,7 @@ export const loginUser = async ({ email, password }) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      persona: user.persona,
     },
     token,
   };
@@ -104,6 +110,7 @@ export const getUserById = async (userId) => {
       name: true,
       email: true,
       role: true,
+      persona: true,
     },
   });
 };

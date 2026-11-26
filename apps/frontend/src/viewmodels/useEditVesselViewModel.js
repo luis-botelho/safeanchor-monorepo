@@ -16,8 +16,8 @@ export function useEditVesselViewModel(id) {
         setName(loadedVessel.vessel.name);
         setType(loadedVessel.vessel.type);
         setStatus(loadedVessel.vessel.status);
-      } catch {
-        setError("Não foi possível carregar a embarcação")
+      } catch (error) {
+        setError(error.message || "Não foi possível carregar a embarcação")
       } finally {
         setIsLoading(false)
       }
@@ -53,8 +53,8 @@ export function useEditVesselViewModel(id) {
       setError("");
       setSuccessMessage("Embarcação atualizada com sucesso.");
       return true;
-    } catch {
-      setError("Nao foi possivel atualizar a embarcacao.");
+    } catch (error) {
+      setError(error.message || "Não foi possível atualizar a embarcação.");
       return false;
     } finally {
       setIsLoading(false);

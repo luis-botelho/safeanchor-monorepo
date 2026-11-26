@@ -14,12 +14,16 @@ import checklistTemplateRoutes from "./routes/checklistTemplateRoutes.js";
 import checklistExecutionRoutes from "./routes/checklistExecutionRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import researchRoutes from "./routes/researchRoutes.js";
+import documentRoutes from "./routes/documentRoutes.js";
+import inspectionRoutes from "./routes/inspectionRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
 
 const genReqId = (request) => request.headers["x-request-id"] || randomUUID();
 
 export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   const app = express();
+
+  app.locals.prisma = db;
 
   app.use(
     pinoHttp({
@@ -53,7 +57,10 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
           return callback(null, true);
         }
 
-        return callback(new Error("Origin not allowed by CORS"));
+        const error = new Error("Origin not allowed by CORS");
+        error.status = 403;
+
+        return callback(error);
       },
     }),
   );
@@ -85,6 +92,15 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   app.use("/preventive-maintenances", preventiveMaintenanceRoutes);
   app.use("/checklist-templates", checklistTemplateRoutes);
   app.use("/checklist-executions", checklistExecutionRoutes);
+  app.use("/documents", documentRoutes);
+  app.use("/inspections", inspectionRoutes);
+
+  app.use((request, response) => {
+    return response.status(404).json({
+      message: "Not found",
+      requestId: request.id,
+    });
+  });
 
   app.use((error, request, response, next) => {
     logger.error(
@@ -92,8 +108,10 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
       "Unhandled error",
     );
 
-    return response.status(500).json({
-      message: "Internal server error",
+    const status = error.status >= 400 && error.status < 500 ? error.status : 500;
+
+    return response.status(status).json({
+      message: status === 500 ? "Internal server error" : error.message,
       requestId: request.id,
     });
   });

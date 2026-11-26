@@ -3,7 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 import { getMarinaById } from "../services/marinaService";
-import { getVesselsByOwner } from "../services/vesselService";
+import { getFleetVessels } from "../services/vesselService";
 import { getTeamByMarina } from "../services/teamService";
 import {
   getBerthSlots,
@@ -52,7 +52,7 @@ export default function MarinaDashboardPage() {
   useEffect(() => {
     async function load() {
       setMarina(await getMarinaById(marinaId));
-      setFleet(await getVesselsByOwner("usr-marina"));
+      setFleet(await getFleetVessels());
       setTeam(await getTeamByMarina(marinaId));
       setSlots(await getBerthSlots());
       setMovements(await getMarinaMovements());

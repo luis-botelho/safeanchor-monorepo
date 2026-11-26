@@ -7,6 +7,10 @@ import {
   deleteVessel,
 } from "../services/vesselService.js";
 
+function hasRequiredFields(body) {
+  return Boolean(body?.name?.trim() && body?.type?.trim() && body?.status?.trim());
+}
+
 export const getVessels = async (request, response) => {
   const scope = await getAccessScope(request.user);
 
@@ -32,6 +36,12 @@ export const getVessel = async (request, response) => {
 };
 
 export const createNewVessel = async (request, response) => {
+  if (!hasRequiredFields(request.body)) {
+    return response.status(400).json({
+      message: "Name, type and status are required",
+    });
+  }
+
   const scope = await getAccessScope(request.user);
 
   const vessel = await createVessel(scope, request.body);
@@ -46,6 +56,12 @@ export const createNewVessel = async (request, response) => {
 };
 
 export const updateVesselController = async (request, response) => {
+  if (!hasRequiredFields(request.body)) {
+    return response.status(400).json({
+      message: "Name, type and status are required",
+    });
+  }
+
   const scope = await getAccessScope(request.user);
 
   const { id } = request.params;

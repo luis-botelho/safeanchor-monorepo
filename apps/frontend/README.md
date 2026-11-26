@@ -45,15 +45,15 @@ O frontend segue o padrao **MVVM (Model-View-ViewModel)**:
 flowchart LR
     A[PageViews<br/>(views/)] -->|chama| B[use*ViewModel hooks<br/>(viewmodels/)]
     B -->|recarrega| C[Services<br/>(services/)]
-    C -->|dados mock| D[(Mock Data)]
-    C -->|HTTP futuro| E[(Backend API)]
+    C -->|HTTP| D[(Backend API)]
+    C -->|catalogos| E[(Mock Data)]
 ```
 
 | Camada | Responsabilidade |
 |---|---|
 | `views/` | Paginas (PageViews) — composicao de componentes |
 | `viewmodels/` | Hooks `use*` que encapsulam logica de negocio |
-| `services/` | Camada de dados — mock atual, HTTP futuro |
+| `services/` | Camada de dados — API nos modulos core, mock nos catalogos |
 | `components/` | Componentes compartilhados (AppShell, Formularios, Cards) |
 | `context/` | React Context (autenticacao) |
 | `router/` | AppRouter + AppShell (navegacao por persona) |
@@ -83,6 +83,7 @@ apps/frontend/
 │   │   ├── MaintenanceForm.jsx        # formulario de manutencao
 │   │   ├── ChecklistTemplateForm.jsx  # formulario de template
 │   │   ├── ChecklistExecutionForm.jsx # formulario de execucao
+│   │   ├── DocumentForm.jsx           # formulario de documento
 │   │   ├── InspectionCard.jsx         # card de inspecao
 │   │   ├── StatusBadge.jsx            # badge de status
 │   │   ├── ReadinessGauge.jsx         # gauge de prontidao
@@ -91,7 +92,7 @@ apps/frontend/
 │   │   ├── Icon.jsx                   # icones SVG
 │   │   └── ...                        # outros componentes
 │   ├── context/
-│   │   └── AuthContext.jsx            # contexto de autenticacao
+│   │   └── AuthContext.jsx            # login/cadastro via API e sessao JWT
 │   ├── mock/
 │   │   ├── vessels.js                 # embarcacoes simuladas
 │   │   ├── maintenances.js            # manutencoes simuladas
@@ -101,15 +102,18 @@ apps/frontend/
 │   │   ├── AppRouter.jsx              # rotas da aplicacao
 │   │   └── AppShell.jsx               # shell com sidebar por persona
 │   ├── services/
-│   │   ├── api.js                     # configuracao base (VITE_API_URL)
-│   │   ├── vesselService.js           # dados de embarcacoes
-│   │   ├── maintenanceService.js      # dados de manutencao
-│   │   ├── inspectionService.js       # dados de inspecoes
+│   │   ├── api.js                     # fetch + token JWT (VITE_API_URL)
+│   │   ├── authService.js             # register/login/me
+│   │   ├── vesselService.js           # embarcacoes via API
+│   │   ├── maintenanceService.js      # manutencao via API
+│   │   ├── documentService.js         # documentos via API + status por validade
+│   │   ├── inspectionService.js       # inspecoes via API + checklist padrao
+│   │   ├── dashboardService.js        # prontidao calculada a partir da API
 │   │   ├── checklistTemplateService.js
 │   │   ├── checklistExecutionService.js
 │   │   ├── maintenanceDashboardService.js
 │   │   ├── moduleService.js           # modulos disponiveis
-│   │   └── ...
+│   │   └── ...                        # catalogos ainda em mock
 │   ├── viewmodels/
 │   │   ├── useVesselsViewModel.js
 │   │   ├── useCreateVesselViewModel.js
@@ -117,6 +121,7 @@ apps/frontend/
 │   │   ├── useMaintenancesViewModel.js
 │   │   ├── useMaintenanceDashboardViewModel.js
 │   │   ├── useInspectionViewModel.js
+│   │   ├── useCreateDocumentViewModel.js
 │   │   ├── useChecklistTemplatesViewModel.js
 │   │   ├── useChecklistExecutionViewModel.js
 │   │   └── ...
@@ -127,7 +132,11 @@ apps/frontend/
 │   │   ├── FleetPage.jsx
 │   │   ├── VesselDetailPage.jsx
 │   │   ├── MaintenancePage.jsx
+│   │   ├── DocumentsPage.jsx
+│   │   ├── CreateDocumentPage.jsx
 │   │   ├── InspectionsPage.jsx
+│   │   ├── NewInspectionPage.jsx
+│   │   ├── InspectionDetailPage.jsx
 │   │   ├── ChecklistTemplatesPage.jsx
 │   │   ├── MarinasPage.jsx
 │   │   └── ...                       # 40+ paginas
@@ -146,16 +155,19 @@ apps/frontend/
 ```bash
 cd apps/frontend
 npm install
+cp .env.example .env   # VITE_API_URL=http://localhost:3001
 npm run dev
 ```
 
 Aplicacao em `http://localhost:5173`. **O backend precisa estar rodando** em
-`http://localhost:3000` para autenticacao e dados reais.
+`http://localhost:3001` para autenticacao e dados reais.
 
 ```bash
 npm run build    # build de producao
-npm run lint     # eslint
+npm run preview  # previsualiza o build
 ```
+
+> Nao ha script de lint neste projeto (sem ESLint configurado).
 
 ---
 
@@ -184,8 +196,8 @@ flowchart LR
     U -->|"navega"| V
     V -->|"chama hooks"| VM
     VM -->|"recarrega dados"| S
-    S -->|"retorna mock"| M
-    S -.->|"HTTP (futuro)"| R
+    S -->|"catalogos"| M
+    S -->|"HTTP"| R
     R --> C --> SR --> P --> DB
     DB --> P --> SR --> C --> R
     R -.->|"response"| S
@@ -198,6 +210,11 @@ flowchart LR
 (`create`, `update`, `delete`). As PageViews apenas orquestram: decidem o que
 renderizar e passam os dados adiante.
 
+O `api.js` guarda o token JWT, envia `Authorization: Bearer <token>` e dispara o
+evento `auth:unauthorized` em respostas 401; o `AuthContext` limpa a sessao. Como
+`/auth/register` nao devolve token, o cadastro chama register e login em
+sequencia para abrir a sessao.
+
 ---
 
 ## Modulos implementados
@@ -206,19 +223,21 @@ renderizar e passam os dados adiante.
 
 | Modulo | Service | ViewModel | Status |
 |---|---|---|---|
-| Autenticacao | `api.js` | `AuthContext` | Funcional |
+| Autenticacao | `authService.js` / `api.js` | `AuthContext` | Funcional |
 | Embarcacoes | `vesselService.js` | `useVesselsViewModel` | Funcional |
 | Manutencao | `maintenanceService.js` | `useMaintenancesViewModel` | Funcional |
 | Dashboard manutencao | `maintenanceDashboardService.js` | `useMaintenanceDashboardViewModel` | Funcional |
 | Manutencao preventiva | `preventiveMaintenanceService.js` | `usePreventiveMaintenanceViewModel` | Funcional |
 | Checklist templates | `checklistTemplateService.js` | `useChecklistTemplatesViewModel` | Funcional |
 | Checklist execucoes | `checklistExecutionService.js` | `useChecklistExecutionViewModel` | Funcional |
+| Documentos | `documentService.js` | `useCreateDocumentViewModel` | Funcional (sem upload) |
+| Inspecoes | `inspectionService.js` | `useInspectionViewModel` | Funcional |
+| Dashboard | `dashboardService.js` | pagina `DashboardPage` | Dados reais; feed mock |
 
 ### Com dados mock (demonstracao)
 
 | Modulo | Service | Status |
 |---|---|---|
-| Inspecoes | `inspectionService.js` | Mock |
 | Marinas | `marinaService.js` | Mock |
 | Marketplace | `marketplaceService.js` | Mock |
 | Comunidade | `communityService.js` | Mock |
@@ -226,8 +245,11 @@ renderizar e passam os dados adiante.
 | Academy (treinamento) | `academyService.js` | Mock |
 | Jobs & Crew | `jobsService.js` | Mock |
 | Trip Planner | `tripService.js` | Mock |
-| Documentos | `documentService.js` | Mock |
 | IA | `aiService.js` | Mock |
+
+> `documentService.js` e `inspectionService.js` adaptam o formato da API ao
+> formato esperado pelas views e calculam status/prontidao no cliente. A API nao
+> fornece um campo `readiness`.
 
 ---
 
@@ -237,18 +259,18 @@ renderizar e passam os dados adiante.
   As PageViews ficam limpas — so compoem e delegam. A logica de negocio vive
   nos ViewModels (`use*ViewModel`) e e reutilizavel entre paginas.
 
-- **Mock data separado por service.**
-  Cada modulo tem seu arquivo de dados simulados. Quando o backend estiver pronto,
-  o service muda de `return mockData` para `fetch(API_URL)` — nada nos ViewModels
-  muda.
+- **Services como adaptadores.**
+  Catalogos ainda leem arquivos de mock, enquanto os modulos core chamam a API.
+  `documentService` e `inspectionService` convertem o contrato do backend no
+  formato que as views ja esperavam — nada nos ViewModels precisou mudar.
 
 - **CSS co-localizado por componente.**
   Cada componente mantém seu arquivo `.css` na mesma pasta. Facilita localizar,
   alterar e remover estilos sem procurar em um CSS monolitico.
 
 - **AppShell com navegacao por persona.**
-  O `AppShell` renderiza itens de navegacao diferentes conforme o `role` do usuario
-  logado — cada persona enxerga apenas o que e relevante.
+  O `AppShell` renderiza itens de navegacao diferentes conforme a `persona` do
+  usuario autenticado (`OWNER`, `SERVICE_PROVIDER`, `MARINA`), obtida do `/auth/me`.
 
 - **VITE_BASE_URL para SPA no GitHub Pages.**
   O `base` do Vite e lido de `import.meta.env.VITE_BASE_URL`, setado no CI.
@@ -276,16 +298,18 @@ O frontend e deployado automaticamente via **GitHub Actions** no branch `main`:
 
 - [x] Arquitetura MVVM com ViewModels
 - [x] Navegacao por persona (AppShell)
-- [x] Autenticacao (login + cadastro + JWT)
-- [x] Modulo de embarcacoes (CRUD + prontidao)
-- [x] Modulo de manutencao (agenda + dashboard)
-- [x] Modulo de checklists (templates + execucoes)
-- [x] Modulo de inspecoes (mock)
+- [x] Autenticacao real (login + cadastro + JWT via API)
+- [x] Modulo de embarcacoes (CRUD via API + prontidao calculada)
+- [x] Modulo de manutencao (agenda + dashboard via API)
+- [x] Modulo de checklists (templates + execucoes via API)
+- [x] Modulo de inspecoes via API (criacao, detalhe e checklist)
+- [x] Modulo de documentos via API (cadastro, listagem e validade)
+- [x] Dashboard com prontidao calculada a partir da API
 - [x] Deploy no GitHub Pages
-- [x] CI com lint + build
-- [ ] Conectar inspecoes ao backend
+- [x] CI com build (sem lint configurado)
 - [ ] Conectar marinas ao backend
 - [ ] Conectar marketplace ao backend
+- [ ] Upload de arquivos de documentos
 - [ ] Testes automatizados de componentes
 - [ ] PWA para uso offline em campo
 - [ ] Notificacoes em tempo real

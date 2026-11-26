@@ -15,6 +15,21 @@ export const getMaintenancesController = async (request, response) => {
 };
 
 export const createMaintenanceController = async (request, response) => {
+  const body = request.body;
+
+  if (
+    !body?.vesselId ||
+    !body?.title?.trim() ||
+    !body?.description?.trim() ||
+    !body?.type?.trim() ||
+    !body?.date ||
+    !body?.status?.trim()
+  ) {
+    return response.status(400).json({
+      message: "Vessel, title, description, type, date and status are required",
+    });
+  }
+
   const scope = await getAccessScope(request.user);
 
   const maintenance = await createMaintenance(scope, request.body);

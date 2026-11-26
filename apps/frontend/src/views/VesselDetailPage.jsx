@@ -19,20 +19,46 @@ export default function VesselDetailPage() {
   const [maintenances, setMaintenances] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [marina, setMarina] = useState(null);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      const loadedVessel = await getVessel(id);
-      if (cancelled || !loadedVessel) return;
+      try {
+        setIsLoading(true);
+        setError("");
 
-      setVessel(loadedVessel);
-      setMaintenances(await getMaintenancesByVesselId(id));
-      setDocuments(await getDocumentsByVessel(id));
+        const loadedVessel = await getVessel(id);
 
-      if (loadedVessel.marinaId) {
-        setMarina(await getMarinaById(loadedVessel.marinaId));
+        if (cancelled) return;
+
+        if (!loadedVessel) {
+          setError("Embarcação não encontrada.");
+          return;
+        }
+
+        const [records, docs] = await Promise.all([
+          getMaintenancesByVesselId(id),
+          getDocumentsByVessel(id),
+        ]);
+
+        if (cancelled) return;
+
+        setVessel(loadedVessel);
+        setMaintenances(records);
+        setDocuments(docs);
+
+        if (loadedVessel.marinaId) {
+          setMarina(await getMarinaById(loadedVessel.marinaId));
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setError(error.message || "Não foi possível carregar a embarcação.");
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
     }
 
@@ -43,8 +69,12 @@ export default function VesselDetailPage() {
     };
   }, [id]);
 
-  if (!vessel) {
+  if (isLoading) {
     return <p>Carregando embarcação...</p>;
+  }
+
+  if (error) {
+    return <p className="field__error">{error}</p>;
   }
 
   const status = getVesselStatus(vessel.status);
@@ -79,8 +109,9 @@ export default function VesselDetailPage() {
           <div className="vessel-hero__gauge-caption">
             <strong>Prontidão operacional</strong>
             <span>
-              Último checklist: {vessel.lastChecklist.date} ·{" "}
-              {vessel.lastChecklist.score}/100
+              {vessel.lastChecklist
+                ? `Último checklist: ${vessel.lastChecklist.date} · ${vessel.lastChecklist.score}/100`
+                : "Sem checklist registrado"}
             </span>
           </div>
         </div>
@@ -110,15 +141,17 @@ export default function VesselDetailPage() {
           </div>
         </section>
 
-        <section className="card card--padding">
-          <div className="section-title">
-            <h2>Fatores de prontidão</h2>
-          </div>
-          <FactorBar label="Manutenção" value={factors.maintenance} />
-          <FactorBar label="Documentação" value={factors.documentation} />
-          <FactorBar label="Checklists" value={factors.checklist} />
-          <FactorBar label="Segurança" value={factors.safety} />
-        </section>
+        {factors && (
+          <section className="card card--padding">
+            <div className="section-title">
+              <h2>Fatores de prontidão</h2>
+            </div>
+            <FactorBar label="Manutenção" value={factors.maintenance} />
+            <FactorBar label="Documentação" value={factors.documentation} />
+            <FactorBar label="Checklists" value={factors.checklist} />
+            <FactorBar label="Segurança" value={factors.safety} />
+          </section>
+        )}
       </div>
 
       <div className="grid grid--2" style={{ marginTop: 18 }}>

@@ -71,6 +71,16 @@ export default function InspectionDetailPage() {
     <div>
       <BackLink to="/inspections" label="Voltar para inspeções" />
 
+      {error && (
+        <div className="card" style={{ marginTop: 18, borderColor: "var(--color-danger)" }}>
+          <div className="card--padding">
+            <p className="page-header__subtitle" style={{ color: "var(--color-danger)" }}>
+              {error}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="vessel-hero__main">
         <div>
           <h1 className="vessel-hero__title">{inspection.vesselName}</h1>

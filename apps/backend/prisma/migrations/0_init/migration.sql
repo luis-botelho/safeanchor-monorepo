@@ -1,3 +1,16 @@
+-- Supabase provides these roles; create them on plain PostgreSQL so the same
+-- migration works in both environments.
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
+        CREATE ROLE anon NOLOGIN;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
+        CREATE ROLE authenticated NOLOGIN;
+    END IF;
+END
+$$;
+
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
 

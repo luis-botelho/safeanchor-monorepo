@@ -2,7 +2,6 @@ import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
-import { personaAccounts } from "../mock/users";
 import Avatar from "./Avatar";
 import Icon from "./Icon";
 
@@ -143,7 +142,7 @@ function navFor(user) {
 }
 
 export default function AppShell() {
-  const { user, login, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -152,15 +151,6 @@ export default function AppShell() {
   function handleLogout() {
     logout();
     navigate("/login");
-  }
-
-  async function switchPersona(account) {
-    if (user?.persona === account.persona) {
-      return;
-    }
-
-    await login(account.email, account.password);
-    navigate("/dashboard");
   }
 
   return (
@@ -197,25 +187,8 @@ export default function AppShell() {
         </nav>
 
         <div className="app-shell__footer">
-          <span className="app-shell__personas-title">Alternar visão (demo)</span>
-          <div className="app-shell__personas">
-            {personaAccounts.map((account) => (
-              <button
-                key={account.persona}
-                type="button"
-                className={`persona-switch ${
-                  user?.persona === account.persona ? "persona-switch--active" : ""
-                }`}
-                onClick={() => switchPersona(account)}
-                title={`${account.label} — ${account.description}`}
-              >
-                <Icon name={account.icon} size={15} />
-                <span>{account.label}</span>
-              </button>
-            ))}
-          </div>
           <span className="app-shell__version">
-            MVP demonstrativo · dados de exemplo
+            SafeAnchor · dados sincronizados com a API
           </span>
         </div>
       </aside>
@@ -239,8 +212,8 @@ export default function AppShell() {
           </div>
           <div className="topbar__account">
             <span className="topbar__location">
-              <Icon name="locationPin" size={15} />
-              {user?.location || "Florianópolis, SC"}
+              <Icon name="user" size={15} />
+              {user?.email}
             </span>
             <Avatar initials={user?.initials || "U"} size={36} />
             <button

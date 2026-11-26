@@ -1,48 +1,73 @@
 import { getFleetVessels } from "./vesselService";
 import { getUpcomingMaintenance } from "./maintenanceService";
-import { getExpiringDocuments, getDocuments } from "./documentService";
+import { getDocuments } from "./documentService";
+import { getInspections } from "./inspectionService";
 import { activities, activityMeta } from "../mock/activity";
 
+function clampScore(value) {
+  return Math.max(0, Math.min(100, value));
+}
+
+function average(values) {
+  if (values.length === 0) return 0;
+
+  return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+}
+
+function buildReadiness(vessels, upcoming, documents, inspections) {
+  return vessels.map((vessel) => {
+    const openMaintenances = upcoming.filter(
+      (item) => item.vesselId === vessel.id,
+    ).length;
+    const vesselDocuments = documents.filter(
+      (item) => item.vesselId === vessel.id,
+    );
+    const expiring = vesselDocuments.filter(
+      (item) => item.status.key === "proximo",
+    ).length;
+    const expired = vesselDocuments.filter(
+      (item) => item.status.key === "vencido",
+    ).length;
+    const activeInspections = inspections.filter(
+      (item) =>
+        item.vesselId === vessel.id &&
+        (item.status === "scheduled" || item.status === "in_progress"),
+    ).length;
+
+    const readinessFactors = {
+      maintenance: clampScore(100 - openMaintenances * 20),
+      documentation: clampScore(100 - expired * 30 - expiring * 10),
+      checklist: clampScore(100 - activeInspections * 15),
+      safety: vessel.status === "OPERACIONAL" ? 100 : 70,
+    };
+
+    return {
+      ...vessel,
+      readinessFactors,
+      readiness: average(Object.values(readinessFactors)),
+    };
+  });
+}
+
 export async function getDashboard() {
-  const vessels = await getFleetVessels();
-  const upcoming = await getUpcomingMaintenance();
-  const expiring = await getExpiringDocuments();
-  const allDocuments = await getDocuments();
+  const [loadedVessels, upcoming, allDocuments, inspections] = await Promise.all([
+    getFleetVessels(),
+    getUpcomingMaintenance(),
+    getDocuments(),
+    getInspections(),
+  ]);
 
-  const readyVessels = vessels.filter(
-    (vessel) => vessel.status === "OPERACIONAL",
+  const vessels = buildReadiness(
+    loadedVessels,
+    upcoming,
+    allDocuments,
+    inspections,
   );
-  const attentionVessels = vessels.filter(
-    (vessel) => vessel.status !== "OPERACIONAL",
+
+  const expiring = allDocuments.filter(
+    (document) =>
+      document.status.key === "vencido" || document.status.key === "proximo",
   );
-
-  const issueCount = vessels.filter((vessel) => vessel.readiness < 80).length;
-
-  const totalReadiness = vessels.length
-    ? Math.round(
-        vessels.reduce((sum, vessel) => sum + vessel.readiness, 0) /
-          vessels.length,
-      )
-    : 0;
-
-  const factorAverages = {
-    maintenance: Math.round(
-      vessels.reduce((sum, vessel) => sum + vessel.readinessFactors.maintenance, 0) /
-        vessels.length,
-    ),
-    documentation: Math.round(
-      vessels.reduce((sum, vessel) => sum + vessel.readinessFactors.documentation, 0) /
-        vessels.length,
-    ),
-    checklist: Math.round(
-      vessels.reduce((sum, vessel) => sum + vessel.readinessFactors.checklist, 0) /
-        vessels.length,
-    ),
-    safety: Math.round(
-      vessels.reduce((sum, vessel) => sum + vessel.readinessFactors.safety, 0) /
-        vessels.length,
-    ),
-  };
 
   const activityFeed = activities.map((activity) => ({
     ...activity,
@@ -52,16 +77,27 @@ export async function getDashboard() {
   return {
     fleetOverview: {
       total: vessels.length,
-      operational: readyVessels.length,
-      attention: attentionVessels.length,
+      operational: vessels.filter((vessel) => vessel.status === "OPERACIONAL").length,
+      attention: vessels.filter((vessel) => vessel.status !== "OPERACIONAL").length,
     },
     readiness: {
-      total: totalReadiness,
-      factors: factorAverages,
+      total: average(vessels.map((vessel) => vessel.readiness)),
+      factors: {
+        maintenance: average(
+          vessels.map((vessel) => vessel.readinessFactors.maintenance),
+        ),
+        documentation: average(
+          vessels.map((vessel) => vessel.readinessFactors.documentation),
+        ),
+        checklist: average(
+          vessels.map((vessel) => vessel.readinessFactors.checklist),
+        ),
+        safety: average(vessels.map((vessel) => vessel.readinessFactors.safety)),
+      },
     },
     issues: {
-      count: issueCount,
-      maintenance: upcoming.filter((item) => item.status === "Em andamento").length,
+      count: vessels.filter((vessel) => vessel.readiness < 80).length,
+      maintenance: upcoming.length,
       documents: expiring.length,
     },
     upcomingMaintenance: upcoming.slice(0, 4),

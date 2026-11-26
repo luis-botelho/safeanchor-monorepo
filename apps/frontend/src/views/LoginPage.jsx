@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
-import { personaAccounts } from "../mock/users";
 import Icon from "../components/Icon";
 
 export default function LoginPage() {
@@ -12,6 +11,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -22,13 +22,15 @@ export default function LoginPage() {
       return;
     }
 
-    await login(email, password);
-    navigate("/dashboard");
-  }
-
-  function quickLogin(accountEmail) {
-    setEmail(accountEmail);
-    setPassword("demo123");
+    try {
+      setIsLoading(true);
+      await login(email, password);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Não foi possível entrar. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -54,28 +56,8 @@ export default function LoginPage() {
           <div className="card--padding">
             <h1 className="auth__card-title">Bem-vindo de volta</h1>
             <p className="auth__card-subtitle">
-              Entre para acompanhar sua frota e serviços.
+              Entre com sua conta para acompanhar sua frota e serviços.
             </p>
-
-            <div className="demo-banner">
-              <strong>MVP demonstrativo — sem backend</strong>
-              Escolha uma das três personas ou crie a sua.
-            </div>
-
-            {personaAccounts.map((account) => (
-              <button
-                key={account.persona}
-                type="button"
-                className="demo-chip"
-                onClick={() => quickLogin(account.email)}
-              >
-                <Icon name={account.icon} size={16} />
-                <span>
-                  <strong>{account.label}</strong> — <code>{account.email}</code> /{" "}
-                  <code>demo123</code>
-                </span>
-              </button>
-            ))}
 
             <form onSubmit={handleSubmit} className="stack" style={{ marginTop: 18 }}>
               <div className="field">
@@ -108,8 +90,12 @@ export default function LoginPage() {
 
               {error && <p className="field__error">{error}</p>}
 
-              <button type="submit" className="btn btn--primary btn--block">
-                Entrar
+              <button
+                type="submit"
+                className="btn btn--primary btn--block"
+                disabled={isLoading}
+              >
+                {isLoading ? "Entrando..." : "Entrar"}
               </button>
             </form>
 
