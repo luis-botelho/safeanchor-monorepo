@@ -16,6 +16,7 @@ import authRoutes from "./routes/authRoutes.js";
 import researchRoutes from "./routes/researchRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import inspectionRoutes from "./routes/inspectionRoutes.js";
+import directorRoutes from "./routes/directorRoutes.js";
 import { requireAuth } from "./middleware/authMiddleware.js";
 
 const genReqId = (request) => request.headers["x-request-id"] || randomUUID();
@@ -94,6 +95,7 @@ export const createApp = ({ prisma: db = prisma, beforeAuth } = {}) => {
   app.use("/checklist-executions", checklistExecutionRoutes);
   app.use("/documents", documentRoutes);
   app.use("/inspections", inspectionRoutes);
+  app.use("/director", directorRoutes);
 
   app.use((request, response) => {
     return response.status(404).json({
