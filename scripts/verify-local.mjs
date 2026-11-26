@@ -74,13 +74,18 @@ const vercelConfig = JSON.parse(readIfExists(join(frontend, "vercel.json")) || "
 const headers = vercelConfig.headers?.[0]?.headers || [];
 const headerMap = new Map(headers.map((item) => [item.key, item.value]));
 
-check("vercel.json tem CSP em Report-Only", headerMap.has("Content-Security-Policy-Report-Only"));
+const csp = headerMap.get("Content-Security-Policy-Report-Only") || "";
+const reportUri = "report-uri https://safeanchor-monorepo.vercel.app/api/csp-report";
+
+check("vercel.json tem CSP em Report-Only", Boolean(csp));
+check("vercel.json tem report-uri no CSP", csp.includes(reportUri));
 check("vercel.json tem X-Content-Type-Options", headerMap.get("X-Content-Type-Options") === "nosniff");
 check("vercel.json tem Referrer-Policy", headerMap.get("Referrer-Policy") === "no-referrer");
 
 const pagesHeaders = readIfExists(join(dist, "_headers"));
 check("dist/_headers presente", Boolean(pagesHeaders));
 check("dist/_headers com nosniff", pagesHeaders.includes("X-Content-Type-Options: nosniff"));
+check("dist/_headers com report-uri", pagesHeaders.includes(reportUri));
 
 check(
   ".env.example não versiona segredo",

@@ -473,7 +473,7 @@ safeanchor-monorepo/
 - [x] Logging estruturado com pino + redacao de campos sensiveis
 - [x] Prisma + PostgreSQL + migrations versionadas (baseline `0_init` registrada)
 - [x] Seed de desenvolvimento protegido por `ALLOW_DATABASE_SEED`
-- [x] Testes com `node --test`: 35 passando e 3 integracoes puladas sem banco, incluindo controllers/rotas de documentos/inspecoes, `research-consent.test.js`, logout, headers, rate limit e validacao de entrada
+- [x] Testes com `node --test`: 37 passando e 3 integracoes puladas sem banco, incluindo controllers/rotas de documentos/inspecoes, `research-consent.test.js`, logout, headers, CSP, rate limit e validacao de entrada
 
 **Frontend (React 19 + Vite, MVVM):**
 
@@ -551,7 +551,7 @@ ciclo; pendente: politicas de Storage.
 7. **Core Maritime Domain** — Frota, manutencao, preventiva, checklists, documentos e inspecoes prontos. Proximo: compliance avancado.
 8. **Storage** — Nao iniciado; necessario para upload/download de documentos (Supabase Storage).
 9. **Mobile** — Nao iniciado; mobile polish de checklists (Feature 036) e PWA sao itens futuros.
-10. **Testing** — Backend com 35 testes passando (incluindo documentos/inspecoes, `research-consent.test.js`, logout, headers, rate limit e validacao); 3 integracoes puladas sem banco. Faltam testes no frontend.
+10. **Testing** — Backend com 37 testes passando (incluindo documentos/inspecoes, `research-consent.test.js`, logout, headers, CSP, rate limit e validacao); 3 integracoes puladas sem banco. Faltam testes no frontend.
 11. **Security** — Correcoes da auditoria 26/11 aplicadas: rate limit, JWT curto com revogacao, token em memoria, nonce de consentimento, headers/CSP em Report-Only e validacao de entrada. Pendente: upload security, scanner no CI e rotacao de segredos pelo mantenedor.
 12. **Observability** — Logging estruturado + health check prontos. Pendente: metricas, tracing e alertas.
 13. **Infrastructure** — Frontend no GitHub Pages e API na Vercel, com Supabase saudavel (`/health` 200).
