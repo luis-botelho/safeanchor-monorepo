@@ -2131,7 +2131,12 @@ textarea {
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.16s ease;
+  transition:
+    color var(--motion-fast) var(--ease),
+    background-color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease),
+    transform var(--motion-fast) var(--ease);
 }
 
 .wizard__step--active {
@@ -2170,10 +2175,6 @@ textarea {
   color: var(--muted);
 }
 
-.wizard__body {
-  animation: fade-in 0.25s ease;
-}
-
 .wizard__done {
   display: flex;
   align-items: center;
@@ -2196,7 +2197,12 @@ textarea {
   border: 1px solid rgba(var(--ink-rgb), 0.16);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.16s ease;
+  transition:
+    color var(--motion-fast) var(--ease),
+    background-color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease),
+    transform var(--motion-fast) var(--ease);
 }
 
 .select-card--button {
@@ -2540,7 +2546,12 @@ textarea {
   font-family: inherit;
   background: var(--neutral-bg);
   color: var(--primary-deep);
-  transition: all 0.15s ease;
+  transition:
+    color var(--motion-fast) var(--ease),
+    background-color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease),
+    transform var(--motion-fast) var(--ease);
 }
 
 .tag--interactive:hover {
@@ -2626,7 +2637,12 @@ textarea {
   border-radius: var(--radius-sm);
   text-decoration: none;
   color: var(--ink);
-  transition: all 0.15s ease;
+  transition:
+    color var(--motion-fast) var(--ease),
+    background-color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease),
+    transform var(--motion-fast) var(--ease);
 }
 
 .mini-link:hover {
@@ -2838,7 +2854,12 @@ textarea {
   font-size: 12.5px;
   font-weight: 600;
   color: var(--muted);
-  transition: all 0.15s ease;
+  transition:
+    color var(--motion-fast) var(--ease),
+    background-color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease),
+    transform var(--motion-fast) var(--ease);
 }
 
 .charter-step--active {
@@ -3363,10 +3384,6 @@ textarea {
   margin-bottom: 10px;
 }
 
-.survey__card {
-  animation: survey-in 0.3s ease both;
-}
-
 .survey__question {
   font-size: clamp(19px, 2.6vw, 24px);
   line-height: 1.28;
@@ -3594,17 +3611,6 @@ textarea {
   flex-shrink: 0;
 }
 
-@keyframes survey-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (max-width: 560px) {
   .survey__header {
     padding: 14px 16px;
@@ -3665,7 +3671,6 @@ textarea {
   border: 1px solid rgba(var(--ink-rgb), 0.08);
   background: var(--surface);
   box-shadow: 0 18px 40px rgba(var(--ink-rgb), 0.22);
-  animation: whatsapp-card-in 180ms ease-out;
 }
 
 .whatsapp-widget__card-head {
@@ -3760,17 +3765,6 @@ textarea {
   margin-top: -4px;
   font-size: 34px;
   line-height: 1;
-}
-
-@keyframes whatsapp-card-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Aviso de cookies / armazenamento local */
@@ -4444,5 +4438,75 @@ textarea {
 @media (prefers-reduced-motion: no-preference) {
   .inline-loader__spin {
     animation: inline-spin 800ms linear 6;
+  }
+}
+
+/* ============================================================
+   Movimento — todas as entradas são opt-in; nada depende de animation
+   para estar visível. Troca de cor permanece em prefers-reduced-motion.
+   ============================================================ */
+
+@keyframes survey-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes whatsapp-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-shell__content,
+  .wizard__body {
+    animation: fade-in var(--motion-base) var(--ease) both;
+  }
+
+  .survey__card {
+    animation: survey-in 0.3s var(--ease) both;
+  }
+
+  .whatsapp-widget__card {
+    animation: whatsapp-card-in 180ms ease-out both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Remove só o movimento espacial: cor e borda continuam comunicando estado */
+  .app-shell__sidebar,
+  .app-shell__link,
+  .persona-switch,
+  .btn,
+  .vessel-card,
+  .vessel-card__cover img,
+  .subnav__item,
+  .wizard__step,
+  .select-card,
+  .tag--interactive,
+  .mini-link,
+  .charter-step,
+  .welcome__choice,
+  .whatsapp-widget__fab {
+    transition-property: color, background-color, border-color, box-shadow, opacity;
+  }
+
+  .btn:active,
+  .vessel-card:hover,
+  .vessel-card__cover img:hover,
+  .welcome__choice:hover,
+  .whatsapp-widget__fab:hover {
+    transform: none;
   }
 }
