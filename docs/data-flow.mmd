@@ -1,39 +1,39 @@
 flowchart LR
-    U["Usuário"]
+    U["Usuário<br/>botões 'Acessos de demonstração'<br/>preenchem as credenciais"]
 
-    subgraph F["Frontend React (MVVM)"]
+    subgraph F["Frontend React 19 + Vite 7 (MVVM)"]
         V["Views<br/>(PageViews)"]
         VM["ViewModels<br/>(use*ViewModel hooks)"]
-        SV["Services<br/>(camada de dados mock / API)"]
+        SV["Services<br/>API real + catálogos mock"]
     end
 
-    subgraph B["Backend Express 5"]
+    subgraph B["Backend Express 5 (Vercel)"]
         RT["Routes<br/>(rotas REST)"]
         CT["Controllers<br/>(validação HTTP)"]
-        SR["Services<br/>(regras de negócio)"]
-        PR["Prisma ORM<br/>(acesso ao banco)"]
+        SR["Services<br/>(regras + accessScope por Party)"]
+        PR["Prisma ORM 7"]
     end
 
     DB[("PostgreSQL<br/>(Supabase)")]
+    MOCK[("Mock Data / localStorage<br/>catálogos, feed e prontidão")]
 
-    U -->|"navega entre páginas"| V
+    U -->|"navega e faz login"| V
     V -->|"chama hooks"| VM
     VM -->|"recarrega dados"| SV
 
-    SV -->|"HTTP (futuro)"| RT
-    SV -->|"dados mock (MVP)"| M[("Mock Data<br/>(arquivos JS)")]
+    SV -->|"HTTP/JSON real: auth, vessels,<br/>maintenances, documents,<br/>inspections, checklists,<br/>preventive-maintenances, research"| RT
+    SV -->|"dados de demonstração"| MOCK
 
     RT --> CT
     CT -->|"valida payload"| SR
-    SR -->|"query estruturada"| PR
+    SR -->|"query com escopo por Party"| PR
     PR -->|"SQL"| DB
     DB -->|"resultado"| PR
     PR -->|"dados"| SR
     SR -->|"response JSON"| CT
     CT -->|"HTTP response"| SV
+    MOCK -->|"dados locais"| SV
 
     SV -->|"dados"| VM
     VM -->|"atualiza estado"| V
     V -->|"renderiza interface"| U
-
-    M -->|"retorna dados"| VM

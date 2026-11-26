@@ -1,44 +1,30 @@
 flowchart TD
-    P(["Usuário acessa o SafeAnchor"]) --> V["Escolhe persona demo"]
-    V --> L["Login com conta de exemplo"]
+    P(["Usuário abre a SPA publicada"]) --> L["Tela de login"]
+    L --> B["Botões 'Acessos de demonstração' preenchem e-mail e senha"]
 
-    L --> D{"Persona selecionada?"}
+    B --> OWNER["Proprietário · demo@safeanchor.app"]
+    B --> PROVIDER["Prestador · carlos@tecno.boat"]
+    B --> MARINA["Marina · gestao@marinacostaazul.com"]
+    LEG["Conta legada · demo@safeanchor.test<br/>(sem botão na tela)"] -.-> AUTH
 
-    D -- "Proprietário / Gestor de frota" --> O1["Dashboard de prontidão das embarcações"]
-    D -- "Prestador de serviços" --> SP["Visão do prestador"]
-    D -- "Marina" --> MA["Visão da marina"]
+    OWNER --> AUTH["POST /auth/login — API real<br/>JWT 1h, sem refresh"]
+    PROVIDER --> AUTH
+    MARINA --> AUTH
 
-    O1 --> O2{"Ação do proprietário"}
+    AUTH --> NAV["Navegação por persona (metadado)<br/>autorização por role · isolamento por Party"]
 
-    O2 -- "Ver frota" --> F["Minha frota"]
-    F --> FD["Detalhes da embarcação (prontidão, docs, checklist)"]
+    NAV --> D["Dashboard"]
+    D --> FEED["Feed de atividades (mock)"]
+    D --> F["Minha Frota — GET /vessels"]
+    F --> FD["Detalhe da embarcação — GET /vessels/:id"]
 
-    O2 -- "Manutenção" --> M["Agenda de manutenção"]
-    M --> MN["Nova manutenção"]
+    FD --> M["Manutenção — /maintenances<br/>e /preventive-maintenances"]
+    FD --> DOC["Documentos — /documents<br/>metadados e validade"]
+    FD --> INS["Inspeções — /inspections"]
+    INS --> IC["Checklist — templates e execuções via API"]
+    IC --> CERT["Conclusão gera certificado<br/>quando não há falhas"]
+    FD --> R["Prontidão: calculada no cliente<br/>(mock, não exposta pela API)"]
 
-    O2 -- "Marinas" --> MR["Explorar marinas"]
-    MR --> MRD["Detalhe da marina (estrutura, serviços, avaliações)"]
-
-    SP --> SPA{"Ação do prestador"}
-
-    SPA -- "Inspeções" --> I["Lista de inspeções"]
-    I --> IN["Agendar inspeção"]
-    I --> ID["Checklist da inspeção"]
-    ID --> DC["Concluir itens do checklist"]
-    DC --> CC["Gerar certificado"]
-
-    SPA -- "Solicitações" --> SR["Solicitações recebidas"]
-
-    SPA -- "Jobs & Crew" --> J["Oportunidades"]
-
-    MA --> MA1{"Ação da marina"}
-
-    MA1 -- "Dashboard" --> MD["Visão operacional da marina"]
-    MA1 -- "Frota" --> MF["Embarcações sob gestão"]
-    MA1 -- "Equipe" --> MT["Colaboradores e dockmasters"]
-    MA1 -- "Reservas" --> MR2["Ocupação de vagas"]
-    MA1 -- "Serviços / Catálogo" --> MS["Catálogo de serviços"]
-
-    DD["Detalhe da embarcação"] --> READ["Score de prontidão (ex: 92%)"]
-    READ --> DS["Manutenção + documentação + checklists"]
-    DS --> DO["Pronto para navegar?"]
+    NAV --> CAT["Catálogos mock/localStorage:<br/>marinas, prestadores, jobs, eventos,<br/>viagens, locações, marketplace,<br/>comunidade, academy e IA"]
+    CAT --> MRD["Detalhe de marina e perfil de prestador<br/>(demonstração)"]
+    NAV --> PUB["Rotas públicas: /pesquisa e /privacidade"]

@@ -15,6 +15,12 @@ autorizacao por scope de propriedade e os dominios operacionais ja existentes.
 - `PreventiveMaintenance`
 - `ChecklistTemplate`
 - `ChecklistExecution`
+- `Document`
+- `Inspection`
+
+O schema tambem define os enums `UserRole` (`USER`, `MANAGER`, `ADMIN`) e
+`Persona` (`OWNER`, `SERVICE_PROVIDER`, `MARINA`). A persona e metadado de
+navegacao; a autorizacao e por role e o isolamento por `Party`.
 
 Todos os IDs sao `String` com valor `cuid()` gerado pelo Prisma. Os campos de
 data permanecem `String` para preservar os contratos atuais da API. `items` e
@@ -32,6 +38,8 @@ erDiagram
   Vessel ||--o{ Maintenance : possui
   Vessel ||--o{ PreventiveMaintenance : agenda
   Vessel ||--o{ ChecklistExecution : recebe
+  Vessel ||--o{ Document : guarda
+  Vessel ||--o{ Inspection : recebe
   ChecklistTemplate ||--o{ ChecklistExecution : define
 ```
 
@@ -40,7 +48,7 @@ pode ser do tipo `USER` (recursos pessoais) ou `ORGANIZATION` (recursos da
 organizacao). `Membership` liga `User` e `Organization` garantindo acesso aos
 recursos de organizacoes das quais o usuario e membro.
 
-As quatro chaves estrangeiras possuem indice e usam `ON DELETE CASCADE` e
+As chaves estrangeiras possuem indice e usam `ON DELETE CASCADE` e
 `ON UPDATE CASCADE`.
 
 ## Conexoes
@@ -53,9 +61,11 @@ Os valores reais ficam apenas em `apps/backend/.env`. O arquivo
 
 ## Seguranca de acesso
 
-As tabelas de dominio usam RLS sem policies e tiveram todos os privilegios
-diretos de `anon` e `authenticated` revogados. Isso bloqueia o acesso pela Data
-API e mantem a conexao PostgreSQL do backend como unico caminho atual.
+As tabelas de dominio tem RLS habilitado e **sem policies**, e tiveram todos os
+privilegios diretos de `anon` e `authenticated` revogados. Isso bloqueia o acesso
+pela Data API; o backend usa as credenciais de owner do banco (conexao Prisma
+via `DATABASE_URL`), que e o unico caminho atual de acesso aos dados. RLS nao
+substitui o controle de escopo aplicado nos services.
 
 O controle de acesso por propriedade e feito na camada de services do backend:
 `src/services/accessScopeService.js` calcula o scope do usuario autenticado
@@ -106,10 +116,13 @@ fluxo completo e a limpeza final foram validados no Supabase.
 
 ## Seed de desenvolvimento
 
-O arquivo `apps/backend/prisma/seed.js` cria um conjunto pequeno de dados de
-demonstracao cobrindo os cinco modelos e seus relacionamentos. O seed usa IDs
-deterministicos com prefixo `seed-demo-` e operacoes `upsert`, portanto pode ser
-executado novamente sem criar duplicatas e sem apagar outros registros.
+O arquivo `apps/backend/prisma/seed.js` cria mais de 12 registros de
+demonstracao cobrindo `Party`, `User`, `Organization`, `Membership`, `Vessel`,
+`ChecklistTemplate`, `Maintenance`, `PreventiveMaintenance`,
+`ChecklistExecution`, `Document` e `Inspection`, com seus relacionamentos. O
+seed usa IDs deterministicos com prefixo `seed-demo-` e operacoes `upsert`,
+portanto pode ser executado novamente sem criar duplicatas e sem apagar outros
+registros. Ele e um recurso **local**, nao uma etapa de producao.
 
 Por seguranca, a execucao e bloqueada por padrao. Antes de liberar o comando,
 confirme que `DATABASE_URL` aponta para o banco de desenvolvimento correto:
@@ -127,3 +140,9 @@ ou altera o schema.
 Migration e seed possuem responsabilidades diferentes: migrations versionam
 mudancas na estrutura do banco, enquanto o seed fornece dados reproduziveis
 para desenvolvimento e testes. O seed nao deve ser tratado como migration.
+
+**Producao:** nao rode `prisma db seed` nem migrations contra o Supabase de
+producao como operacao rotineira (sem `DIRECT_URL` operacional). As contas demo
+(`demo@safeanchor.app`, `carlos@tecno.boat`, `gestao@marinacostaazul.com` e a
+legada `demo@safeanchor.test`) foram criadas por `/auth/register` e seus dados
+foram escritos pela propria API autenticada, nao pelo seed local.

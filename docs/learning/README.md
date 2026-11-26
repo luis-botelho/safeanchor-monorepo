@@ -1,7 +1,9 @@
 # Guia de estudo — estado atual do SafeAnchor
 
 Este resumo ajuda quem está começando a entender o projeto e a escolher uma
-primeira tarefa. Para o estado operacional da demo, veja
+primeira tarefa. Para apresentar a demo, use o roteiro autorizado em
+[`../demo-apresentacao.md`](../demo-apresentacao.md) e, antes de começar, rode
+`node scripts/verify-demo.mjs` na raiz (Node 22). Para o estado operacional, veja
 [`../handoff-freeze.md`](../handoff-freeze.md). Para tecnologias e fluxo de uso,
 veja [`../diagnostico.md`](../diagnostico.md). Para o tema visual e as regras de
 loading e animação, veja [`../visual-system.md`](../visual-system.md).
@@ -86,8 +88,11 @@ apps/
    rota `POST /vessels` → `vesselController.js` → `vesselService.js` → Prisma.
    Para uma listagem, comece em `views/FleetPage.jsx` (chama
    `getFleetVessels()` diretamente) → `GET /vessels`.
-2. **Rodar local:** configure `.env` apenas no backend (nunca versionado), rode
-   `npx prisma migrate dev` e `npm run dev` nos dois apps.
+2. **Rodar local:** configure `.env` apenas no backend (nunca versionado) e rode
+   `npm run dev` nos dois apps. Use `npx prisma migrate dev` somente em banco
+   local, após conferir para onde aponta `DATABASE_URL`; nunca execute esse
+   comando contra o Supabase de produção, nem rode seed ou migrations em
+   produção.
 3. **Trocar um mock por API:** escolha um catálogo pequeno em `src/mock/` e crie
    o service, o viewmodel e a rota correspondentes.
 4. **Escrever um teste:** use os testes existentes em `apps/backend/test/` como
@@ -104,4 +109,11 @@ apps/
 - Não use `transition: all`, shimmer agressivo ou animação infinita: o contrato
   de movimento está em `docs/visual-system.md`.
 - Para validar o build no Windows, use `npm.cmd run build` dentro de
-  `apps/frontend` (o script não existe na raiz).
+  `apps/frontend` (o script não existe na raiz), com as variáveis do build:
+
+  ```powershell
+  $env:VITE_BASE_URL="/safeanchor-monorepo/"
+  $env:VITE_API_URL="https://safeanchor-monorepo.vercel.app"
+  $env:VITE_RESEARCH_WHATSAPP="5524992772357"
+  npm.cmd run build
+  ```

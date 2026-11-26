@@ -1,6 +1,6 @@
 # Sistema visual e contrato de carregamento — SafeAnchor
 
-**Data:** 2026-11-26 · **Status:** contrato aceito para a reformulação visual da demo.
+**Data:** 2026-11-26 · **Status:** contrato em produção desde 26/11/2026 (PR #177).
 
 > Objetivo: fazer a interface parecer produto de equipe sênior — densa, calma,
 > confiável e acessível — sem trocar a stack. Continua sendo React + Vite, CSS
@@ -13,8 +13,9 @@
 
 A pasta `stitch_safeanchor_maritime_ux_architecture/`, adicionada pelo usuário,
 é a fonte da direção visual: precisão marítima, prontidão operacional e ficha
-técnica de embarcação. Ela será mapeada para tokens e componentes existentes;
-o HTML/CSS dela é **referência**, não código para copiar e colar.
+técnica de embarcação. Ela é mapeada para tokens e componentes existentes
+(publicado em produção via PR #177); o HTML/CSS dela é **referência**, não
+código para copiar e colar.
 
 > Quando esta pasta evoluir, atualize a tabela de mapeamento abaixo e o
 > `docs/handoff-freeze.md`. Não versione imagens de terceiros sem origem clara.
@@ -92,6 +93,9 @@ nada sobre o que vem.
 | `LoadingFallback.jsx` | fallback único para telas secundárias e `ProtectedRoute` |
 | `ErrorState.jsx` | falha com título, mensagem e ação de nova tentativa |
 | `SubmitButton.jsx` + `InlineSpinner.jsx` | submit com `disabled`, `aria-busy`, spinner e rótulo de largura estável |
+
+Esses componentes e o tema Maritime Precision estão em produção desde
+26/11/2026; o contrato acima descreve o comportamento atual, não uma proposta.
 
 ### 3.4 Microinterações
 
